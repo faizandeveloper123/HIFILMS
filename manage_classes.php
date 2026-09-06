@@ -2,6 +2,7 @@
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 require_login();
+require_role(['admin']);
 $page_title = 'Manage Classes';
 
 db_query("ALTER TABLE classes ADD COLUMN IF NOT EXISTS monthly_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00");

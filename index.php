@@ -3,7 +3,14 @@ define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 
 if (is_logged_in()) {
-    header('Location: ' . BASE_URL . 'dashboard.php');
+    $role = $_SESSION['user_role'] ?? 'admin';
+    $dashMap = [
+        'admin'    => 'dashboard.php',
+        'staff'    => 'staff_dashboard.php',
+        'teacher'  => 'teacher_dashboard.php',
+        'accounts' => 'accounts_dashboard.php',
+    ];
+    header('Location: ' . BASE_URL . ($dashMap[$role] ?? 'dashboard.php'));
     exit;
 }
 
@@ -28,7 +35,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_email'] = $user['email'];
             $_SESSION['user_name'] = $user['full_name'];
             $_SESSION['user_role'] = $user['role'];
-            header('Location: ' . BASE_URL . 'dashboard.php');
+            $redirects = [
+                'admin'    => 'dashboard.php',
+                'staff'    => 'staff_dashboard.php',
+                'teacher'  => 'teacher_dashboard.php',
+                'accounts' => 'accounts_dashboard.php',
+            ];
+            $dest = $redirects[$user['role']] ?? 'dashboard.php';
+            header('Location: ' . BASE_URL . $dest);
             exit;
         } else {
             $error = 'Invalid email or password.';

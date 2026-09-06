@@ -47,6 +47,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $st2->execute();
         $message = 'Route deleted successfully!';
     }
+
+    if ($action === 'ToggleStatus') {
+        $rid = (int) ($_POST['route_id'] ?? 0);
+        if ($rid > 0) {
+            $st2 = db_prepare("UPDATE routes SET status = IF(status=1, 0, 1) WHERE route_id=?");
+            $st2->bind_param('i', $rid);
+            $st2->execute();
+            $message = 'Route status toggled!';
+        }
+    }
 }
 
 $routes = [];
@@ -94,17 +104,26 @@ include __DIR__ . '/includes/header.php';
                 <div style="overflow-x:auto; background:#fff; border:1px solid #E5E7EB; border-radius:14px;">
                     <table class="table table-striped table-bordered" style="width:100%; background:#fff; margin-bottom:0;">
                         <thead>
-                            <tr><th>#</th><th>Route Title</th><th>Fare</th><th style="width:150px;">Actions</th></tr>
+                            <tr><th>#</th><th>Route Title</th><th>Fare</th><th>Status</th><th style="width:180px;">Actions</th></tr>
                         </thead>
                         <tbody>
                             <?php if (count($routes) === 0): ?>
-                                <tr><td colspan="4" style="text-align:center; color:#6B7280; padding:36px;"><i class="fa fa-signal" style="font-size:36px; display:block; margin-bottom:10px;"></i>No routes added yet. Use the form to save your first record.</td></tr>
+                                <tr><td colspan="5" style="text-align:center; color:#6B7280; padding:36px;"><i class="fa fa-signal" style="font-size:36px; display:block; margin-bottom:10px;"></i>No routes added yet. Use the form to save your first record.</td></tr>
                             <?php endif; ?>
                             <?php foreach ($routes as $rt): ?>
                                 <tr>
                                     <td><?php echo $rt['route_id']; ?></td>
                                     <td><strong><?php echo e($rt['route_name']); ?></strong></td>
                                     <td><?php echo number_format((float) $rt['fare'], 2); ?></td>
+                                    <td>
+                                        <form method="post" action="route.php" style="display:inline;">
+                                            <input type="hidden" name="action" value="ToggleStatus">
+                                            <input type="hidden" name="route_id" value="<?php echo $rt['route_id']; ?>">
+                                            <button type="submit" class="btn <?php echo $rt['status'] ? 'btn-success' : 'btn-warning'; ?> btn-xs" style="font-size:11px;">
+                                                <?php echo $rt['status'] ? 'Active' : 'Inactive'; ?>
+                                            </button>
+                                        </form>
+                                    </td>
                                     <td>
                                         <button class="btn btn-primary btn-xs edit-r" data-id="<?php echo $rt['route_id']; ?>" data-name="<?php echo e($rt['route_name']); ?>" data-fare="<?php echo e($rt['fare']); ?>"><i class="fa fa-pencil"></i></button>
                                         <form method="post" action="route.php" style="display:inline;" onsubmit="return confirm('Delete this route? Related student assignments will also be cleared.');">

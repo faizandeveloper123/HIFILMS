@@ -69,6 +69,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $st2->execute();
         $message = 'Vehicle deleted successfully!';
     }
+
+    if ($action === 'ToggleStatus') {
+        $vid = (int) ($_POST['vehicle_id'] ?? 0);
+        if ($vid > 0) {
+            $st2 = db_prepare("UPDATE vehicles SET status = IF(status=1, 0, 1) WHERE vehicle_id=?");
+            $st2->bind_param('i', $vid);
+            $st2->execute();
+            $message = 'Vehicle status toggled!';
+        }
+    }
 }
 
 $vehicles = [];
@@ -145,11 +155,11 @@ include __DIR__ . '/includes/header.php';
                 <div style="overflow-x:auto; background:#fff; border:1px solid #E5E7EB; border-radius:14px;">
                     <table class="table table-striped table-bordered" style="width:100%; background:#fff; margin-bottom:0;">
                         <thead>
-                            <tr><th>#</th><th>Vehicle Number</th><th>Model</th><th>Year</th><th>Capacity</th><th>Driver Name</th><th>License</th><th>Contact</th><th>Note</th><th style="width:110px;">Action</th></tr>
+                            <tr><th>#</th><th>Vehicle Number</th><th>Model</th><th>Year</th><th>Capacity</th><th>Driver Name</th><th>License</th><th>Contact</th><th>Note</th><th>Status</th><th style="width:140px;">Action</th></tr>
                         </thead>
                         <tbody>
                             <?php if (count($vehicles) === 0): ?>
-                                <tr><td colspan="10" style="text-align:center; color:#6B7280; padding:36px;"><i class="fa fa-bus" style="font-size:36px; display:block; margin-bottom:10px;"></i>No vehicles added yet. Use the form to save your first record.</td></tr>
+                                <tr><td colspan="11" style="text-align:center; color:#6B7280; padding:36px;"><i class="fa fa-bus" style="font-size:36px; display:block; margin-bottom:10px;"></i>No vehicles added yet. Use the form to save your first record.</td></tr>
                             <?php endif; ?>
                             <?php foreach ($vehicles as $v): ?>
                                 <tr>
@@ -162,6 +172,15 @@ include __DIR__ . '/includes/header.php';
                                     <td><?php echo e($v['driver_license'] ?? '-'); ?></td>
                                     <td><?php echo e($v['driver_contact'] ?? '-'); ?></td>
                                     <td><?php echo e($v['vehicle_note'] ?? '-'); ?></td>
+                                    <td>
+                                        <form method="post" action="vehicles.php" style="display:inline;">
+                                            <input type="hidden" name="action" value="ToggleStatus">
+                                            <input type="hidden" name="vehicle_id" value="<?php echo $v['vehicle_id']; ?>">
+                                            <button type="submit" class="btn <?php echo $v['status'] ? 'btn-success' : 'btn-warning'; ?> btn-xs" style="font-size:11px;">
+                                                <?php echo $v['status'] ? 'Active' : 'Inactive'; ?>
+                                            </button>
+                                        </form>
+                                    </td>
                                     <td>
                                         <button class="btn btn-primary btn-xs edit-v" data-id="<?php echo $v['vehicle_id']; ?>" data-no="<?php echo e($v['vehicle_no']); ?>" data-name="<?php echo e($v['vehicle_name']); ?>" data-year="<?php echo e($v['year_made']); ?>" data-cap="<?php echo $v['capacity']; ?>" data-driver="<?php echo e($v['driver_name']); ?>" data-license="<?php echo e($v['driver_license']); ?>" data-contact="<?php echo e($v['driver_contact']); ?>" data-note="<?php echo e($v['vehicle_note']); ?>"><i class="fa fa-pencil"></i></button>
                                         <form method="post" action="vehicles.php" style="display:inline;" onsubmit="return confirm('Delete this vehicle?');">

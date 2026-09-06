@@ -55,3 +55,39 @@ function get_setting($key, $default = '') {
     }
     return $cache[$key] ?? $default;
 }
+
+function role() {
+    return $_SESSION['user_role'] ?? 'admin';
+}
+
+function require_role($roles) {
+    if (!is_array($roles)) { $roles = [$roles]; }
+    if (!in_array(role(), $roles)) {
+        ?>
+        <!DOCTYPE html>
+        <html lang="en"><head>
+            <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Access Denied | HIIFI LMS</title>
+            <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>assets/img/favicon.png">
+            <link href="<?php echo BASE_URL; ?>assets/css/bootstrap.min.css" rel="stylesheet">
+            <link href="<?php echo BASE_URL; ?>assets/css/font-awesome.min.css" rel="stylesheet">
+            <style>
+                body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;font-family:'Segoe UI',sans-serif;background:#f8f9fa;}
+                .denied-card{text-align:center;padding:40px;background:#fff;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,.08);max-width:400px;width:90%;}
+                .denied-card h1{font-size:64px;color:#dc2626;margin:0;}
+                .denied-card p{color:#6b7280;margin:12px 0 24px;font-size:15px;}
+                .denied-card a{display:inline-block;padding:10px 24px;background:#ff8c00;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;}
+                .denied-card a:hover{background:#e07c00;}
+            </style>
+        </head><body>
+            <div class="denied-card">
+                <h1><i class="fas fa-lock"></i></h1>
+                <h3 style="color:#111827;">Access Denied</h3>
+                <p>You do not have permission to access this page.</p>
+                <a href="<?php echo BASE_URL; ?>dashboard.php"><i class="fas fa-home"></i> Go to Dashboard</a>
+            </div>
+        </body></html>
+        <?php
+        exit;
+    }
+}

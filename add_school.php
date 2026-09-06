@@ -2,6 +2,7 @@
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 require_login();
+require_role(['admin']);
 $page_title = 'Add School';
 
 db_query("CREATE TABLE IF NOT EXISTS settings (

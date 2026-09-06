@@ -2,6 +2,7 @@
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 require_login();
+require_role(['admin', 'accounts']);
 
 $__migrate = [
     "ALTER TABLE payroll ADD COLUMN IF NOT EXISTS paid_date DATE DEFAULT NULL",

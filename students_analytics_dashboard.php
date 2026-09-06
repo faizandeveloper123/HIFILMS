@@ -24,6 +24,29 @@ $totalClasses   = (int) (db_query("SELECT COUNT(*) c FROM classes WHERE status=1
 $localities     = (int) (db_query("SELECT COUNT(*) c FROM localities WHERE status=1")->fetch_assoc()['c'] ?? 0);
 $recentAdm      = (int) (db_query("SELECT COUNT(*) c FROM students WHERE status=1 AND admission_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)")->fetch_assoc()['c'] ?? 0);
 
+$classWise = [];
+$res = db_query("SELECT c.class_name, COUNT(s.student_id) c FROM students s JOIN classes c ON s.class_id=c.class_id WHERE s.status=1 GROUP BY c.class_name ORDER BY c.class_name");
+while ($row = $res->fetch_assoc()) { $classWise[] = $row; }
+$classLabels = array_column($classWise, 'class_name');
+$classCounts = array_map('intval', array_column($classWise, 'c'));
+$maxClass = max(1, max($classCounts));
+
+$admSources = [];
+$res = db_query("SELECT COALESCE(NULLIF(TRIM(admission_source),''),'Unknown') src, COUNT(*) c FROM students WHERE status=1 GROUP BY src ORDER BY c DESC");
+while ($row = $res->fetch_assoc()) { $admSources[] = $row; }
+$admSrcLabels = array_column($admSources, 'src');
+$admSrcCounts = array_map('intval', array_column($admSources, 'c'));
+$admSrcColors = ['#f39c12','#3498db','#27ae60','#9b59b6','#e74c3c','#1abc9c','#e67e22','#34495e'];
+
+$recentList = [];
+$res = db_query("SELECT s.first_name, s.last_name, s.admission_date, s.gr_no, c.class_name FROM students s LEFT JOIN classes c ON s.class_id=c.class_id WHERE s.status=1 ORDER BY s.admission_date DESC LIMIT 10");
+while ($row = $res->fetch_assoc()) { $recentList[] = $row; }
+
+$attPresent = (int) (db_query("SELECT COUNT(*) c FROM attendance WHERE status='present' AND date=CURDATE()")->fetch_assoc()['c'] ?? 0);
+$attAbsent = (int) (db_query("SELECT COUNT(*) c FROM attendance WHERE status='absent' AND date=CURDATE()")->fetch_assoc()['c'] ?? 0);
+$attLate = (int) (db_query("SELECT COUNT(*) c FROM attendance WHERE status='late' AND date=CURDATE()")->fetch_assoc()['c'] ?? 0);
+$attTotal = $attPresent + $attAbsent + $attLate;
+
 // Monthly admission trends (this year)
 $monthlyAdm = [];
 for ($m = 1; $m <= 12; $m++) {
@@ -365,6 +388,98 @@ include __DIR__ . '/includes/header.php';
                     <div class="trend-grid" style="display:none;" id="withGrid"></div>
                     <div id="withFallback" style="font-size:13px; color:#6B7280;">No withdrawal data yet.</div>
                 </div>
+
+                <!-- Students Per Class Bar Chart -->
+                <div class="chart-card" style="margin-top:16px;">
+                    <div class="chart-title">
+                        <span><i class="fa fa-bar-chart"></i> Students Per Class</span>
+                        <span class="badge-soft">Chart.js</span>
+                    </div>
+                    <canvas id="classBarChart" height="200"></canvas>
+                </div>
+
+                <!-- Admission Sources Pie Chart -->
+                <div class="chart-card" style="margin-top:16px;">
+                    <div class="chart-title">
+                        <span><i class="fa fa-pie-chart"></i> Admission Sources</span>
+                    </div>
+                    <div style="max-width:400px; margin:0 auto;">
+                        <canvas id="admSourcePie" height="250"></canvas>
+                    </div>
+                    <div class="legend-list" style="margin-top:14px;">
+                        <?php foreach ($admSources as $i => $as): ?>
+                            <div class="legend-item">
+                                <span class="legend-dot" style="background:<?php echo $admSrcColors[$i % count($admSrcColors)]; ?>;"></span>
+                                <span class="legend-name"><?php echo e($as['src']); ?></span>
+                                <span class="legend-count"><?php echo $as['c']; ?></span>
+                                <span class="legend-pct"><?php echo $totalActive > 0 ? round(($as['c'] / $totalActive) * 100, 1) : 0; ?>%</span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- Recent Admissions List -->
+                <div class="section-container" style="margin-top:16px;">
+                    <div class="section-title"><i class="fa fa-user-plus"></i><span>Recent Admissions (Last 10)</span></div>
+                    <?php if (count($recentList) === 0): ?>
+                        <div style="text-align:center; color:#9CA3AF; padding:20px;">No recent admissions found.</div>
+                    <?php else: ?>
+                        <div style="overflow-x:auto;">
+                            <table class="table table-striped table-bordered" style="width:100%; margin:0; font-size:12.5px;">
+                                <thead><tr><th>#</th><th>Student Name</th><th>GR No</th><th>Class</th><th>Admission Date</th></tr></thead>
+                                <tbody>
+                                    <?php foreach ($recentList as $i => $rl): ?>
+                                        <tr>
+                                            <td><?php echo $i + 1; ?></td>
+                                            <td><strong><?php echo e(trim($rl['first_name'] . ' ' . $rl['last_name'])); ?></strong></td>
+                                            <td><?php echo e($rl['gr_no'] ?? '-'); ?></td>
+                                            <td><?php echo e($rl['class_name'] ?? '-'); ?></td>
+                                            <td><?php echo $rl['admission_date'] ? date('d M Y', strtotime($rl['admission_date'])) : '-'; ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Attendance Summary -->
+                <div class="section-container" style="margin-top:16px;">
+                    <div class="section-title"><i class="fa fa-check-square-o"></i><span>Today's Attendance Summary</span></div>
+                    <?php if ($attTotal > 0): ?>
+                        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px;">
+                            <div style="text-align:center; background:#F0FFF4; border-radius:10px; padding:14px;">
+                                <div style="font-size:24px; font-weight:800; color:#16A34A;"><?php echo $attPresent; ?></div>
+                                <div style="font-size:12px; color:#16A34A; font-weight:600;">Present</div>
+                                <div style="font-size:11px; color:#6B7280;"><?php echo $attTotal > 0 ? round(($attPresent / $attTotal) * 100, 1) : 0; ?>%</div>
+                            </div>
+                            <div style="text-align:center; background:#FEF2F2; border-radius:10px; padding:14px;">
+                                <div style="font-size:24px; font-weight:800; color:#DC2626;"><?php echo $attAbsent; ?></div>
+                                <div style="font-size:12px; color:#DC2626; font-weight:600;">Absent</div>
+                                <div style="font-size:11px; color:#6B7280;"><?php echo $attTotal > 0 ? round(($attAbsent / $attTotal) * 100, 1) : 0; ?>%</div>
+                            </div>
+                            <div style="text-align:center; background:#FEF3C7; border-radius:10px; padding:14px;">
+                                <div style="font-size:24px; font-weight:800; color:#D97706;"><?php echo $attLate; ?></div>
+                                <div style="font-size:12px; color:#D97706; font-weight:600;">Late</div>
+                                <div style="font-size:11px; color:#6B7280;"><?php echo $attTotal > 0 ? round(($attLate / $attTotal) * 100, 1) : 0; ?>%</div>
+                            </div>
+                            <div style="text-align:center; background:#EFF6FF; border-radius:10px; padding:14px;">
+                                <div style="font-size:24px; font-weight:800; color:#2563EB;"><?php echo $attTotal; ?></div>
+                                <div style="font-size:12px; color:#2563EB; font-weight:600;">Total Marked</div>
+                                <div style="font-size:11px; color:#6B7280;">Today</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px; height:10px; background:#F3F4F6; border-radius:6px; overflow:hidden; display:flex;">
+                            <?php if ($attTotal > 0): ?>
+                                <div style="width:<?php echo round(($attPresent / $attTotal) * 100); ?>%; background:#16A34A;"></div>
+                                <div style="width:<?php echo round(($attLate / $attTotal) * 100); ?>%; background:#D97706;"></div>
+                                <div style="width:<?php echo round(($attAbsent / $attTotal) * 100); ?>%; background:#DC2626;"></div>
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div style="text-align:center; color:#9CA3AF; padding:16px;">No attendance recorded today.</div>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- Quick Access Reports -->
@@ -424,7 +539,7 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
 function toggleDataIssues() {
     var content = document.getElementById('dataIssuesContent');
@@ -437,7 +552,6 @@ function toggleDataIssues() {
     else { btn.insertAdjacentHTML('beforeend', '<span style="margin-left:auto; color:#B91C1C;"><i class="fa fa-chevron-down"></i> View Details</span>'); }
 }
 
-// Render withdrawal trends from PHP data
 (function () {
     var data = <?php echo json_encode($withTrend); ?>;
     var months = <?php echo json_encode(array_column($monthlyAdm, 'month')); ?>;
@@ -462,7 +576,6 @@ function toggleDataIssues() {
     }
 })();
 
-// Smooth animations
 document.addEventListener('DOMContentLoaded', function () {
     var cards = document.querySelectorAll('.stat-card2');
     cards.forEach(function (card, index) {
@@ -472,32 +585,60 @@ document.addEventListener('DOMContentLoaded', function () {
             card.style.transform = 'translateY(0)';
         }, index * 50);
     });
-});
 
-// Class Head donut charts
-(function () {
-    var hdLabels = <?php echo json_encode($hdLabels); ?>;
-    var hdCounts = <?php echo json_encode($hdCounts); ?>;
-    var hdColors = <?php echo json_encode($hdColors); ?>;
-    if (window.Chart && hdLabels.length > 0) {
-        var donutEl = document.getElementById('classHeadDonut');
-        if (donutEl) {
-            new Chart(donutEl, {
-                type: 'doughnut',
-                data: { labels: hdLabels, datasets: [{ data: hdCounts, backgroundColor: hdColors, borderWidth: 2, borderColor: '#fff' }] },
-                options: { cutout: '68%', plugins: { legend: { display: false }, tooltip: { enabled: true } } }
-            });
-        }
-        var shareEl = document.getElementById('classHeadShareDonut');
-        if (shareEl) {
-            new Chart(shareEl, {
-                type: 'doughnut',
-                data: { labels: hdLabels, datasets: [{ data: hdCounts, backgroundColor: hdColors, borderWidth: 2, borderColor: '#fff' }] },
-                options: { cutout: '74%', plugins: { legend: { display: false }, tooltip: { enabled: true } } }
-            });
-        }
+    var classLabels = <?php echo json_encode($classLabels); ?>;
+    var classCounts = <?php echo json_encode($classCounts); ?>;
+    var classBar = document.getElementById('classBarChart');
+    if (classBar && classLabels.length > 0) {
+        new Chart(classBar, {
+            type: 'bar',
+            data: {
+                labels: classLabels,
+                datasets: [{
+                    label: 'Students',
+                    data: classCounts,
+                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                    borderColor: 'rgba(99, 102, 241, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                    x: { ticks: { maxRotation: 45, font: { size: 11 } } }
+                }
+            }
+        });
     }
-})();
+
+    var srcLabels = <?php echo json_encode($admSrcLabels); ?>;
+    var srcCounts = <?php echo json_encode($admSrcCounts); ?>;
+    var srcColors = <?php echo json_encode($admSrcColors); ?>;
+    var srcPie = document.getElementById('admSourcePie');
+    if (srcPie && srcLabels.length > 0) {
+        new Chart(srcPie, {
+            type: 'pie',
+            data: {
+                labels: srcLabels,
+                datasets: [{
+                    data: srcCounts,
+                    backgroundColor: srcColors.slice(0, srcLabels.length),
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 11 } } }
+                }
+            }
+        });
+    }
+});
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

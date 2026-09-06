@@ -2,6 +2,7 @@
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 require_login();
+require_role(['admin', 'accounts']);
 
 $page_title = 'Create Employees PayRoll';
 
@@ -76,7 +77,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'Gener
             $ddPct = isset($dedcs[$emp_id]) && $dedcs[$emp_id] !== '' ? (float)$dedcs[$emp_id] : $deductionPct;
             $allowances = round($basic * ($alPct / 100), 2);
             $deductions = round($basic * ($ddPct / 100), 2);
-            $net = round($basic + $allowances - $deductions, 2);
+            $traveling = isset($_POST['traveling'][$emp_id]) ? (float)$_POST['traveling'][$emp_id] : 0;
+            $reimb = isset($_POST['reimb'][$emp_id]) ? (float)$_POST['reimb'][$emp_id] : 0;
+            $other_allow = isset($_POST['other_allow'][$emp_id]) ? (float)$_POST['other_allow'][$emp_id] : 0;
+            $absent = isset($_POST['absent'][$emp_id]) ? (float)$_POST['absent'][$emp_id] : 0;
+            $security = isset($_POST['security'][$emp_id]) ? (float)$_POST['security'][$emp_id] : 0;
+            $other_ded = isset($_POST['other_ded'][$emp_id]) ? (float)$_POST['other_ded'][$emp_id] : 0;
+            $adv_dec = isset($_POST['adv_dec'][$emp_id]) ? (float)$_POST['adv_dec'][$emp_id] : 0;
+            $totalAllow = $allowances + $traveling + $reimb + $other_allow;
+            $totalDed = $deductions + $absent + $security + $other_ded + $adv_dec;
+            $net = round($basic + $totalAllow - $totalDed, 2);
 
             $mstr = (string)$month;
             $chk = db_prepare("SELECT COUNT(*) c FROM payroll WHERE emp_id=? AND month=? AND year=?");
@@ -84,8 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'Gener
             $chk->execute();
             if ($chk->get_result()->fetch_assoc()['c'] > 0) { continue; }
 
-            $ins = db_prepare("INSERT INTO payroll (emp_id, month, year, basic_salary, allowances, deductions, net_salary, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')");
-            $ins->bind_param('isiddid', $emp_id, $mstr, $year, $basic, $allowances, $deductions, $net);
+            $ins = db_prepare("INSERT INTO payroll (emp_id, month, year, basic_salary, allowances, deductions, traveling, reimb, other_allow, absent, security, other_ded, adv_dec, net_salary, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')");
+            $ins->bind_param('isidddddddddid', $emp_id, $mstr, $year, $basic, $allowances, $deductions, $traveling, $reimb, $other_allow, $absent, $security, $other_ded, $adv_dec, $net);
             $ins->execute();
             $created++;
         }
@@ -177,9 +187,18 @@ input.pct-input { width:80px; display:inline-block; }
                         <th style="width:40px;"><input type="checkbox" id="selAll"></th>
                         <th>Employee</th>
                         <th>Designation</th>
-                        <th>Gross / Basic</th>
-                        <th>Allowances (<small>% of basic</small>)</th>
-                        <th>Deductions (<small>% of basic</small>)</th>
+                        <th>Basic</th>
+                        <th>Allow %</th>
+                        <th>Allow Amt</th>
+                        <th>Traveling</th>
+                        <th>Reimb</th>
+                        <th>Other Allow</th>
+                        <th>Ded %</th>
+                        <th>Ded Amt</th>
+                        <th>Absent</th>
+                        <th>Security</th>
+                        <th>Other Ded</th>
+                        <th>Adv Dec</th>
                         <th>Net</th>
                         <th>Status</th>
                     </tr>
@@ -197,16 +216,23 @@ input.pct-input { width:80px; display:inline-block; }
                                 <?php if ($e['already']): ?><span class="status-badge status-present" style="margin-left:6px;">Already</span><?php endif; ?></td>
                             <td><?php echo e($e['designation'] ?? '-'); ?></td>
                             <td>
-                                <input type="number" step="0.01" class="form-control input-sm basic-input" style="width:110px;" name="basic[<?php echo $e['emp_id']; ?>]" value="<?php echo $basic; ?>">
+                                <input type="number" step="0.01" class="form-control input-sm basic-input" style="width:100px;" name="basic[<?php echo $e['emp_id']; ?>]" value="<?php echo $basic; ?>">
                             </td>
                             <td>
-                                <input type="number" step="0.01" class="form-control input-sm al-pct" style="width:80px; display:inline-block;" name="allowance_pct[<?php echo $e['emp_id']; ?>]" value="<?php echo $allowancePct; ?>">
-                                <span class="al-amt" style="color:#16A34A; font-weight:700;"><?php echo number_format($alAmt, 2); ?></span>
+                                <input type="number" step="0.01" class="form-control input-sm al-pct" style="width:65px;" name="allowance_pct[<?php echo $e['emp_id']; ?>]" value="<?php echo $allowancePct; ?>">
                             </td>
+                            <td><span class="al-amt" style="color:#16A34A; font-weight:700;"><?php echo number_format($alAmt, 2); ?></span></td>
+                            <td><input type="number" step="0.01" class="form-control input-sm extra-field" style="width:80px;" name="traveling[<?php echo $e['emp_id']; ?>]" value="0"></td>
+                            <td><input type="number" step="0.01" class="form-control input-sm extra-field" style="width:80px;" name="reimb[<?php echo $e['emp_id']; ?>]" value="0"></td>
+                            <td><input type="number" step="0.01" class="form-control input-sm extra-field" style="width:80px;" name="other_allow[<?php echo $e['emp_id']; ?>]" value="0"></td>
                             <td>
-                                <input type="number" step="0.01" class="form-control input-sm dd-pct" style="width:80px; display:inline-block;" name="deduction_pct[<?php echo $e['emp_id']; ?>]" value="<?php echo $deductionPct; ?>">
-                                <span class="dd-amt" style="color:#DC2626; font-weight:700;"><?php echo number_format($ddAmt, 2); ?></span>
+                                <input type="number" step="0.01" class="form-control input-sm dd-pct" style="width:65px;" name="deduction_pct[<?php echo $e['emp_id']; ?>]" value="<?php echo $deductionPct; ?>">
                             </td>
+                            <td><span class="dd-amt" style="color:#DC2626; font-weight:700;"><?php echo number_format($ddAmt, 2); ?></span></td>
+                            <td><input type="number" step="0.01" class="form-control input-sm extra-field" style="width:80px;" name="absent[<?php echo $e['emp_id']; ?>]" value="0"></td>
+                            <td><input type="number" step="0.01" class="form-control input-sm extra-field" style="width:80px;" name="security[<?php echo $e['emp_id']; ?>]" value="0"></td>
+                            <td><input type="number" step="0.01" class="form-control input-sm extra-field" style="width:80px;" name="other_ded[<?php echo $e['emp_id']; ?>]" value="0"></td>
+                            <td><input type="number" step="0.01" class="form-control input-sm extra-field" style="width:80px;" name="adv_dec[<?php echo $e['emp_id']; ?>]" value="0"></td>
                             <td><strong class="net-amt"><?php echo number_format($net, 2); ?></strong></td>
                             <td><span class="status-badge status-pending">Pending</span></td>
                         </tr>
@@ -231,13 +257,23 @@ function recalc(row) {
     var ddPct = parseFloat(row.querySelector('.dd-pct').value) || 0;
     var al = basic * alPct / 100;
     var dd = basic * ddPct / 100;
-    row.querySelector('.al-amt').textContent = al.toFixed(2);
-    row.querySelector('.dd-amt').textContent = dd.toFixed(2);
-    row.querySelector('.net-amt').textContent = (basic + al - dd).toFixed(2);
+    var extras = row.querySelectorAll('.extra-field');
+    var traveling = parseFloat(extras[0].value) || 0;
+    var reimb = parseFloat(extras[1].value) || 0;
+    var otherAllow = parseFloat(extras[2].value) || 0;
+    var absent = parseFloat(extras[3].value) || 0;
+    var security = parseFloat(extras[4].value) || 0;
+    var otherDed = parseFloat(extras[5].value) || 0;
+    var advDec = parseFloat(extras[6].value) || 0;
+    var totalAllow = al + traveling + reimb + otherAllow;
+    var totalDed = dd + absent + security + otherDed + advDec;
+    row.querySelector('.al-amt').textContent = totalAllow.toFixed(2);
+    row.querySelector('.dd-amt').textContent = totalDed.toFixed(2);
+    row.querySelector('.net-amt').textContent = (basic + totalAllow - totalDed).toFixed(2);
 }
 document.querySelectorAll('.pay-row').forEach(function(row){
     ['input', 'change'].forEach(function(ev){
-        row.querySelectorAll('.basic-input, .al-pct, .dd-pct').forEach(function(inp){
+        row.querySelectorAll('.basic-input, .al-pct, .dd-pct, .extra-field').forEach(function(inp){
             inp.addEventListener(ev, function(){ recalc(row); });
         });
     });

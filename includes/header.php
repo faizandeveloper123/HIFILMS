@@ -583,6 +583,15 @@ $topSimLimit   = (int) get_setting('sim_sms_limit', 0);
 $topSimPct     = $topSimLimit > 0 ? min(100, round($topSimUsed / $topSimLimit * 100)) : 0;
 $topNewComp    = (int) (db_query("SELECT COUNT(*) c FROM complaints WHERE status IN ('new','open')")->fetch_assoc()['c'] ?? 0);
 $topUserName   = e($_SESSION['user_name'] ?? 'Admin');
+$topUserRole   = e($_SESSION['user_role'] ?? 'admin');
+$roleBadgeColors = [
+    'admin'    => 'background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;',
+    'staff'    => 'background:#dbeafe;color:#2563eb;border:1px solid #93c5fd;',
+    'teacher'  => 'background:#d1fae5;color:#059669;border:1px solid #6ee7b7;',
+    'accounts' => 'background:#fef3c7;color:#d97706;border:1px solid #fcd34d;',
+];
+$topRoleStyle = $roleBadgeColors[$topUserRole] ?? $roleBadgeColors['admin'];
+$topRoleLabel = ucfirst($topUserRole);
 ?>
 <style>
     .top_nav { width: 100%; background: #fff; border-bottom: 1px solid #eaecef; box-shadow: 0 2px 6px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 900; }
@@ -751,7 +760,7 @@ $topUserName   = e($_SESSION['user_name'] ?? 'Admin');
         <div class="avtar"><?php echo strtoupper(substr($topUserName, 0, 1)); ?></div>
         <div class="user-info">
             <span class="user-name" style="color:black;"><?php echo e($topUserName); ?></span>
-            <span class="user-designation"><?php echo e($_SESSION['user_role'] ?? 'Admin'); ?></span>
+            <span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:2px;<?php echo $topRoleStyle; ?>"><?php echo $topRoleLabel; ?></span>
         </div>
     </div>
 </div>
@@ -772,7 +781,7 @@ $topUserName   = e($_SESSION['user_name'] ?? 'Admin');
     <div class="avtar"><?php echo strtoupper(substr($topUserName, 0, 1)); ?></div>
     <div class="user-info">
         <span class="user-name" style="color:black;"><?php echo e($topUserName); ?></span>
-        <span class="user-designation"><?php echo e($_SESSION['user_role'] ?? 'Admin'); ?></span>
+        <span style="display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:2px;<?php echo $topRoleStyle; ?>"><?php echo $topRoleLabel; ?></span>
     </div>
 </div>
 

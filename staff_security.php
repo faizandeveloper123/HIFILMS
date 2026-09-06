@@ -2,6 +2,7 @@
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 require_login();
+require_role(['admin', 'accounts']);
 
 $__migrate = [
     "CREATE TABLE IF NOT EXISTS employee_security (id INT AUTO_INCREMENT PRIMARY KEY, employee_id INT NOT NULL, month VARCHAR(7) NOT NULL, security_amount DECIMAL(10,2) DEFAULT 0, paid DECIMAL(10,2) DEFAULT 0, note VARCHAR(255) DEFAULT NULL, UNIQUE KEY uq_emp_month (employee_id, month))",
