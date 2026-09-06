@@ -1,0 +1,143 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Favicons-->
+<link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32" />
+<title>Print Students Vouchers</title>
+<!-- Favicons-->
+<link rel="icon" type="image/png" href="img/favicon.png" sizes="32x32" />
+<script type="text/javascript">
+  //window.print();
+</script>
+<style>
+@media print {
+    #Header, #Footer { display: none !important; }
+}
+@media screen
+   {
+      p.bodyText {font-family:verdana, arial, sans-serif;}
+   }
+   @media print
+   {
+      p.bodyText {font-family:georgia, times, serif;}
+   }
+   @media screen, print
+   {
+      p.bodyText {font-size:10pt}
+   }
+   @media print {
+  a[href]:after {
+    content: none !important;
+  }
+}
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #FAFAFA;
+    font-weight:bold;
+    font-size:15px;
+    /*font: 12pt "Tahoma";*/
+}
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+.page {
+    width: 29.7cm;
+    height: 21cm;
+    padding-left:3mm;
+    padding-top:3mm;
+    padding-bottom:35mm;
+    margin: 10mm auto;
+    border: 1px #D3D3D3 solid;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+.subpage {
+    width: 29.7cm;
+    height: 20cm;
+}
+@page {
+    size: A4 landscape;
+    margin: 0;
+}
+@media print {
+    html, body {
+        width: 29.7cm;
+        height: 21cm;
+    }
+    .page {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        page-break-after: blue;
+    }
+}
+ol li {
+font-size: 11px;
+margin-left: -32px;
+}
+        /* Container styling for the 3 partitions */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            height: 100%;
+        }
+        /* Box styling for each voucher partition */
+        .box {
+            width:30%; /* One third of the width */
+            padding: 0px;
+            margin-top:1%;
+            box-sizing: border-box;
+            height: 100%; /* Ensure height is divided into 3 parts */
+        }
+        /* Optional: Flexbox layout adjustments for the boxes */
+        .box .header {
+            font-size: 16px;
+            font-weight: bold;
+            height:auto%;
+            width: 99%;
+            padding:1.5%;
+            border:2px black solid;
+            border-radius:10px;
+        }
+        .box .details {
+            margin-top:1%;
+            font-size: 14px;
+            height:auto;
+            width: 102%;
+            background:;
+            border-radius:10px;
+        }
+        .box .footer {
+            font-size: 14px;
+            float:left;
+            margin-top:1%;
+            height:auto%;
+            width: 98%;
+            padding:1.5%;
+            background:;
+            border:2px black solid;
+            border-radius:6px;
+        }
+        .rowstyle {line-height: 15px;}
+        .thstyle {padding:1.5%;font-size:11px;}
+        tr th{padding:2%;font-size:14px;}
+        tr td{font-size:14px;padding:2%;font-weight:bold;}
+        .tdAlign{text-align:center;border:2px solid black;}
+        .tdNames{border:2px solid black;font-size:14px;}
+  </style>
+</head>
+<body>
+</body>
+</html>

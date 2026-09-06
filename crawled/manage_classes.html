@@ -1,0 +1,3779 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manage Classes | EduPortal</title>
+    
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap -->
+    <link href="../vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="../vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://apps.eduportal.pk/Production/css/customizedStyling.css" rel="stylesheet">
+
+    <!-- Custom Theme Style -->
+    <link href="../build/css/custom.min1.css" rel="stylesheet">
+    <link href="https://apps.eduportal.pk/Production/css/style11.css" rel="stylesheet">
+    <link href="https://apps.eduportal.pk/Production/css/font-awesome-5.min.css" rel="stylesheet">
+
+    <style>
+    /* Global: neutralize legacy wrapper <div class="col-md-3 left_col"> present on 600+ pages */
+    .col-md-3.left_col { display: contents !important; width: auto !important; padding: 0 !important; margin: 0 !important; float: none !important; }
+    </style>
+<style>
+  
+.nav-container {
+  width: 100%;
+  background: #fff;
+  border-bottom: 1px solid #eaecef;
+  /* padding: 10px 20px; */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  margin-top:15px;
+}
+
+.nav-bar {
+  display: flex;
+  gap: 1px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  justify-content: center;   /* ✅ Items center mai */
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 15px;  
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+  border: 1px solid #eaecef;
+}
+
+.nav-item:hover {
+  background: #fff4e6;
+  border-color: #ffd8b3;
+  color: #e67e22;
+}
+
+.nav-item.active {
+  background: #ff7800;
+  color: white;
+  border-color: #ff7800;
+  box-shadow: 0 3px 8px rgba(230, 126, 34, 0.3);
+}
+
+.nav-item.active i {
+  color: white;
+}
+
+.nav-item i {
+  font-size: 14px;
+  margin-right: 6px;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.nav-item:hover i {
+  color: #e67e22;
+}
+
+.nav-bar::-webkit-scrollbar {
+  display: none;
+}
+.nav-bar {
+  -ms-overflow-style: none;  
+  scrollbar-width: none; 
+}
+
+</style>    
+    <style>
+      /* ✅ Improved UX Styles */
+      .page-header {
+        background: #2b2b36;
+        color: white;
+        padding: 20px 25px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      }
+
+      .page-header h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: white;
+      }
+
+      .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin: 0 0 10px 0;
+        color: rgba(255,255,255,0.9);
+      }
+
+      .breadcrumb a {
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+      }
+
+      .breadcrumb a:hover {
+        color: white;
+        text-decoration: underline;
+      }
+
+      .action-buttons {
+        margin-bottom: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .action-buttons .btn-add-class {
+        margin-left: auto;
+        background: #ff9800;
+        border-color: #ff9800;
+        color: #111;
+      }
+
+      .action-buttons .btn-add-class:hover {
+        background: #e68900;
+        border-color: #e68900;
+      }
+
+      .action-buttons .btn {
+        padding: 10px 20px;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .action-buttons .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      }
+
+      .action-buttons .btn i {
+        margin-right: 8px;
+      }
+
+      .stats-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-left: 4px solid #ff9800;
+      }
+
+      .stats-card .badge {
+        font-size: 18px;
+        padding: 8px 15px;
+        background: #ff9800;
+        color: #111;
+        border-radius: 20px;
+      }
+
+      .table-container {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+      }
+
+      .table thead th {
+        background: #2b2b36;
+        color: white;
+        font-weight: 600;
+        text-align: center;
+        padding: 12px;
+        border: none;
+      }
+
+      .table tbody td {
+        padding: 12px;
+        vertical-align: middle;
+        text-align: center;
+      }
+
+      .table tbody tr {
+        transition: all 0.2s ease;
+      }
+
+      .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transform: scale(1.01);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+
+      .btn-action {
+        padding: 6px 12px;
+        margin: 0 3px;
+        font-size: 13px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+
+      .btn-action:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+      }
+
+      .empty-state i {
+        font-size: 64px;
+        color: #dee2e6;
+        margin-bottom: 15px;
+      }
+
+      .empty-state p {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      .fee-amount {
+        font-weight: 600;
+        color: #28a745;
+      }
+
+      .section-link {
+        color: #ff9800;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+      }
+
+      .section-link:hover {
+        color: #e68900;
+        text-decoration: underline;
+      }
+
+      .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .loading-overlay.active {
+        display: flex;
+      }
+
+      .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      @media (max-width: 768px) {
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .action-buttons .btn {
+          width: 100%;
+        }
+
+        .table-container {
+          overflow-x: auto;
+        }
+      }
+    </style>
+  </head>
+  
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+            <style>
+  :root {
+    --sb-collapsed: 90px;
+    --sb-expanded: 240px;
+    --sb-bg: #2B2B36;
+    --sb-fly: #3A3A4D;
+    --text: #fff;
+  }
+
+  /* Sidebar main */
+  .left_col {
+    position: fixed !important;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: var(--sb-bg);
+    z-index: 1000;
+    transition: width .25s ease;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    overflow-y: auto;
+    /* scroll always */
+  }
+
+  body.sidebar-collapsed .left_col {
+    width: var(--sb-collapsed);
+  }
+
+  body.sidebar-expanded .left_col {
+    width: var(--sb-expanded);
+  }
+
+  /* Fix content positioning - ensure it's to the right of sidebar, not underneath */
+  body.sidebar-collapsed .right_col {
+    margin-left: var(--sb-collapsed) !important;
+    transition: margin-left .25s ease;
+    width: calc(100% - var(--sb-collapsed));
+  }
+
+  body.sidebar-expanded .right_col {
+    margin-left: var(--sb-expanded) !important;
+    transition: margin-left .25s ease;
+    width: calc(100% - var(--sb-expanded));
+  }
+
+  /* Ensure main content container is properly positioned */
+  .right_col {
+    position: relative;
+    min-height: 100vh;
+    box-sizing: border-box;
+  }
+
+  /* Additional fix for any content that might be going underneath */
+  .main_content,
+  .content-wrapper,
+  .dashboard-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Sidebar header toggle */
+  .ds-brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 12px;
+    height: 60px;
+    box-sizing: border-box;
+  }
+
+  .ds-brand .ds-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+  }
+
+  .ds-brand .ds-toggle:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Branch info */
+  .ds-branch {
+    color: #fff;
+    text-align: center;
+    padding: 6px 8px;
+    font-size: 12px;
+    opacity: .9;
+  }
+
+  body.sidebar-collapsed .ds-branch {
+    display: none;
+  }
+
+  /* Menu styling */
+  #sidebar-menu {
+    padding: 6px 0 16px;
+  }
+
+  #sidebar-menu .side-menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  #sidebar-menu .side-menu>li {
+    position: relative;
+  }
+
+  #sidebar-menu .side-menu>li>a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: var(--text);
+    text-decoration: none;
+    border-radius: 10px;
+    margin: 4px 8px;
+    white-space: nowrap;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.2px;
+    transition: all 0.2s ease;
+  }
+
+  #sidebar-menu .side-menu>li>a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(2px);
+  }
+
+  #sidebar-menu .side-menu>li>a i {
+    min-width: 20px;
+    text-align: center;
+    font-size: 18px;
+    opacity: 0.9;
+  }
+
+  #sidebar-menu .side-menu>li>a .chev {
+    margin-left: auto;
+    opacity: .6;
+    transition: transform 0.2s ease;
+  }
+
+  body.sidebar-collapsed #sidebar-menu .side-menu>li>a {
+    justify-content: center;
+    font-size: 0;
+    padding: 8px 6px;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  body.sidebar-collapsed #sidebar-menu .side-menu>li>a i {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  /* Show label under icon in collapsed mode */
+  body.sidebar-collapsed #sidebar-menu .side-menu>li>a .label {
+    display: block;
+    font-size: 10px;
+    margin-top: 2px;
+    line-height: 1.05;
+    max-width: 64px;
+    text-align: center;
+    white-space: normal;
+  }
+
+  body.sidebar-collapsed #sidebar-menu .side-menu>li>a .chev {
+    display: none;
+  }
+
+  /* Child menu expanded */
+  .child_menu {
+    display: none;
+    list-style: none;
+    margin: 0;
+    padding: 6px 0;
+    background: var(--sb-fly);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .child_menu li a {
+    display: block;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.1px;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    margin: 2px 6px;
+  }
+
+  .child_menu li a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(3px);
+    color: #fff;
+  }
+
+  body.sidebar-expanded #sidebar-menu .side-menu>li.active>.child_menu {
+    display: block;
+    position: static;
+    margin: 2px 8px 8px 44px;
+    border-radius: 8px;
+    animation: slideIn 0.2s ease;
+  }
+
+  /* Child menu collapsed flyout */
+  body.sidebar-collapsed #sidebar-menu .side-menu>li>.child_menu {
+    position: fixed;
+    left: var(--sb-collapsed);
+    min-width: 220px;
+    max-height: 80vh;
+    overflow: auto;
+    display: none;
+    z-index: 2001;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 768px) {
+    .left_col {
+      width: var(--sb-collapsed) !important;
+    }
+
+    body.sidebar-collapsed .right_col {
+      margin-left: var(--sb-collapsed) !important;
+      width: calc(100% - var(--sb-collapsed)) !important;
+    }
+
+    /* Larger touch targets for mobile */
+    #sidebar-menu .side-menu>li>a {
+      min-height: 44px;
+      /* iOS recommended touch target size */
+      padding: 12px 8px;
+    }
+
+    /* Better mobile submenu positioning */
+    body.sidebar-collapsed #sidebar-menu .side-menu>li>.child_menu {
+      left: var(--sb-collapsed);
+      min-width: 200px;
+      max-width: calc(100vw - var(--sb-collapsed) - 20px);
+    }
+
+    /* Mobile-friendly tooltip positioning */
+    .child_menu {
+      font-size: 14px;
+    }
+
+    .child_menu li a {
+      padding: 12px 16px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  /* Professional typography improvements */
+  body.sidebar-expanded #sidebar-menu .side-menu>li>a .label {
+    font-weight: 500;
+    font-size: 14px;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+
+  body.sidebar-expanded #sidebar-menu .side-menu>li>a .chev {
+    font-size: 12px;
+    transition: transform 0.2s ease;
+  }
+
+  body.sidebar-expanded #sidebar-menu .side-menu>li:hover>a .chev {
+    transform: rotate(90deg);
+  }
+
+  /* Branch info professional styling */
+  .ds-branch {
+    color: #fff;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 500;
+    opacity: .9;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 8px;
+  }
+
+  /* Animations */
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Logout button */
+  .ds-logout {
+    margin: 12px;
+  }
+
+  .ds-logout a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+    transition: all .2s ease;
+  }
+
+  .ds-logout a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+
+  /* === Sidebar Scrollbar Styling === */
+  .left_col::-webkit-scrollbar {
+    width: 2px;
+    /* ultra-thin scrollbar */
+  }
+
+  /* Track (background) */
+  .left_col::-webkit-scrollbar-track {
+    background: transparent;
+    /* transparent rakha for clean look */
+  }
+
+  /* Thumb (scroll handle) */
+  .left_col::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgb(67, 67, 68), rgb(241, 243, 245));
+    /* purple → blue gradient */
+    border-radius: 10px;
+  }
+
+  /* Hover effect */
+  .left_col::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgb(86, 85, 87), rgb(237, 232, 247));
+    /* stylish darker gradient */
+  }
+
+  /* Firefox ke liye */
+  .left_col {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(100, 98, 101) transparent;
+    /* thumb color, track transparent */
+    border-top-right-radius: 1%;
+    border-bottom-right-radius: 1%;
+
+  }
+
+
+
+  /* === Sidebar Logo Styling === */
+  .sidebar-logo {
+    text-align: center;
+    /* center me rakhega */
+    padding: 8px 0;
+    /* upar niche thoda gap */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /* halka separator line */
+  }
+
+  .sidebar-logo img {
+    height: 55px;
+    /* aap adjust kar sakte ho */
+    width: 55px;
+    border-radius: 50%;
+    /* thoda rounded look */
+    object-fit: cover;
+    /* image ko fit karega */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    /* stylish shadow */
+  }
+</style>
+
+<style>
+  /* === iOS-only overlay sidebar mode === */
+  body.ios-device .left_col {
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    width: 260px !important;
+    /* fixed width for iOS */
+    z-index: 2003;
+    /* above backdrop and close to toggle */
+  }
+
+  body.ios-device.ios-sidebar-open .left_col {
+    transform: translateX(0);
+  }
+
+  /* On iOS overlay mode, don't shift content area */
+  body.ios-device .right_col {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Floating toggle button (iOS only) */
+  #ios_toggle_btn {
+    position: fixed;
+    left: 12px;
+    top: 12px;
+    z-index: 2002;
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 0;
+    background: #2B2B36;
+    color: #fff;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  body.ios-device #ios_toggle_btn {
+    display: inline-flex;
+  }
+
+  /* Backdrop behind sidebar when open (iOS only) */
+  #ios_sidebar_backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 2000;
+    display: none;
+  }
+
+  body.ios-device.ios-sidebar-open #ios_sidebar_backdrop {
+    display: block;
+  }
+
+  /* === iOS simple menu (requested structure) === */
+  #menu-ios {
+    display: none;
+    padding: 8px 10px 16px;
+  }
+
+  body.ios-device #menu-web {
+    display: none;
+  }
+
+  body.ios-device #menu-ios {
+    display: block;
+  }
+
+  .ios-nav .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    text-decoration: none;
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 2px 6px;
+    background: transparent;
+  }
+
+  .ios-nav .nav-item:active {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .ios-nav .nav-item .nav-icon {
+    display: none;
+  }
+
+  .ios-nav .nav-item .nav-text {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: .2px;
+  }
+
+  .ios-nav .submenu {
+    display: none;
+    background: var(--sb-fly);
+    border: 1px solid rgba(255, 255, 255, .05);
+    border-radius: 10px;
+    margin: 4px 8px 8px 12px;
+    padding: 6px 0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+  }
+
+  .ios-nav .submenu-item {
+    display: block;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 6px;
+    margin: 2px 6px;
+  }
+
+  .ios-nav .submenu-item:active {
+    background: rgba(255, 255, 255, 0.08);
+  }
+</style>
+
+<!-- iOS toggle button mounted near top-left of the page -->
+<button id="ios_toggle_btn" aria-label="Toggle sidebar"><i class="fa fa-bars"></i></button>
+
+<div class="left_col scroll-view" id="dsLeftCol">
+  <!-- Toggle Only -->
+  <!-- iOS toggle button (hidden by default, shown via JS/CSS on iOS) -->
+  <!-- Moved OUTSIDE sidebar so it's visible when sidebar is off-canvas -->
+
+  <!-- Logo Section -->
+  <div class="sidebar-logo">
+    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg"
+      onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';"
+      alt="Logo" />
+  </div>
+
+  <div class="ds-branch">
+    <div style="font-weight:700; font-size:12px;">Test Portal</div>
+    <div style="font-size:12px;">(2026-2027)</div>
+  </div>
+
+  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+    <!-- Web/Android original menu -->
+    <ul class="side-menu" id="menu-web">
+      <li><a href="software_demo_videos.php"><i class="fa fa-play"></i><span class="label" style="font-weight: normal !important;">Guidline Videos</span></a></li>
+
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-phone"></i>
+              <span class="label" style="font-weight: normal !important;">Front Office</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="front_desk_analytics.php">
+                      Front Desk Overview                    </a>
+                  </li>
+                                <li>
+                    <a href="student_inquiry.php">
+                      Admission Inquiries                    </a>
+                  </li>
+                                <li>
+                    <a href="manage_complaint.php">
+                      Complaint Hub                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-dashboard"></i>
+              <span class="label" style="font-weight: normal !important;">Dashboard</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="dashboard.php">
+                      Executive Dashboard                    </a>
+                  </li>
+                                <li>
+                    <a href="basic_dashboard.php">
+                      Staff Dashboard                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-users"></i>
+              <span class="label" style="font-weight: normal !important;">Students</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="add_student.php">
+                      Add New Student                    </a>
+                  </li>
+                                <li>
+                    <a href="students_analytics_dashboard.php">
+                      Student Analytics                    </a>
+                  </li>
+                                <li>
+                    <a href="class_promotion.php">
+                      Class Promotion                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-microphone"></i>
+              <span class="label" style="font-weight: normal !important;">Attendance</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="mark_attend.php">
+                      Mark Attendance                    </a>
+                  </li>
+                                <li>
+                    <a href="mark_attendanceReport_list.php">
+                      Attendance Analytics                    </a>
+                  </li>
+                                <li>
+                    <a href="send_msgs.php?attendance=A">
+                      Send SMS Report                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-envelope"></i>
+              <span class="label" style="font-weight: normal !important;">Messages</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="new_message.php">
+                      New Message                    </a>
+                  </li>
+                                <li>
+                    <a href="messages_history.php">
+                      View Messages                    </a>
+                  </li>
+                                <li>
+                    <a href="view_templates.php">
+                      View Templates                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-money"></i>
+              <span class="label" style="font-weight: normal !important;">Fee Collection</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="monthly_challan.php">
+                      Create Challan                    </a>
+                  </li>
+                                <li>
+                    <a href="view_challan_details.php">
+                      View Challan                    </a>
+                  </li>
+                                <li>
+                    <a href="multi_fee_reports.php">
+                      Fee Reporting                    </a>
+                  </li>
+                                <li>
+                    <a href="update_fee_settings.php">
+                      Fee Settings                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-graduation-cap"></i>
+              <span class="label" style="font-weight: normal !important;">Examination</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="view_marksheet.php">
+                      Add Marks Sheet                    </a>
+                  </li>
+                                <li>
+                    <a href="reportcards.php">
+                      View Marks Sheet                    </a>
+                  </li>
+                                <li>
+                    <a href="manage_exams.php">
+                      Academic Setting                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-clock-o"></i>
+              <span class="label" style="font-weight: normal !important;">Timetable</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="period_categories.php">
+                      Periods Category                    </a>
+                  </li>
+                                <li>
+                    <a href="create_period_details.php">
+                      Create/Manage Periods                    </a>
+                  </li>
+                                <li>
+                    <a href="class_period.php">
+                      Assign Periods to Classes                    </a>
+                  </li>
+                                <li>
+                    <a href="class_period_selection.php">
+                      Create Timetable                    </a>
+                  </li>
+                                <li>
+                    <a href="view_class_period_selection.php">
+                      View Timetable                    </a>
+                  </li>
+                                <li>
+                    <a href="view_teachers_timetable.php">
+                      Teachers Timetable                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-user"></i>
+              <span class="label" style="font-weight: normal !important;">Employees/HRM</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="add_emp.php">
+                      Add Employee                    </a>
+                  </li>
+                                <li>
+                    <a href="view_emp.php">
+                      View Employees                    </a>
+                  </li>
+                                <li>
+                    <a href="view_emp_attendance.php">
+                      Staff Attendance                    </a>
+                  </li>
+                                <li>
+                    <a href="monthly_attendance.php">
+                      Attendance Report                    </a>
+                  </li>
+                                <li>
+                    <a href="old_employee.php">
+                      Old Employees                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-clock-o"></i>
+              <span class="label" style="font-weight: normal !important;">Datesheet</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="create_datesheet.php">
+                      Create Datesheet                    </a>
+                  </li>
+                                <li>
+                    <a href="view_datesheet.php">
+                      View Datesheet                    </a>
+                  </li>
+                                <li>
+                    <a href="generate_rollnoSlips.php">
+                      Generate Roll No Slips                    </a>
+                  </li>
+                                <li>
+                    <a href="syllabus_management.php">
+                      Syllabus Management                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-truck"></i>
+              <span class="label" style="font-weight: normal !important;">Transport</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="vehicles.php">
+                      Vehicles                    </a>
+                  </li>
+                                <li>
+                    <a href="route.php">
+                      Routes                    </a>
+                  </li>
+                                <li>
+                    <a href="vehicle_route.php">
+                      Assign Vehicles                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-book"></i>
+              <span class="label" style="font-weight: normal !important;">Library</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="list_books.php">
+                      Book List                    </a>
+                  </li>
+                                <li>
+                    <a href="issue_return.php">
+                      Issue Return                    </a>
+                  </li>
+                                <li>
+                    <a href="issue_return_employee.php">
+                      Employee Issue&amp;Return                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-paypal"></i>
+              <span class="label" style="font-weight: normal !important;">PayRoll</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="creat_payroll.php">
+                      Create PayRoll                    </a>
+                  </li>
+                                <li>
+                    <a href="view_payroll.php">
+                      View PayRoll                     </a>
+                  </li>
+                                <li>
+                    <a href="staff_security.php">
+                      Staff Security Fee                    </a>
+                  </li>
+                                <li>
+                    <a href="payroll_setting.php">
+                      PayRoll Setting                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-home"></i>
+              <span class="label" style="font-weight: normal !important;">Parents Portal</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="parents_portal_dashboard.php">
+                      Parents Overview                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-money"></i>
+              <span class="label" style="font-weight: normal !important;">Expenses</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="manage_expenses.php">
+                      Add/View Expenses                    </a>
+                  </li>
+                                <li>
+                    <a href="monthly_expenses_report.php">
+                      Expenses Report                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-file"></i>
+              <span class="label" style="font-weight: normal !important;">Cards Generator</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="cards.php">
+                      Staff Cards                    </a>
+                  </li>
+                                <li>
+                    <a href="students_card.php">
+                      Students Cards                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-search"></i>
+              <span class="label" style="font-weight: normal !important;">Point of Sale</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="canteen_dashboard.php">
+                      POS Dashboard                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-dollar"></i>
+              <span class="label" style="font-weight: normal !important;">Academic Setup</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="academic_setup.php">
+                      Manage Academics                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-gear"></i>
+              <span class="label" style="font-weight: normal !important;">System Settings</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="settings.php">
+                      Update Settings                    </a>
+                  </li>
+                                <li>
+                    <a href="manage_localities.php">
+                      Manage Localities                    </a>
+                  </li>
+                          </ul>
+          </li>
+                <li class="has-children">
+            <a href="javascript:void(0)">
+              <i class="fa fa-calculator"></i>
+              <span class="label" style="font-weight: normal !important;">Accounts</span>
+              <span class="fa fa-chevron-right chev"></span>
+            </a>
+            <ul class="child_menu">
+                                <li>
+                    <a href="add_revenue.php">
+                      Add Revenue                    </a>
+                  </li>
+                                <li>
+                    <a href="revenue_list.php">
+                      List of Revenues                    </a>
+                  </li>
+                                <li>
+                    <a href="revenue_heads.php">
+                      Revenue Heads                    </a>
+                  </li>
+                          </ul>
+          </li>
+      
+      <li class="ds-logout">
+        <a href="#" onclick="localStorage.clear(); window.location.href='logout.php'; return false;">
+          <span>LOGOUT</span> <i class="fa fa-sign-out" aria-hidden="true"></i>
+        </a>
+      </li>
+    </ul>
+
+    <!-- iOS simple menu with requested structure -->
+    <div id="menu-ios" class="ios-nav">
+      <a href="software_demo_videos.php" class="nav-item">
+        <div class="nav-icon"><i class="fa fa-play"></i></div>
+        <div class="nav-text">Guidline Videos</div>
+      </a>
+      <a href="front_desk_analytics.php" class="nav-item">
+        <div class="nav-icon"><i class="fa fa-line-chart"></i></div>
+        <div class="nav-text">Front Desk Analytics</div>
+      </a>
+
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-phone"></i></div>
+            <div class="nav-text">Front Office</div>
+          </a>
+          <div class="submenu">
+                            <a href="front_desk_analytics.php" class="submenu-item">Front Desk Overview</a>
+                            <a href="student_inquiry.php" class="submenu-item">Admission Inquiries</a>
+                            <a href="manage_complaint.php" class="submenu-item">Complaint Hub</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-dashboard"></i></div>
+            <div class="nav-text">Dashboard</div>
+          </a>
+          <div class="submenu">
+                            <a href="dashboard.php" class="submenu-item">Executive Dashboard</a>
+                            <a href="basic_dashboard.php" class="submenu-item">Staff Dashboard</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-users"></i></div>
+            <div class="nav-text">Students</div>
+          </a>
+          <div class="submenu">
+                            <a href="add_student.php" class="submenu-item">Add New Student</a>
+                            <a href="students_analytics_dashboard.php" class="submenu-item">Student Analytics</a>
+                            <a href="class_promotion.php" class="submenu-item">Class Promotion</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-microphone"></i></div>
+            <div class="nav-text">Attendance</div>
+          </a>
+          <div class="submenu">
+                            <a href="mark_attend.php" class="submenu-item">Mark Attendance</a>
+                            <a href="mark_attendanceReport_list.php" class="submenu-item">Attendance Analytics</a>
+                            <a href="send_msgs.php?attendance=A" class="submenu-item">Send SMS Report</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-envelope"></i></div>
+            <div class="nav-text">Messages</div>
+          </a>
+          <div class="submenu">
+                            <a href="new_message.php" class="submenu-item">New Message</a>
+                            <a href="messages_history.php" class="submenu-item">View Messages</a>
+                            <a href="view_templates.php" class="submenu-item">View Templates</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-money"></i></div>
+            <div class="nav-text">Fee Collection</div>
+          </a>
+          <div class="submenu">
+                            <a href="monthly_challan.php" class="submenu-item">Create Challan</a>
+                            <a href="view_challan_details.php" class="submenu-item">View Challan</a>
+                            <a href="multi_fee_reports.php" class="submenu-item">Fee Reporting</a>
+                            <a href="update_fee_settings.php" class="submenu-item">Fee Settings</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-graduation-cap"></i></div>
+            <div class="nav-text">Examination</div>
+          </a>
+          <div class="submenu">
+                            <a href="view_marksheet.php" class="submenu-item">Add Marks Sheet</a>
+                            <a href="reportcards.php" class="submenu-item">View Marks Sheet</a>
+                            <a href="manage_exams.php" class="submenu-item">Academic Setting</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-clock-o"></i></div>
+            <div class="nav-text">Timetable</div>
+          </a>
+          <div class="submenu">
+                            <a href="period_categories.php" class="submenu-item">Periods Category</a>
+                            <a href="create_period_details.php" class="submenu-item">Create/Manage Periods</a>
+                            <a href="class_period.php" class="submenu-item">Assign Periods to Classes</a>
+                            <a href="class_period_selection.php" class="submenu-item">Create Timetable</a>
+                            <a href="view_class_period_selection.php" class="submenu-item">View Timetable</a>
+                            <a href="view_teachers_timetable.php" class="submenu-item">Teachers Timetable</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-user"></i></div>
+            <div class="nav-text">Employees/HRM</div>
+          </a>
+          <div class="submenu">
+                            <a href="add_emp.php" class="submenu-item">Add Employee</a>
+                            <a href="view_emp.php" class="submenu-item">View Employees</a>
+                            <a href="view_emp_attendance.php" class="submenu-item">Staff Attendance</a>
+                            <a href="monthly_attendance.php" class="submenu-item">Attendance Report</a>
+                            <a href="old_employee.php" class="submenu-item">Old Employees</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-clock-o"></i></div>
+            <div class="nav-text">Datesheet</div>
+          </a>
+          <div class="submenu">
+                            <a href="create_datesheet.php" class="submenu-item">Create Datesheet</a>
+                            <a href="view_datesheet.php" class="submenu-item">View Datesheet</a>
+                            <a href="generate_rollnoSlips.php" class="submenu-item">Generate Roll No Slips</a>
+                            <a href="syllabus_management.php" class="submenu-item">Syllabus Management</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-truck"></i></div>
+            <div class="nav-text">Transport</div>
+          </a>
+          <div class="submenu">
+                            <a href="vehicles.php" class="submenu-item">Vehicles</a>
+                            <a href="route.php" class="submenu-item">Routes</a>
+                            <a href="vehicle_route.php" class="submenu-item">Assign Vehicles</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-book"></i></div>
+            <div class="nav-text">Library</div>
+          </a>
+          <div class="submenu">
+                            <a href="list_books.php" class="submenu-item">Book List</a>
+                            <a href="issue_return.php" class="submenu-item">Issue Return</a>
+                            <a href="issue_return_employee.php" class="submenu-item">Employee Issue&amp;Return</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-paypal"></i></div>
+            <div class="nav-text">PayRoll</div>
+          </a>
+          <div class="submenu">
+                            <a href="creat_payroll.php" class="submenu-item">Create PayRoll</a>
+                            <a href="view_payroll.php" class="submenu-item">View PayRoll </a>
+                            <a href="staff_security.php" class="submenu-item">Staff Security Fee</a>
+                            <a href="payroll_setting.php" class="submenu-item">PayRoll Setting</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-home"></i></div>
+            <div class="nav-text">Parents Portal</div>
+          </a>
+          <div class="submenu">
+                            <a href="parents_portal_dashboard.php" class="submenu-item">Parents Overview</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-money"></i></div>
+            <div class="nav-text">Expenses</div>
+          </a>
+          <div class="submenu">
+                            <a href="manage_expenses.php" class="submenu-item">Add/View Expenses</a>
+                            <a href="monthly_expenses_report.php" class="submenu-item">Expenses Report</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-file"></i></div>
+            <div class="nav-text">Cards Generator</div>
+          </a>
+          <div class="submenu">
+                            <a href="cards.php" class="submenu-item">Staff Cards</a>
+                            <a href="students_card.php" class="submenu-item">Students Cards</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-search"></i></div>
+            <div class="nav-text">Point of Sale</div>
+          </a>
+          <div class="submenu">
+                            <a href="canteen_dashboard.php" class="submenu-item">POS Dashboard</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-dollar"></i></div>
+            <div class="nav-text">Academic Setup</div>
+          </a>
+          <div class="submenu">
+                            <a href="academic_setup.php" class="submenu-item">Manage Academics</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-gear"></i></div>
+            <div class="nav-text">System Settings</div>
+          </a>
+          <div class="submenu">
+                            <a href="settings.php" class="submenu-item">Update Settings</a>
+                            <a href="manage_localities.php" class="submenu-item">Manage Localities</a>
+                      </div>
+                <a href="#" class="nav-item has-submenu">
+            <div class="nav-icon"><i class="fa fa-calculator"></i></div>
+            <div class="nav-text">Accounts</div>
+          </a>
+          <div class="submenu">
+                            <a href="add_revenue.php" class="submenu-item">Add Revenue</a>
+                            <a href="revenue_list.php" class="submenu-item">List of Revenues</a>
+                            <a href="revenue_heads.php" class="submenu-item">Revenue Heads</a>
+                      </div>
+      
+      <a href="#" class="nav-item" onclick="localStorage.clear(); window.location.href='logout.php'; return false;">
+        <div class="nav-icon"><i class="fa fa-sign-out"></i></div>
+        <div class="nav-text">Logout</div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- iOS backdrop -->
+<div id="ios_sidebar_backdrop"></div>
+
+<script>
+  (function() {
+    if (!document.body.classList.contains('sidebar-expanded') &&
+      !document.body.classList.contains('sidebar-collapsed')) {
+      document.body.classList.add('sidebar-collapsed');
+    }
+  })();
+
+  // Detect iOS / iPadOS / Mac with touch and enable overlay mode
+  (function() {
+    var ua = navigator.userAgent || navigator.vendor || window.opera;
+    var isiOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (isiOS) {
+      document.body.classList.add('ios-device');
+      var btn = document.getElementById('ios_toggle_btn');
+      var backdrop = document.getElementById('ios_sidebar_backdrop');
+      if (btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          document.body.classList.toggle('ios-sidebar-open');
+        }, {
+          passive: false
+        });
+      }
+      if (backdrop) {
+        backdrop.addEventListener('click', function() {
+          document.body.classList.remove('ios-sidebar-open');
+        });
+      }
+      // Close on escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          document.body.classList.remove('ios-sidebar-open');
+        }
+      });
+    }
+  })();
+
+  var dsToggle = document.getElementById('ds_toggle_btn');
+  if (dsToggle) {
+    dsToggle.addEventListener('click', function() {
+      document.body.classList.toggle('sidebar-expanded');
+      document.body.classList.toggle('sidebar-collapsed');
+    });
+  }
+
+  // Make state accessible to other handlers
+  var activeFlyout = null;
+  var hoverTimeout = null;
+
+  // Mobile detection
+  var isMobile = function() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      ('ontouchstart' in window) ||
+      (navigator.maxTouchPoints > 0);
+  };
+
+  function bindFlyouts() {
+    var isCollapsed = function() {
+      return document.body.classList.contains('sidebar-collapsed');
+    };
+
+
+
+    // Handle items with submenus
+    document.querySelectorAll('#sidebar-menu .has-children').forEach(function(li) {
+      var fly = li.querySelector('.child_menu');
+      if (!fly) return;
+
+      // Function to show submenu
+      function showSubmenu() {
+        if (!isCollapsed()) return;
+
+        // Clear any existing timeout
+        if (hoverTimeout) {
+          clearTimeout(hoverTimeout);
+          hoverTimeout = null;
+        }
+
+        // Hide any other active flyout first
+        if (activeFlyout && activeFlyout !== fly) {
+          activeFlyout.style.display = 'none';
+        }
+
+        var r = li.getBoundingClientRect();
+        fly.style.display = 'block';
+        fly.style.position = 'fixed';
+        fly.style.left = getComputedStyle(document.documentElement).getPropertyValue('--sb-collapsed').trim() || '60px';
+        // First render to measure height, then adjust to keep within viewport and align near item
+        fly.style.top = r.top + 'px';
+        fly.style.maxHeight = (window.innerHeight - 16) + 'px';
+        // After layout, adjust top so flyout fits in viewport
+        var fh = fly.offsetHeight || 0;
+        var desiredTop = Math.max(8, Math.min(window.innerHeight - fh - 8, r.top - 6));
+        fly.style.top = desiredTop + 'px';
+        fly.style.overflowY = 'auto';
+        fly.style.zIndex = 2001;
+
+        activeFlyout = fly;
+      }
+
+      // Function to hide submenu
+      function hideSubmenu() {
+        if (!isCollapsed()) return;
+
+        // Don't hide immediately, give user time to move to submenu
+        hoverTimeout = setTimeout(function() {
+          if (activeFlyout === fly) {
+            fly.style.display = 'none';
+            activeFlyout = null;
+          }
+        }, 150);
+      }
+
+      // Click events for both desktop and mobile
+      li.addEventListener('click', function(e) {
+        // Only prevent default if clicking on the parent link, not submenu links
+        var clickedLink = e.target.closest('a');
+        if (clickedLink && clickedLink.parentElement === li) {
+          e.preventDefault();
+          e.stopPropagation();
+        } else {
+          // Submenu link clicked — close flyout/dropdown before navigating
+          if (isCollapsed()) {
+            fly.style.display = 'none';
+            activeFlyout = null;
+          } else {
+            li.classList.remove('active');
+          }
+          return;
+        }
+
+        if (isCollapsed()) {
+          // Collapsed sidebar behavior
+          if (fly.style.display === 'block') {
+            fly.style.display = 'none';
+            activeFlyout = null;
+          } else {
+            // Hide any other active flyout first
+            if (activeFlyout && activeFlyout !== fly) {
+              activeFlyout.style.display = 'none';
+            }
+            showSubmenu();
+          }
+        } else {
+          // Expanded sidebar behavior
+          var isActive = li.classList.contains('active');
+
+          // Remove active class from all menu items
+          document.querySelectorAll('#sidebar-menu .has-children').forEach(function(item) {
+            item.classList.remove('active');
+          });
+
+          // Toggle active class on current item
+          if (!isActive) {
+            li.classList.add('active');
+          } else {
+            li.classList.remove('active');
+          }
+        }
+      });
+
+      // Hide submenu when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!li.contains(e.target) && !fly.contains(e.target)) {
+          if (isCollapsed()) {
+            fly.style.display = 'none';
+            activeFlyout = null;
+          } else {
+            li.classList.remove('active');
+          }
+        }
+      });
+    });
+
+    // Handle items without submenus - show tooltip on hover/touch
+    document.querySelectorAll('#sidebar-menu li:not(.has-children)').forEach(function(li) {
+      var link = li.querySelector('a');
+      if (!link) return;
+
+      var label = link.querySelector('.label');
+      if (!label) return;
+
+      // Function to show tooltip
+      function showTooltip() {
+        if (!isCollapsed()) return;
+
+        // Create tooltip with EXACT same structure as submenu
+        var tooltip = document.createElement('ul');
+        tooltip.className = 'child_menu';
+        tooltip.style.cssText = `
+        position: fixed;
+        left: var(--sb-collapsed);
+        top: ${li.getBoundingClientRect().top + 10}px;
+        min-width: 220px;
+        max-height: 80vh;
+        overflow: auto;
+        display: block;
+        z-index: 2001;
+        background: var(--sb-fly);
+        box-shadow: 0 8px 24px rgba(0,0,0,.25);
+        border-radius: 10px;
+        list-style: none;
+        margin: 0;
+        padding: 6px 0;
+      `;
+
+        // Add content with EXACT same structure as submenu items
+        tooltip.innerHTML = '<li>\
+          <a href="' + link.href + '" style="display: block; padding: 8px 14px; font-size: 13px; color: #fff; text-decoration: none;">\
+            ' + (label.textContent || '') + '\
+          </a>\
+        </li>';
+
+        // Add hover effect like submenu
+        var tooltipLink = tooltip.querySelector('a');
+        tooltipLink.addEventListener('mouseenter', function() {
+          this.style.background = 'rgba(255,255,255,0.08)';
+        });
+        tooltipLink.addEventListener('mouseleave', function() {
+          this.style.background = 'transparent';
+        });
+
+        document.body.appendChild(tooltip);
+        li._tooltip = tooltip;
+      }
+
+      // Function to hide tooltip
+      function hideTooltip() {
+        if (!isCollapsed()) return;
+
+        if (li._tooltip) {
+          li._tooltip.remove();
+          li._tooltip = null;
+        }
+      }
+
+      // Desktop hover events
+      if (!isMobile()) {
+        li.addEventListener('mouseenter', showTooltip);
+        li.addEventListener('mouseleave', hideTooltip);
+      } else {
+        // Mobile touch events - show tooltip on long press or tap
+        var touchStartTime = 0;
+        var touchTimeout = null;
+
+        li.addEventListener('touchstart', function(e) {
+          touchStartTime = Date.now();
+          touchTimeout = setTimeout(function() {
+            showTooltip();
+          }, 500); // Show after 500ms long press
+        });
+
+        li.addEventListener('touchend', function(e) {
+          if (touchTimeout) {
+            clearTimeout(touchTimeout);
+            touchTimeout = null;
+          }
+
+          // If it was a quick tap (not long press), hide tooltip
+          if (Date.now() - touchStartTime < 500) {
+            hideTooltip();
+          }
+        });
+
+        li.addEventListener('touchmove', function(e) {
+          if (touchTimeout) {
+            clearTimeout(touchTimeout);
+            touchTimeout = null;
+          }
+        });
+
+        // Hide tooltip when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!li.contains(e.target)) {
+            hideTooltip();
+          }
+        });
+      }
+    });
+  }
+  bindFlyouts();
+
+  // iOS simple menu interactions
+  (function() {
+    // Only bind on iOS devices
+    if (!document.body.classList.contains('ios-device')) return;
+
+    // Toggle submenu on tap
+    document.querySelectorAll('#menu-ios .has-submenu').forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // keep sidebar open while interacting
+        document.body.classList.add('ios-sidebar-open');
+        var submenu = this.nextElementSibling;
+        // Close others
+        document.querySelectorAll('#menu-ios .submenu').forEach(function(sm) {
+          if (sm !== submenu) {
+            sm.style.display = 'none';
+          }
+        });
+        // Toggle current
+        if (submenu) {
+          submenu.style.display = (submenu.style.display === 'block') ? 'none' : 'block';
+        }
+      }, {
+        passive: false
+      });
+    });
+
+    // Close submenus on outside click
+    document.addEventListener('click', function(e) {
+      var iosMenu = document.getElementById('menu-ios');
+      if (iosMenu && !iosMenu.contains(e.target)) {
+        document.querySelectorAll('#menu-ios .submenu').forEach(function(sm) {
+          sm.style.display = 'none';
+        });
+      }
+    });
+  })();
+
+  // Close all flyouts on every page show (handles bfcache and normal loads)
+  function closeAllFlyouts() {
+    document.querySelectorAll('#sidebar-menu .child_menu').forEach(function(flyout) {
+      flyout.style.display = 'none';
+    });
+    activeFlyout = null;
+    document.querySelectorAll('#sidebar-menu .has-children').forEach(function(item) {
+      item.classList.remove('active');
+    });
+  }
+  window.addEventListener('pageshow', closeAllFlyouts);
+
+  // Direct listeners on all child menu links — failsafe close before navigation
+  document.querySelectorAll('#sidebar-menu .child_menu a').forEach(function(link) {
+    link.addEventListener('click', closeAllFlyouts);
+  });
+
+  // Better scroll handling - don't hide immediately
+  var scrollTimeout;
+  window.addEventListener('scroll', function() {
+    if (!document.body.classList.contains('sidebar-collapsed')) return;
+
+    // Clear previous timeout
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+
+    // Only hide after scrolling stops for a while
+    scrollTimeout = setTimeout(function() {
+      if (activeFlyout) {
+        activeFlyout.style.display = 'none';
+        activeFlyout = null;
+      }
+    }, 500); // Increased to 500ms
+  });
+
+  // Hide flyouts when clicking outside
+  document.addEventListener('click', function(e) {
+    var sidebar = document.getElementById('dsLeftCol');
+    var flyouts = document.querySelectorAll('#sidebar-menu .child_menu');
+
+    if (!sidebar.contains(e.target)) {
+      if (document.body.classList.contains('sidebar-collapsed')) {
+        flyouts.forEach(function(flyout) {
+          flyout.style.display = 'none';
+        });
+        activeFlyout = null;
+      } else {
+        // For expanded sidebar, remove active class from all menu items
+        document.querySelectorAll('#sidebar-menu .has-children').forEach(function(item) {
+          item.classList.remove('active');
+        });
+      }
+    }
+  });
+
+  // Additional fix: Prevent submenu from disappearing when hovering over scrollbar
+  document.addEventListener('mouseover', function(e) {
+    if (!document.body.classList.contains('sidebar-collapsed')) return;
+
+    // If hovering over a submenu, keep it open
+    if (e.target.closest('.child_menu')) {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = null;
+      }
+    }
+  });
+
+  // Mobile-specific: Hide flyouts on orientation change
+  window.addEventListener('orientationchange', function() {
+    setTimeout(function() {
+      if (activeFlyout) {
+        activeFlyout.style.display = 'none';
+        activeFlyout = null;
+      }
+    }, 100);
+  });
+
+  // Mobile-specific: Hide flyouts on window resize
+  window.addEventListener('resize', function() {
+    if (activeFlyout) {
+      activeFlyout.style.display = 'none';
+      activeFlyout = null;
+    }
+  });
+</script>            
+
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Only animate notification badges if they exist
+    const notificationIcons = document.querySelectorAll('.notificationIcon');
+    if (notificationIcons.length) {
+      setInterval(function toggleNotification() {
+        notificationIcons.forEach(function(icon) {
+          icon.classList.toggle('hidden');
+        });
+      }, 3000);
+    }
+  });
+
+  document.addEventListener('contextmenu', function(event) {
+    event.preventDefault();
+  });
+</script>
+
+
+<style>
+  .user-dropdown {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+    overflow: hidden;
+  }
+  .dropdown-card {
+    min-width: 280px;
+  }
+  .dropdown-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    font-weight: 600;
+    color: #111827;
+    border-bottom: 1px solid #eef2f7;
+    background: #f9fafb;
+  }
+  .dropdown-section-title {
+    padding: 8px 14px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+    color: #6b7280;
+    background: #fafafa;
+    border-top: 1px solid #f1f5f9;
+  }
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #111827;
+  }
+  .dropdown-item i {
+    width: 18px;
+    text-align: center;
+    color: #64748b;
+  }
+  .dropdown-item:hover {
+    background: #f3f4f6;
+  }
+  .dropdown-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .usage-card {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .usage-title {
+    font-weight: 600;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .usage-metrics {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #6b7280;
+  }
+  .usage-bar {
+    width: 100%;
+    height: 4px;
+    background: #e5e7eb;
+    border-radius: 2px;
+    margin-top: 6px;
+  }
+  .usage-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+  }
+  .notif-item {
+    display: block;
+    padding: 10px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    text-decoration: none;
+    color: #111827;
+  }
+  .notif-item.unread {
+    background: #f8fafc;
+  }
+  .notif-title {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .notif-meta {
+    font-size: 11px;
+    color: #6b7280;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Header layout - all in one div */
+  .header{ display:flex; align-items:center; justify-content: space-between; gap: 0; padding: 0 24px; height: 80px; background: #fff; border-bottom: 1px solid #e0e0e0; }
+  .header > * { display: flex; }
+  /* Right side layout polish */
+  .right-nav a{ text-decoration:none; display:flex; align-items:center; }
+  .quick-link-btn{ position:relative; margin:0; flex-shrink:0; }
+  .quick-link-btn .btn{ display:flex; align-items:center; height:36px; padding:6px 12px; border-radius:18px; }
+  .message{ position:relative; display:flex; align-items:center; height:36px; flex-shrink:0; }
+  .chip{ display:flex; align-items:center; justify-content:center; height:36px; border-radius:18px; padding:0 10px; cursor:pointer; }
+  .sms-chip{ width:36px; padding:0; }
+  .user-chip{ gap:8px; }
+  .avtar{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#3949ab; color:#fff; font-weight:600; }
+  .chip.user-chip{ position: relative; }
+  #logout_btn_mobile, #logout_btn_desktop{ position: absolute; right: 0; top: 100%; z-index: 99999; width: 230px !important; box-sizing: border-box; border-radius: 14px; }
+  @media (min-width: 769px){
+    #logout_btn_desktop{ position: fixed !important; left: auto !important; right: 20px !important; top: 84px !important; width: 230px !important; }
+  }
+  #logout_btn_mobile .dropdown-header, #logout_btn_desktop .dropdown-header{
+    padding: 9px 12px;
+    font-size: 12.5px;
+    gap: 6px;
+  }
+  #logout_btn_mobile .dropdown-header i, #logout_btn_desktop .dropdown-header i{
+    font-size: 13px;
+    color: #3949ab;
+  }
+  #logout_btn_mobile .dropdown-section-title, #logout_btn_desktop .dropdown-section-title{
+    padding: 5px 12px 2px;
+    font-size: 9.5px;
+    font-weight: 700;
+  }
+  #logout_btn_mobile .dropdown-item, #logout_btn_desktop .dropdown-item{
+    padding: 6px 12px;
+    font-size: 12.5px;
+    gap: 8px;
+    transition: background .15s ease, padding-left .15s ease;
+  }
+  #logout_btn_mobile .dropdown-item:hover, #logout_btn_desktop .dropdown-item:hover{
+    background: #f4f6ff;
+    padding-left: 15px;
+  }
+  #logout_btn_mobile .dropdown-item i, #logout_btn_desktop .dropdown-item i{
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    background: #f1f3f9;
+    color: #475569;
+    font-size: 10.5px;
+  }
+  #logout_btn_mobile .dropdown-item:hover i, #logout_btn_desktop .dropdown-item:hover i{
+    background: #3949ab;
+    color: #fff;
+  }
+  #logout_btn_mobile a[href*="logout"], #logout_btn_desktop a[href*="logout"]{
+    color: #dc2626;
+  }
+  #logout_btn_mobile a[href*="logout"] i, #logout_btn_desktop a[href*="logout"] i{
+    color: #dc2626;
+    background: #fef2f2;
+  }
+  #logout_btn_mobile a[href*="logout"]:hover i, #logout_btn_desktop a[href*="logout"]:hover i{
+    background: #dc2626;
+    color: #fff;
+  }
+  .user-info{ display:flex; flex-direction:column; line-height:1; }
+  .user-name{ font-size:13px; font-weight:600; }
+  .user-designation{ font-size:11px; opacity:.7; }
+  @media (max-width: 1200px){ .user-info{ display:none; } }
+  
+  /* Desktop: Show desktop profile, hide mobile profile */
+  .mobile-profile {
+    display: none !important;
+  }
+  .desktop-profile {
+    display: flex !important;
+  }
+  .menu-btn{
+    display:flex; align-items:center; justify-content:center;
+    width:36px; height:36px; border-radius:10px;
+    color:#637381; text-decoration:none;
+    border:1px solid rgba(99,115,129,0.2);
+    background: transparent;
+    transition: all .2s ease;
+  }
+  .menu-btn:hover{ background: rgba(145,158,171,0.12); border-color: rgba(99,115,129,0.35); }
+  .menu-btn i{ font-size:18px; line-height:1; }
+
+  /* Ensure header/search aligns with sidebar width */
+  .top_nav{ position: sticky; top: 0; z-index: 900; background:#fff; box-sizing: border-box; padding-bottom: 6px;}
+  /* Neutralize theme's left offset on header */
+  .main_container .top_nav{ margin-left: 0 !important; }
+  .top_nav .nav_menu{ transition: padding-left .25s ease; box-sizing: border-box; padding-right:16px; }
+  body.sidebar-collapsed .top_nav .nav_menu{ padding-left: var(--sb-collapsed); }
+  body.sidebar-expanded  .top_nav .nav_menu{ padding-left: var(--sb-expanded); }
+
+  /* Brand block (left side) */
+  .brand-info{ display:flex; flex-direction:column; justify-content:center; min-width:260px; padding:6px 10px; }
+  .brand-title{ font-weight:700; font-size:16px; color:#212B36; }
+  .brand-subtitle{ font-style:italic; color:#919EAB; font-size:13px; margin-top:2px; }
+  @media (max-width: 992px){ .brand-info{ display:none; } }
+
+  /* Search bar pill */
+  .searchbar-container{ width: 20%; display:flex; align-items:center; justify-content:flex-start; margin-left:0; }
+  .search-bar{ display:flex; align-items:center; gap:10px; width:100%; height:44px; padding:0 14px; border-radius:28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15); }
+  .search-bar i{ color:#637381; font-size:18px; }
+  .search-bar input{ border:0; outline:0; width:100%; font-size:14px; color:#212B36; }
+
+
+
+
+  
+#filter {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 28px;
+  background: #fff;
+  border: 1px solid rgba(145, 158, 171, 0.20);
+  box-shadow: 0 6px 16px rgba(145, 158, 171, 0.15);
+}
+
+#livesearch {
+  position: absolute;    /* input ke niche fix karne ke liye */
+  top: 100%;             /* input field ke just neeche */
+  left: 0;
+  width: 100%;           /* input ke width ke barabar */
+  background-color: white;
+  z-index: 902;
+  padding: 10px;
+  border: 1px solid rgba(145,158,171,0.20);
+  box-shadow: 0 6px 16px rgba(145,158,171,0.15);
+  display: none; /* default me hide, search ke result me show karo */
+}
+.search-item {
+  display: block;
+  padding: 8px 10px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #111;
+  text-decoration: none;
+  font-size: 13px;
+}
+.search-item:last-child {
+  border-bottom: none;
+}
+.search-item:hover,
+.search-item.active {
+  background: #f4f6f8;
+}
+.search-item .student-name {
+  font-weight: 600;
+}
+@media (max-width: 768px){
+  .header{ 
+    flex-wrap: wrap; 
+    height: auto; 
+    padding: 8px 12px; 
+    gap: 8px; 
+    width: 100vw !important;
+    max-width: 100vw !important;
+    position: relative !important;
+    top: auto !important;
+    z-index: auto !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+  }
+  .brand-info{
+    display: block !important;
+    width: 100% !important;
+    min-width: auto !important;
+    max-width: none !important;
+    flex: 1 1 100% !important;
+    padding: 0;
+    text-align: left !important;
+    margin-right: 0 !important;
+  }
+  .brand-title{ 
+    font-size: 18px !important; 
+    text-align: left !important;
+    width: 100% !important;
+  }
+  .brand-subtitle{ 
+    font-size: 12px !important; 
+    text-align: left !important;
+    width: 100% !important;
+  }
+  .searchbar-container{
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: 1 1 100% !important;
+    margin: 0 !important;
+    padding-bottom: 0 !important;
+    text-align: left !important;
+    margin-left: 0 !important;
+  }
+  #filter{ 
+    width: 100% !important; 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important; 
+    text-align: left !important;
+  }
+  .quick-link-btn{ 
+    width: 100% !important; 
+    margin-left: 0 !important; 
+    text-align: left !important;
+    margin-right: 0 !important;
+  }
+  .quick-link-btn .btn{ 
+    width: 100% !important; 
+    justify-content: space-between; 
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important; 
+    text-align: left !important;
+  }
+  .message{ 
+    margin-left: 0 !important; 
+    width: 100% !important;
+    margin-right: 0 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    order: 4 !important;
+    flex-wrap: nowrap !important;
+  }
+  .chip.user-chip{ 
+    margin-left: 0 !important; 
+    width: auto !important;
+    order: 5 !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+  }
+  .chip, .sms-chip{ 
+    height: 34px !important; 
+    width: auto !important;
+    flex-shrink: 0 !important;
+  }
+  /* Ensure notification icons stay in one row */
+  .message > div {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+  /* Make sure all notification elements are inline */
+  #msg_wrap, #div2, .user-chip {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+  }
+  /* Show user info on mobile */
+  .user-info {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+    flex-shrink: 0 !important;
+  }
+  .user-name, .user-designation {
+    display: block !important;
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+  .avtar {
+    width: 32px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important;
+  }
+  /* Force all notification elements to stay in one line */
+  .message, .message > *, .user-chip, #msg_wrap, #div2 {
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+  /* Show mobile profile, hide desktop profile on mobile */
+  .mobile-profile {
+    display: flex !important;
+  }
+  .desktop-profile {
+    display: none !important;
+  }
+  /* Hide the duplicate profile that appears below header on mobile */
+  .top_nav .nav_menu nav ul {
+    display: none !important;
+  }
+  #sms_show_hide{ 
+    left: auto !important; 
+    right: 0 !important; 
+    width: 90vw !important;
+  }
+  #msg_show_hide{ 
+    right: 0 !important; 
+    left: auto !important; 
+    width: 90vw !important; 
+  }
+}
+</style>
+
+
+
+
+<!-- top navigation -->
+
+
+
+
+
+<div class="top_nav">
+
+<div class="nav_menu" >
+
+<nav>
+
+
+
+    <div class="flex header" style="padding:0px;">
+
+
+
+  <!-- Branch Name Section - Left Side -->
+  <div class="brand-info" style="width: 260px; min-width: 180px; max-width: 400px; flex: 1 1 260px; margin-right: 0;">
+    <div class="brand-title" style="font-size: 15px; font-weight: 700; color: #212B36; line-height: 1.2;">Test Portal</div>
+    <div class="brand-subtitle" style="font-size: 14px; color: #637381; font-style: normal; margin-top: 4px;">2026-2027</div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="searchbar-container" style="width: 260px; min-width: 180px; max-width: 400px; flex: 1 1 260px; margin: 0 0px; padding-bottom: 11px; margin-left:25px; position: relative;">
+    
+  
+              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" 
+        placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="" >
+              
+
+    
+  <div id="livesearch" role="listbox" aria-label="Student search results"
+     style="background-color:white; z-index:902; padding:10px;">
+  </div>
+
+     
+  </div>
+
+  <!-- Quick Links Section -->
+      <div class="quick-link-btn" style="margin-left: auto; margin-right: 10px;">
+      <button id="quickLinkBtn" class="btn" style="width: 214px; height: 44px; border: 1px solid #e0e0e0; color: #637381; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-radius: 22px; font-size: 14px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.background='#FFA500'; this.style.color='white'; this.style.borderColor='#FFA500'; this.style.boxShadow='0 4px 12px rgba(255,165,0,0.3)';" onmouseout="this.style.background='white'; this.style.color='#637381'; this.style.borderColor='#e0e0e0'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)';">
+        <span>Quick Links</span>
+        <i class="fa fa-chevron-down" style="font-size: 12px; margin-left: 8px;"></i>
+      </button>
+      <div id="dropdownContent" class="dropdown-content" style="z-index: 99999; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; display: none;">
+        <a href="https://apps.eduportal.pk/Production/graph_analytics.php">Analytics Dashboard</a>
+        <a href="https://apps.eduportal.pk/Production/data_health_checker.php">Data Health Checker</a>  
+        <a href="https://apps.eduportal.pk/Production/students_reports.php">Students Reports</a>
+        <a href="https://apps.eduportal.pk/Production/customer_tickets.php">Support Tickets</a>
+        <a href="https://apps.eduportal.pk/Production/print_daily_income_exp_report.php">Daily Closing</a>
+        <a href="https://apps.eduportal.pk/Production/print_profitloss_report.php">Monthly Closing</a>
+        <a href="https://apps.eduportal.pk/Production/mark_attend.php">Mark Attendance</a>
+        <a href="https://apps.eduportal.pk/Production/view_challan.php">View Challan</a>
+        <a href="https://apps.eduportal.pk/Production/messages_history.php">View Messages</a>
+        <a href="https://apps.eduportal.pk/Production/manage_expenses.php">Expenses</a>
+        <a href="https://apps.eduportal.pk/Production/user_audit_report.php">Users Activities</a>
+        <a href="https://apps.eduportal.pk/Production/parents_id.php">View Parents IDs</a>
+        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&to_date=2026-09-30&status=All&type=All&addaccountAdmin=1">Complaint</a>
+      </div>
+    </div>
+  
+  <!-- Notifications Section -->
+  <div class="message" style="margin-right: 8px;">
+    <!-- Unread badge for notifications (bell) -->
+    <div id="div1" style="position:absolute; top: 0; left: 0;z-index: 2;" onclick="sms_show();">
+          </div>
+
+    <!-- Contact assigned CSR/Agent via WhatsApp -->
+    <div id="csr_whatsapp_wrap" style="position: relative; height: auto; z-index: 9999; margin-right: 6px;">
+            <a href="https://wa.me/923000228123" target="_blank" rel="noopener" class="chip sms-chip" style="width:35px; border: none;" title="Chat with your Support Representative (Mubeen Arshad) on WhatsApp">
+        <i class="fab fa-whatsapp" style="font-size: 19px; color: #25D366;"></i>
+      </a>
+          </div>
+
+    <!-- Envelope (Messages) -->
+    <div id="msg_wrap" style="position: relative; height: auto; z-index: 9999; margin-right: 6px;">
+      <div class="chip sms-chip" onclick="msg_show();" style="width:35px; border: none">
+        <i class="fa fa-envelope" style="font-size: 18px; color: #808080;"></i>
+      </div>
+      <div class="user-dropdown dropdown-card" id="msg_show_hide" style="display: none; z-index: 99999; width: 24em; position: absolute; right: 0; top: 100%; height: auto;">
+        <div class="dropdown-header"><i class="fa fa-signal"></i> SMS Usage</div>
+        <div class="usage-card">
+          <div class="usage-title" style="color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp SMS</div>
+          <div class="usage-metrics">
+            <span>Used: 12</span>
+            <span>Limit: 10,000</span>
+          </div>
+          <div class="usage-bar">
+            <div class="usage-bar-fill" style="width: 0.12%; background:#25D366;"></div>
+          </div>
+        </div>
+        <div class="usage-card">
+          <div class="usage-title" style="color:#007bff;"><i class="fa fa-mobile"></i> SIM SMS</div>
+          <div class="usage-metrics">
+            <span>Used: 0</span>
+            <span>Limit: 0</span>
+          </div>
+          <div class="usage-bar">
+            <div class="usage-bar-fill" style="width: 0%; background:#007bff;"></div>
+          </div>
+        </div>
+        <div class="usage-card">
+          <div class="usage-title"><i class="fa fa-bar-chart"></i> Total SMS Usage (This Month)</div>
+          <div class="usage-metrics">
+            <span>WhatsApp: 12</span>
+            <span>SIM: 0</span>
+          </div>
+          <div class="usage-metrics" style="margin-top:4px;">
+            <span>Total: 12</span>
+            <span>Remaining: 9,988</span>
+          </div>
+        </div>
+        <a class="dropdown-item" href="https://apps.eduportal.pk/Production/messages_history.php">
+          <i class="fa fa-history"></i> View Messages History
+        </a>
+      </div>
+    </div>
+
+    <!-- Bell (Notifications) -->
+    <div id="div2" style="position: relative; height: auto; z-index: 9999;">
+      <div class="chip sms-chip" onclick="sms_show();" style="width:35px; border: none">
+        <i class="fa fa-bell" style="font-size: 18px; color: #808080;"></i>
+      </div>  
+      <div class="user-dropdown dropdown-card" id="sms_show_hide" style="display: none; z-index: 99999; width: 26em; position: absolute; left: -20em; top: 100%; height: auto;">
+        <div class="dropdown-header"><i class="fa fa-bell"></i> Notifications</div>
+        <div class="dropdown-list">
+                  </div>
+      </div>
+    </div>
+
+    <!-- User Profile Section - Now inside message div for mobile alignment -->
+    <div class="chip user-chip mobile-profile" style="background:white; margin-left: 8px;" onclick="show_hide();">
+      <div class="user-dropdown dropdown-card" id="logout_btn_mobile" style="width:100%; display: none;">
+        <div class="dropdown-header"><i class="fa fa-user-circle"></i> Account</div>
+        <div class="dropdown-section-title">Profile</div>
+        <a href="update_profile.php" class="dropdown-item"><i class="fa fa-user"></i> Profile</a>
+        <a href="customer_tickets.php" class="dropdown-item"><i class="fa fa-ticket-alt"></i> Support Tickets</a>
+        <div class="dropdown-section-title">Invoices</div>
+        <a href="monthly_invoices.php" class="dropdown-item"><i class="fa fa-file-alt"></i> Monthly Invoices</a>
+        <div class="dropdown-section-title">Security</div>
+        <a href="update_pswd.php" class="dropdown-item"><i class="fa fa-key"></i> Change Password</a>
+        <div class="dropdown-section-title">Session</div>
+        <a href="logout.php" class="dropdown-item"><i class="fa fa-sign-out-alt"></i> Logout</a>
+      </div>
+      <div class="avtar"></div>
+      <div class="user-info">
+        <span class="user-name" style="color:black;">
+                  </span>
+        <span class="user-designation">Super Admin</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Section - Desktop version (hidden on mobile) -->
+  <div class="chip user-chip desktop-profile" style="background:white;" onclick="show_hide();">
+    <div class="user-dropdown dropdown-card" id="logout_btn_desktop" style="width:100%; display: none;">
+      <div class="dropdown-header"><i class="fa fa-user-circle"></i> Account</div>
+      <div class="dropdown-section-title">Profile</div>
+      <a href="update_profile.php" class="dropdown-item"><i class="fa fa-user"></i> Profile</a>
+      <a href="customer_tickets.php" class="dropdown-item"><i class="fa fa-ticket-alt"></i> Support Tickets</a>
+      <div class="dropdown-section-title">Invoices</div>
+      <a href="monthly_invoices.php" class="dropdown-item"><i class="fa fa-file-alt"></i> Monthly Invoices</a>
+      <div class="dropdown-section-title">Security</div>
+      <a href="update_pswd.php" class="dropdown-item"><i class="fa fa-key"></i> Change Password</a>
+      <div class="dropdown-section-title">Session</div>
+      <a href="logout.php" class="dropdown-item"><i class="fa fa-sign-out-alt"></i> Logout</a>
+    </div>
+    <div class="avtar"></div>
+    <div class="user-info">
+      <span class="user-name" style="color:black;">
+              </span>
+      <span class="user-designation">Super Admin</span>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+</ul>
+
+</li>
+
+</ul>
+
+</nav>
+
+</div>
+
+</div>
+
+<!-- /top navigation -->
+
+
+
+
+
+
+
+<!-- function for live search header --> 
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+
+
+// SECURITY: Enhanced showResult function with input validation
+function showResult(str) {
+  if (window.__skipSearch === true) {
+    window.__skipSearch = false;
+    return;
+  }
+  // SECURITY: Input validation and sanitization
+  if (!str || str.length == 0) { 
+    document.getElementById("livesearch").innerHTML="";
+    document.getElementById("livesearch").style.display="none";
+    return;
+  }
+  
+  // SECURITY: Limit input length to prevent abuse
+  if (str.length > 100) {
+    str = str.substring(0, 100);
+  }
+  
+  // SECURITY: Basic XSS prevention - escape special characters
+  str = str.replace(/[<>\"'&]/g, function(match) {
+    switch(match) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#x27;';
+      case '&': return '&amp;';
+      default: return match;
+    }
+  });
+  
+  if (window.XMLHttpRequest) {
+    xmlhttp = new XMLHttpRequest();
+  } else {
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  
+  xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      // SECURITY: Use textContent instead of innerHTML to prevent XSS
+      document.getElementById("livesearch").innerHTML = this.responseText;
+      document.getElementById("livesearch").style.display = "block";
+      initSearchResults();
+    }
+  }
+  
+  // SECURITY: URL encode the search parameter
+  xmlhttp.open("GET", "livesearch.php?q=" + encodeURIComponent(str), true);
+  xmlhttp.send();
+}
+
+
+// Keyboard-friendly search results
+var searchIndex = -1;
+function getSearchItems() {
+  return Array.prototype.slice.call(document.querySelectorAll('#livesearch .search-item'));
+}
+function updateActiveResult(index) {
+  var items = getSearchItems();
+  items.forEach(function(item, i) {
+    item.classList.toggle('active', i === index);
+  });
+}
+function initSearchResults() {
+  var items = getSearchItems();
+  searchIndex = -1;
+  updateActiveResult(searchIndex);
+  items.forEach(function(item, i) {
+    item.addEventListener('mouseenter', function() {
+      searchIndex = i;
+      updateActiveResult(searchIndex);
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var searchInput = document.getElementById('filter');
+  if (!searchInput) return;
+
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === 'Escape') {
+      window.__skipSearch = true;
+    } else {
+      window.__skipSearch = false;
+    }
+    var items = getSearchItems();
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      searchIndex = Math.min(searchIndex + 1, items.length - 1);
+      updateActiveResult(searchIndex);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      searchIndex = Math.max(searchIndex - 1, 0);
+      updateActiveResult(searchIndex);
+    } else if (e.key === 'Enter') {
+      if (searchIndex >= 0 && items[searchIndex]) {
+        window.location.href = items[searchIndex].getAttribute('href');
+      }
+    } else if (e.key === 'Escape') {
+      document.getElementById("livesearch").style.display = "none";
+      searchIndex = -1;
+      updateActiveResult(searchIndex);
+    }
+  });
+});
+
+
+// logout btn hide and show script
+
+
+
+var a;
+
+
+
+function show_hide(){
+    if(a==1) {
+        // Show both mobile and desktop profile dropdowns
+        var mobileDropdown = document.getElementById("logout_btn_mobile");
+        var desktopDropdown = document.getElementById("logout_btn_desktop");
+        
+        if(mobileDropdown) mobileDropdown.style.display = "inline";
+        if(desktopDropdown) desktopDropdown.style.display = "inline";
+        
+        return a=0;
+    } else {
+        // Hide both mobile and desktop profile dropdowns
+        var mobileDropdown = document.getElementById("logout_btn_mobile");
+        var desktopDropdown = document.getElementById("logout_btn_desktop");
+        
+        if(mobileDropdown) mobileDropdown.style.display = "none";
+        if(desktopDropdown) desktopDropdown.style.display = "none";
+        
+        return a=1;
+    }
+}
+
+
+
+
+
+
+
+var a;
+
+
+
+function sms_show(){
+
+
+
+if(a==1)
+
+{
+
+
+
+    // hide messages dropdown if open
+    var msg = document.getElementById("msg_show_hide");
+    if(msg){ msg.style.display = "none"; }
+    document.getElementById("sms_show_hide").style.display="inline";
+
+    return a=0;
+
+
+
+}else{
+
+
+
+    document.getElementById("sms_show_hide").style.display="none";
+
+    return a=1;
+
+}
+
+
+
+}
+
+
+
+
+// toggle messages dropdown
+var b;
+function msg_show(){
+if(b==1)
+{
+  // hide notification if open
+  var notif = document.getElementById("sms_show_hide");
+  if(notif){ notif.style.display = "none"; }
+  document.getElementById("msg_show_hide").style.display="inline";
+  return b=0;
+}else{
+  document.getElementById("msg_show_hide").style.display="none";
+  return b=1;
+}
+}
+
+var quickLinkBtn = document.getElementById("quickLinkBtn");
+if (quickLinkBtn) {
+  quickLinkBtn.addEventListener("click", function() {
+    var dropdown = document.getElementById("dropdownContent");
+    if (!dropdown) return;
+
+    if (dropdown.style.display === "block") {
+      dropdown.style.display = "none";
+    } else {
+      dropdown.style.display = "block";
+    }
+  });
+}
+
+
+</script>     
+        <!-- page content -->
+        <div class="right_col" role="main">
+          <!-- ✅ Improved Page Header -->
+          <div class="page-header" style="margin-top: 0px;">
+            <nav aria-label="breadcrumb" class="breadcrumb">
+              <a href="dashboard.php">
+                <i class="fa fa-home"></i> Dashboard
+              </a>
+              <span> <i class="fa fa-angle-double-right"></i> </span>
+
+              <a href="academic_setup.php">
+                <i class="fa fa-settings"></i> Academic Setup
+              </a>
+              <span> <i class="fa fa-angle-double-right"></i> </span>
+              <span>Manage Classes</span>
+            </nav>
+            <h2><i class="fa fa-graduation-cap"></i> Class Management</h2>
+          </div>
+
+          <!-- ✅ Stats Card -->
+          <div class="stats-card">
+            <strong><i class="fa fa-info-circle"></i> Total Classes:</strong>
+            <span class="badge">22</span>
+          </div>
+
+          <!-- ✅ Action Buttons -->
+          <div class="action-buttons">
+            
+            <a href="manage_sections.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&page=" 
+               class="btn btn-primary">
+              <i class="fa fa-list"></i> Manage Sections
+            </a>
+
+            <a href="class_drag.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703" 
+               class="btn btn-info">
+              <i class="fa fa-sort"></i> Class Order / Sorting
+            </a>
+
+            <a href="manage_class_heads.php" class="btn btn-dark">
+              <i class="fa fa-sitemap"></i> Class Heads
+            </a>
+
+            
+            <button type="button" class="btn btn-primary btn-add-class" data-toggle="modal" data-target="#addClassModal">
+              <i class="fa fa-plus"></i> Add New Class
+            </button>
+          </div>
+
+          <!-- ✅ Classes Table -->
+          <div class="table-container">
+                          <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th><i class="fa fa-book"></i> Class Name</th>
+                      <th><i class="fa fa-sitemap"></i> Class Head</th>
+                      <th><i class="fa fa-list-alt"></i> Sections</th>
+                      <th><i class="fa fa-money-bill-wave"></i> Monthly Fee</th>
+                      <th><i class="fa fa-coins"></i> Misc Fee</th>
+                      <th><i class="fa fa-calendar"></i> Created Date</th>
+                      <th><i class="fa fa-cog"></i> Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                                          <tr>
+                        <td style="font-weight: 600;">10TH</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15834&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (2)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>19-Aug-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15834&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15834&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">BSIT</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=16795&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (2)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>07-Feb-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=16795&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=16795&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">MIT</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=17184&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">5,000</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>30-Mar-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=17184&fee=5000" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=17184&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">BSCS</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=16766&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>04-Feb-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=16766&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=16766&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">Pharm-D 2021-26</td>
+                       
+                        <td>Pharm-D</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=17073&class_head=94" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (10)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>13-Mar-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=17073&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=17073&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">2ND</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15552&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (2)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>22-May-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15552&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15552&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">DMS Play Group</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=17890&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">5,000</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>19-Aug-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=17890&fee=5000" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=17890&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">Class 7</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=16922&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>26-Feb-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=16922&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=16922&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">14th</td>
+                       
+                        <td>Modern Edu</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=17807&class_head=162" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (2)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">5,000</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">1,000</span>
+                        </td>
+
+                        <td>23-Jul-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=17807&fee=5000" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=17807&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">KG-2</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15550&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>22-May-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15550&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15550&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">1ST</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15551&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (3)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>22-May-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15551&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15551&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">3RD</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15553&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>22-May-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15553&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15553&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">4TH</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15554&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>22-May-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15554&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15554&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">5TH</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15555&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (4)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>22-May-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15555&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15555&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">6TH</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15556&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>22-May-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15556&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15556&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">7TH</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15557&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>22-May-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15557&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15557&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">8TH</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15832&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>19-Aug-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15832&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15832&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">9TH</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15833&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>19-Aug-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15833&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15833&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">BS Computer Science</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=15905&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (2)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>29-Aug-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=15905&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=15905&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">Bs English</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=16136&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (2)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>09-Oct-2025</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=16136&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=16136&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">New Fee Head Class</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=16540&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>06-Jan-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=16540&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=16540&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                          <tr>
+                        <td style="font-weight: 600;">reminder sms class</td>
+                       
+                        <td>N/A</td>
+
+                        <td>
+                          <a href="manage_sections.php?class_id=16613&class_head=N/A" 
+                             class="section-link">
+                            <i class="fa fa-eye"></i> View Sections (1)
+                          </a>
+                        </td>
+                                
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>
+                          <span class="fee-amount">0</span>
+                        </td>
+
+                        <td>26-Jan-2026</td>
+
+                        <td>
+                          <a href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&id=16613&fee=0" 
+                             class="btn btn-success btn-action"
+                             title="Edit Class">
+                            <i class="fa fa-edit"></i> Edit
+                          </a>
+
+                          <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" 
+                             href="manage_classes.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&cid=16613&delete_class=1" 
+                             class="btn btn-danger btn-action"
+                             title="Delete Class">
+                            <i class="fa fa-trash"></i> Delete
+                          </a>
+                        </td>
+                      </tr>
+                                      </tbody>
+                </table>
+              </div>
+                      </div>
+
+          <div class="clearfix"></div>
+        </div>
+        <!-- /page content -->
+      </div>
+    </div>
+
+    <!-- ✅ Add Class Modal -->
+    <div id="addClassModal" class="modal fade" role="dialog" aria-labelledby="addClassModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header" style="background: #2b2b36; color: white;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: white; opacity: 1;">
+              <span aria-hidden="true">&times;</span>
+            </button>
+            <h4 class="modal-title" id="addClassModalLabel">
+              <i class="fa fa-plus"></i> Add New Class            </h4>
+          </div>
+          <div class="modal-body">
+            
+<style type="text/css">
+  .inputfield{
+    width: 100%;
+    height:34px;
+  }
+</style>
+<form class="form-style-7" action="https://apps.eduportal.pk/Production/parent/InsertMe.php" method="post" enctype="multipart/form-data">
+
+
+   
+<input type="hidden" name="action" value="AddClass">
+
+<input type="hidden" name="csrf_token" value="3c6f32a702815aaa6c4cf5d803cad48773bddbeb11649c3cf734a32fe4e406d9">
+
+
+      <ul style="list-style-type:none;">
+       <div class="col-md-12"> <h3 class="heding_name">Add New Class</h3></div>
+
+       <div class="clearfix"></div>
+       
+        <hr>
+      
+
+        <li>
+          <label for=""> Class Name </label>
+<input type="text" name="name" class="inputfield" 
+       value="" 
+       autocomplete="off" required maxlength="100">
+
+        </li>
+
+<li>
+    <label for=""> Class Head </label>
+    <select name="class_head" class="inputfield">
+      <option value="">Select Class Head</option>
+                        <option value="27" >
+            Hajvery Campus          </option>
+                  <option value="29" >
+            Main Campus          </option>
+                  <option value="94" >
+            Pharm-D          </option>
+                  <option value="95" >
+            Pharm-D 2022-27          </option>
+                  <option value="96" >
+            Pharm-D 2023-28          </option>
+                  <option value="97" >
+            Pharm-D 2024-29          </option>
+                  <option value="162" >
+            Modern Edu          </option>
+                  </select>
+</li>
+  
+
+          
+<li>
+    <label for=""> Standard Monthly Fee </label>
+    <input type="text" name="fee" class="inputfield" 
+           value="" 
+           required maxlength="100">
+</li>
+
+
+<li>
+    <label for=""> Standard Misc Fee </label>
+    <input type="text" name="misc" class="inputfield" 
+           value="" 
+           maxlength="100">
+</li>
+
+    
+        <div class="clearfix"></div>
+        <li class=" pull-left" style="margin-top:30px;">
+        
+          <input type="submit" value=" Submit " class="btn btn-primary" >
+        </li>
+      </ul>
+    </form>          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- jQuery -->
+<script src="../vendors/jquery/dist/jqueryfile.js"></script>
+<!-- Bootstrap -->
+<script src="../vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- Custom Theme Scripts -->
+<script src="../build/js/custom.min.js"></script>
+<!-- jQuery Sparklines -->
+<script src="../vendors/jquery-sparkline/dist/jquery.sparkline.min.js"></script>    
+    <script>
+      // ✅ Show loading overlay on form submissions and delete actions
+      $(document).ready(function() {
+        // Show loading on delete links
+        $('a[href*="delete_class=1"]').on('click', function() {
+          if (confirm('Are you sure you want to delete this class? This will also expel all students in this class!')) {
+            $('#loadingOverlay').addClass('active');
+          } else {
+            return false;
+          }
+        });
+
+        // Show loading on form submissions
+        $('form').on('submit', function() {
+          $('#loadingOverlay').addClass('active');
+        });
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+          $('.alert').fadeOut('slow');
+        }, 5000);
+
+              });
+    </script>
+  
+  </body>
+</html>

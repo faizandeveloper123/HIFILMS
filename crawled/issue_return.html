@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <title>Issue &amp; Return Book | EduPortal</title>
   
 
@@ -180,6 +182,8 @@
     .breadcrumb-bar { margin-bottom:10px; font-size:13px; color:#718096; overflow:hidden; }
     .breadcrumb-bar a { color:#ed8936; }
   </style>
+</head>
+
 <script>
 function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
   document.getElementById('edit_history_id').value  = historyId;
@@ -190,12 +194,10 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
   $sel.val(bookId).trigger('change');
   jQuery('#editBookModal').modal('show');
 }
-</script><script src="js/ajax_functions.js"></script><style type="text/css">.jqstooltip { position: absolute;left: 0px;top: 0px;visibility: hidden;background: rgb(0, 0, 0) transparent;background-color: rgba(0,0,0,0.6);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";color: white;font: 10px arial, san serif;text-align: left;white-space: nowrap;padding: 5px;border: 1px solid white;box-sizing: content-box;z-index: 10000;}.jqsfield { color: white;font: 10px arial, san serif;text-align: left;}</style></head>
+</script>
 
-
-
-
-<body class="nav-md sidebar-collapsed">
+<script src="js/ajax_functions.js"></script>
+<body class="nav-md">
 <div class="container body">
   <div class="main_container">
     <div class="col-md-3 left_col">
@@ -728,7 +730,9 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
 
   <!-- Logo Section -->
   <div class="sidebar-logo">
-    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg" onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';" alt="Logo">
+    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg"
+      onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';"
+      alt="Logo" />
   </div>
 
   <div class="ds-branch">
@@ -736,9 +740,9 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
     <div style="font-size:12px;">(2026-2027)</div>
   </div>
 
-  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu active">
+  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
     <!-- Web/Android original menu -->
-    <ul class="side-menu" id="menu-web" style="">
+    <ul class="side-menu" id="menu-web">
       <li><a href="software_demo_videos.php"><i class="fa fa-play"></i><span class="label" style="font-weight: normal !important;">Guidline Videos</span></a></li>
 
                 <li class="has-children">
@@ -747,7 +751,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Front Office</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="front_desk_analytics.php">
                       Front Desk Overview                    </a>
@@ -768,7 +772,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Dashboard</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="dashboard.php">
                       Executive Dashboard                    </a>
@@ -785,7 +789,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Students</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_student.php">
                       Add New Student                    </a>
@@ -806,7 +810,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Attendance</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="mark_attend.php">
                       Mark Attendance                    </a>
@@ -827,7 +831,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Messages</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="new_message.php">
                       New Message                    </a>
@@ -848,7 +852,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Fee Collection</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="monthly_challan.php">
                       Create Challan                    </a>
@@ -873,7 +877,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Examination</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="view_marksheet.php">
                       Add Marks Sheet                    </a>
@@ -894,7 +898,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Timetable</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="period_categories.php">
                       Periods Category                    </a>
@@ -927,7 +931,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Employees/HRM</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_emp.php">
                       Add Employee                    </a>
@@ -956,7 +960,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Datesheet</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="create_datesheet.php">
                       Create Datesheet                    </a>
@@ -981,7 +985,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Transport</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="vehicles.php">
                       Vehicles                    </a>
@@ -1002,12 +1006,12 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Library</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="list_books.php">
                       Book List                    </a>
                   </li>
-                                <li class="current-page">
+                                <li>
                     <a href="issue_return.php">
                       Issue Return                    </a>
                   </li>
@@ -1023,7 +1027,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">PayRoll</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="creat_payroll.php">
                       Create PayRoll                    </a>
@@ -1048,7 +1052,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Parents Portal</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="parents_portal_dashboard.php">
                       Parents Overview                    </a>
@@ -1061,7 +1065,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Expenses</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="manage_expenses.php">
                       Add/View Expenses                    </a>
@@ -1078,7 +1082,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Cards Generator</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="cards.php">
                       Staff Cards                    </a>
@@ -1095,7 +1099,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Point of Sale</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="canteen_dashboard.php">
                       POS Dashboard                    </a>
@@ -1108,7 +1112,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Academic Setup</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="academic_setup.php">
                       Manage Academics                    </a>
@@ -1121,7 +1125,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">System Settings</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="settings.php">
                       Update Settings                    </a>
@@ -1138,7 +1142,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
               <span class="label" style="font-weight: normal !important;">Accounts</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_revenue.php">
                       Add Revenue                    </a>
@@ -2212,7 +2216,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
 
 <div class="top_nav">
 
-<div class="nav_menu">
+<div class="nav_menu" >
 
 <nav>
 
@@ -2232,11 +2236,13 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
   <div class="searchbar-container" style="width: 260px; min-width: 180px; max-width: 400px; flex: 1 1 260px; margin: 0 0px; padding-bottom: 11px; margin-left:25px; position: relative;">
     
   
-              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="">
+              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" 
+        placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="" >
               
 
     
-  <div id="livesearch" role="listbox" aria-label="Student search results" style="background-color:white; z-index:902; padding:10px;">
+  <div id="livesearch" role="listbox" aria-label="Student search results"
+     style="background-color:white; z-index:902; padding:10px;">
   </div>
 
      
@@ -2261,7 +2267,7 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
         <a href="https://apps.eduportal.pk/Production/manage_expenses.php">Expenses</a>
         <a href="https://apps.eduportal.pk/Production/user_audit_report.php">Users Activities</a>
         <a href="https://apps.eduportal.pk/Production/parents_id.php">View Parents IDs</a>
-        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&amp;to_date=2026-09-30&amp;status=All&amp;type=All&amp;addaccountAdmin=1">Complaint</a>
+        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&to_date=2026-09-30&status=All&type=All&addaccountAdmin=1">Complaint</a>
       </div>
     </div>
   
@@ -2288,11 +2294,11 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
         <div class="usage-card">
           <div class="usage-title" style="color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp SMS</div>
           <div class="usage-metrics">
-            <span>Used: 0</span>
+            <span>Used: 12</span>
             <span>Limit: 10,000</span>
           </div>
           <div class="usage-bar">
-            <div class="usage-bar-fill" style="width: 0%; background:#25D366;"></div>
+            <div class="usage-bar-fill" style="width: 0.12%; background:#25D366;"></div>
           </div>
         </div>
         <div class="usage-card">
@@ -2308,12 +2314,12 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
         <div class="usage-card">
           <div class="usage-title"><i class="fa fa-bar-chart"></i> Total SMS Usage (This Month)</div>
           <div class="usage-metrics">
-            <span>WhatsApp: 0</span>
+            <span>WhatsApp: 12</span>
             <span>SIM: 0</span>
           </div>
           <div class="usage-metrics" style="margin-top:4px;">
-            <span>Total: 0</span>
-            <span>Remaining: 10,000</span>
+            <span>Total: 12</span>
+            <span>Remaining: 9,988</span>
           </div>
         </div>
         <a class="dropdown-item" href="https://apps.eduportal.pk/Production/messages_history.php">
@@ -2384,11 +2390,11 @@ function openEditBook(historyId, bookId, issueDate, dueDate, remarks) {
 
 
 
+</ul>
 
+</li>
 
-
-
-
+</ul>
 
 </nav>
 
@@ -2628,7 +2634,7 @@ if (quickLinkBtn) {
 
 
 </script>
-    <div class="right_col" role="main" style="min-height: 733px;">
+    <div class="right_col" role="main">
 
       <!-- Breadcrumb -->
       <div class="breadcrumb-bar">
@@ -2687,37 +2693,66 @@ if (quickLinkBtn) {
         </div>
 
                 <div style="overflow-x:auto; padding:0 4px;">
-          <div id="recordsTable_wrapper" class="dataTables_wrapper no-footer"><div class="dataTables_length" id="recordsTable_length"><label>Show <select name="recordsTable_length" aria-controls="recordsTable" class=""><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select> records</label></div><table id="recordsTable" class="table hist-tbl table-hover dataTable no-footer" style="width:100%; margin:0;" role="grid" aria-describedby="recordsTable_info">
+          <table id="recordsTable" class="table hist-tbl table-hover" style="width:100%; margin:0;">
             <thead>
-              <tr role="row"><th class="sorting" tabindex="0" aria-controls="recordsTable" rowspan="1" colspan="1" aria-label="#: activate to sort column ascending" style="width: 23px;">#</th><th class="sorting" tabindex="0" aria-controls="recordsTable" rowspan="1" colspan="1" aria-label="Student Name: activate to sort column ascending" style="width: 124px;">Student Name</th><th class="sorting" tabindex="0" aria-controls="recordsTable" rowspan="1" colspan="1" aria-label="GR No / Family Code: activate to sort column ascending" style="width: 164px;">GR No / Family Code</th><th class="sorting" tabindex="0" aria-controls="recordsTable" rowspan="1" colspan="1" aria-label="Book Title: activate to sort column ascending" style="width: 88px;">Book Title</th><th class="sorting_desc" tabindex="0" aria-controls="recordsTable" rowspan="1" colspan="1" aria-sort="descending" aria-label="Issue Date: activate to sort column ascending" style="width: 94px;">Issue Date</th><th class="sorting" tabindex="0" aria-controls="recordsTable" rowspan="1" colspan="1" aria-label="Due Date: activate to sort column ascending" style="width: 94px;">Due Date</th><th class="sorting" tabindex="0" aria-controls="recordsTable" rowspan="1" colspan="1" aria-label="Status: activate to sort column ascending" style="width: 86px;">Status</th><th class="sorting_disabled" rowspan="1" colspan="1" aria-label="Action" style="width: 180px;">Action</th></tr>
+              <tr>
+                <th>#</th>
+                <th>Student Name</th>
+                <th>GR No / Family Code</th>
+                <th>Book Title</th>
+                <th>Issue Date</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
             </thead>
             <tbody>
-                            
-                            
-                            
-                          <tr class="odd" role="row">
+                            <tr class="">
+                <td>1</td>
+                <td><strong>Umar Ali Arshad</strong></td>
+                <td>26-332</td>
+                <td>Jungle Book</td>
+                <td>01 May 2026</td>
+                <td>
+                  12 May 2026                                  </td>
+                <td>
+                                      <span class="b-returned">Returned</span>
+                                  </td>
+                <td style="white-space:nowrap;">
+                                      <button type="button" class="btn-returned-row" disabled><i class="fa fa-check"></i> Returned</button>
+                    <a class="btn-row-del" title="Delete"
+                       href="https://apps.eduportal.pk/Production/parent/InsertMe.php?book_history_id=75&action=delete_student_book_history"
+                       onclick="return confirm('Delete this book record?');">
+                      <i class="fa fa-trash"></i>
+                    </a>
+                                  </td>
+              </tr>
+                            <tr class="">
                 <td>2</td>
                 <td><strong>NASAR</strong></td>
                 <td>26-316</td>
                 <td>CS219</td>
-                <td class="sorting_1">21 Apr 2026</td>
+                <td>21 Apr 2026</td>
                 <td>
                   25 Apr 2026                                  </td>
                 <td>
                                       <span class="b-returned">Returned</span>
                                   </td>
                 <td style="white-space:nowrap;">
-                                      <button type="button" class="btn-returned-row" disabled=""><i class="fa fa-check"></i> Returned</button>
-                    <a class="btn-row-del" title="Delete" href="https://apps.eduportal.pk/Production/parent/InsertMe.php?book_history_id=63&amp;action=delete_student_book_history" onclick="return confirm('Delete this book record?');">
+                                      <button type="button" class="btn-returned-row" disabled><i class="fa fa-check"></i> Returned</button>
+                    <a class="btn-row-del" title="Delete"
+                       href="https://apps.eduportal.pk/Production/parent/InsertMe.php?book_history_id=63&action=delete_student_book_history"
+                       onclick="return confirm('Delete this book record?');">
                       <i class="fa fa-trash"></i>
                     </a>
                                   </td>
-              </tr><tr class="row-overdue even" role="row">
+              </tr>
+                            <tr class="row-overdue">
                 <td>3</td>
                 <td><strong>NASAR </strong></td>
                 <td>26-294</td>
                 <td>CS219</td>
-                <td class="sorting_1">21 Apr 2026</td>
+                <td>21 Apr 2026</td>
                 <td>
                   21 Apr 2026                                    <br><small style="color:#e53e3e;"><i class="fa fa-exclamation-triangle"></i> Overdue</small>
                                   </td>
@@ -2725,10 +2760,13 @@ if (quickLinkBtn) {
                                       <span class="b-overdue">Issued</span>
                                   </td>
                 <td style="white-space:nowrap;">
-                                      <a class="btn-return-row" href="https://apps.eduportal.pk/Production/parent/InsertMe.php?book_history_id=64&amp;action=quick_return_book_history" onclick="return confirm('Mark this book as returned?');">
+                                      <a class="btn-return-row"
+                       href="https://apps.eduportal.pk/Production/parent/InsertMe.php?book_history_id=64&action=quick_return_book_history"
+                       onclick="return confirm('Mark this book as returned?');">
                       <i class="fa fa-reply"></i> Return
                     </a>
-                    <button type="button" class="btn-row-edit" title="Edit" onclick="openEditBook(
+                    <button type="button" class="btn-row-edit" title="Edit"
+                      onclick="openEditBook(
                         64,
                         '14394',
                         '2026-04-21',
@@ -2737,29 +2775,15 @@ if (quickLinkBtn) {
                       )">
                       <i class="fa fa-pencil"></i>
                     </button>
-                    <a class="btn-row-del" title="Delete" href="https://apps.eduportal.pk/Production/parent/InsertMe.php?book_history_id=64&amp;action=delete_student_book_history" onclick="return confirm('Delete this book record?');">
+                    <a class="btn-row-del" title="Delete"
+                       href="https://apps.eduportal.pk/Production/parent/InsertMe.php?book_history_id=64&action=delete_student_book_history"
+                       onclick="return confirm('Delete this book record?');">
                       <i class="fa fa-trash"></i>
                     </a>
                                   </td>
-              </tr><tr class="odd" role="row">
-                <td>1</td>
-                <td><strong>Umar Ali Arshad</strong></td>
-                <td>26-332</td>
-                <td>Jungle Book</td>
-                <td class="sorting_1">01 May 2026</td>
-                <td>
-                  12 May 2026                                  </td>
-                <td>
-                                      <span class="b-returned">Returned</span>
-                                  </td>
-                <td style="white-space:nowrap;">
-                                      <button type="button" class="btn-returned-row" disabled=""><i class="fa fa-check"></i> Returned</button>
-                    <a class="btn-row-del" title="Delete" href="https://apps.eduportal.pk/Production/parent/InsertMe.php?book_history_id=75&amp;action=delete_student_book_history" onclick="return confirm('Delete this book record?');">
-                      <i class="fa fa-trash"></i>
-                    </a>
-                                  </td>
-              </tr></tbody>
-          </table><div class="dataTables_info" id="recordsTable_info" role="status" aria-live="polite">Showing 1 to 3 of 3 records</div><div class="dataTables_paginate paging_simple_numbers" id="recordsTable_paginate"><a class="paginate_button previous disabled" aria-controls="recordsTable" data-dt-idx="0" tabindex="0" id="recordsTable_previous">Previous</a><span><a class="paginate_button current" aria-controls="recordsTable" data-dt-idx="1" tabindex="0">1</a></span><a class="paginate_button next disabled" aria-controls="recordsTable" data-dt-idx="2" tabindex="0" id="recordsTable_next">Next</a></div></div>
+              </tr>
+                          </tbody>
+          </table>
         </div>
               </div>
 
@@ -2771,20 +2795,20 @@ if (quickLinkBtn) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">×</button>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
               <h4 class="modal-title"><i class="fa fa-plus-circle"></i> &nbsp;Issue Book</h4>
             </div>
             <div class="modal-body">
               <form action="https://apps.eduportal.pk/Production/parent/InsertMe.php" method="post">
-                <input type="hidden" name="action" value="student_book_history">
-                <input type="hidden" name="class_id" value="">
+                <input type="hidden" name="action"     value="student_book_history">
+                <input type="hidden" name="class_id"   value="">
                 <input type="hidden" name="section_id" value="">
-                <input type="hidden" name="roll_no" value="">
-                <input type="hidden" name="adm_no" value="">
+                <input type="hidden" name="roll_no"    value="">
+                <input type="hidden" name="adm_no"     value="">
 
                 <div class="form-group">
                   <label class="form-lbl">Student <span style="color:red;">*</span></label>
-                  <select name="student_id" id="issueStudentSelect" class="form-control" style="width:100%" required=""></select>
+                  <select name="student_id" id="issueStudentSelect" class="form-control" style="width:100%" required></select>
                 </div>
 
                 <div class="form-group">
@@ -2796,7 +2820,7 @@ if (quickLinkBtn) {
 
                 <div class="form-group">
                   <label class="form-lbl">Book Title <span style="color:red;">*</span></label>
-                  <select name="book_id" class="form-control sel-issue" required="">
+                  <select name="book_id" class="form-control sel-issue" required>
                     <option value="">Select Book</option>
                                         <option value="7768" data-dept="">
                       Jungle Book                    </option>
@@ -2811,20 +2835,23 @@ if (quickLinkBtn) {
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-lbl">Issue Date <span style="color:red;">*</span></label>
-                      <input type="date" name="book_issue_date" class="form-control" value="2026-09-01" required="">
+                      <input type="date" name="book_issue_date" class="form-control"
+                             value="2026-09-05" required>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-lbl">Return Due Date <span style="color:red;">*</span></label>
-                      <input type="date" name="book_return_duedate" class="form-control" value="2026-09-15" required="">
+                      <input type="date" name="book_return_duedate" class="form-control"
+                             value="2026-09-19" required>
                     </div>
                   </div>
                 </div>
 
                 <div class="form-group">
                   <label class="form-lbl">Remarks</label>
-                  <textarea name="issue_remarks" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                  <textarea name="issue_remarks" class="form-control" rows="2"
+                            placeholder="Optional notes..."></textarea>
                 </div>
 
                 <div style="text-align:right; padding-top:8px; border-top:1px solid #eee; margin-top:8px;">
@@ -2848,7 +2875,7 @@ if (quickLinkBtn) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">×</button>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
               <h4 class="modal-title"><i class="fa fa-reply"></i> &nbsp;Return Book</h4>
             </div>
             <div class="modal-body">
@@ -2857,7 +2884,7 @@ if (quickLinkBtn) {
 
                 <div class="form-group">
                   <label class="form-lbl">Select Issued Book <span style="color:red;">*</span></label>
-                  <select name="book_history_id" class="form-control sel-return" required="">
+                  <select name="book_history_id" class="form-control sel-return" required>
                     <option value="">Select a record</option>
                                         <option value="64">
                       NASAR  — CS219                      (Due: 21 Apr 2026)
@@ -2886,7 +2913,7 @@ if (quickLinkBtn) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">×</button>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
               <h4 class="modal-title"><i class="fa fa-bookmark"></i> &nbsp;Reserve Book</h4>
             </div>
             <div class="modal-body">
@@ -2897,7 +2924,7 @@ if (quickLinkBtn) {
 
                 <div class="form-group">
                   <label class="form-lbl">Student <span style="color:red;">*</span></label>
-                  <select name="person_id" id="reserveStudentSelect" class="form-control" style="width:100%" required=""></select>
+                  <select name="person_id" id="reserveStudentSelect" class="form-control" style="width:100%" required></select>
                 </div>
 
                 <div class="form-group">
@@ -2909,7 +2936,7 @@ if (quickLinkBtn) {
 
                 <div class="form-group">
                   <label class="form-lbl">Book Title <span style="color:red;">*</span></label>
-                  <select name="library_id" class="form-control sel-reserve" required="">
+                  <select name="library_id" class="form-control sel-reserve" required>
                     <option value="">Select Book</option>
                                         <option value="7768" data-dept="">
                       Jungle Book                    </option>
@@ -2924,7 +2951,8 @@ if (quickLinkBtn) {
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-lbl">Reservation Date <span style="color:red;">*</span></label>
-                      <input type="date" name="reservation_date" class="form-control" value="2026-09-01" required="">
+                      <input type="date" name="reservation_date" class="form-control"
+                             value="2026-09-05" required>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -2937,7 +2965,8 @@ if (quickLinkBtn) {
 
                 <div class="form-group">
                   <label class="form-lbl">Notes</label>
-                  <textarea name="notes" class="form-control" rows="2" placeholder="Optional notes..."></textarea>
+                  <textarea name="notes" class="form-control" rows="2"
+                            placeholder="Optional notes..."></textarea>
                 </div>
 
                 <div style="text-align:right; padding-top:8px; border-top:1px solid #eee; margin-top:8px;">
@@ -2961,14 +2990,14 @@ if (quickLinkBtn) {
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal">×</button>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
               <h4 class="modal-title">
                 <i class="fa fa-pencil"></i> &nbsp;Edit Book Issue Record
               </h4>
             </div>
             <div class="modal-body">
               <form action="https://apps.eduportal.pk/Production/parent/InsertMe.php" method="post">
-                <input type="hidden" name="action" value="edit_student_book_history">
+                <input type="hidden" name="action"          value="edit_student_book_history">
                 <input type="hidden" name="book_history_id" id="edit_history_id">
 
                 <div class="form-group">
@@ -2980,7 +3009,8 @@ if (quickLinkBtn) {
 
                 <div class="form-group">
                   <label class="form-lbl">Book Title <span style="color:red;">*</span></label>
-                  <select name="book_id" id="edit_book_id" class="form-control sel-edit" required="">
+                  <select name="book_id" id="edit_book_id"
+                          class="form-control sel-edit" required>
                     <option value="">Select Book</option>
                                         <option value="7768" data-dept="">
                       Jungle Book                    </option>
@@ -2995,20 +3025,23 @@ if (quickLinkBtn) {
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-lbl">Issue Date <span style="color:red;">*</span></label>
-                      <input type="date" name="book_issue_date" id="edit_issue_date" class="form-control" required="">
+                      <input type="date" name="book_issue_date"
+                             id="edit_issue_date" class="form-control" required>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="form-group">
                       <label class="form-lbl">Return Due Date <span style="color:red;">*</span></label>
-                      <input type="date" name="book_return_duedate" id="edit_due_date" class="form-control" required="">
+                      <input type="date" name="book_return_duedate"
+                             id="edit_due_date" class="form-control" required>
                     </div>
                   </div>
                 </div>
 
                 <div class="form-group">
                   <label class="form-lbl">Remarks</label>
-                  <textarea name="issue_remarks" id="edit_remarks_f" class="form-control" rows="2"></textarea>
+                  <textarea name="issue_remarks" id="edit_remarks_f"
+                            class="form-control" rows="2"></textarea>
                 </div>
 
                 <div style="text-align:right; padding-top:8px; border-top:1px solid #eee; margin-top:8px;">
@@ -3141,7 +3174,5 @@ $(document).ready(function () {
   } catch (e) { console.error('Select2 pickers init failed:', e); }
 });
 </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;3650377dd59a42ccbb65668736c3a93b&quot;,&quot;r&quot;:1}" crossorigin="anonymous"></script>
-
-
-</div></body></html>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<?php
+define('HIIFI', true);
+require_once __DIR__ . '/config.php';
+require_login();
+
+$inquiry_id = (int) ($_GET['inquiry_id'] ?? 0);
+
+function inquiry_field($val) {
+    return $val !== null && $val !== '' ? $val : '--';
+}
+
+$inquiry = null;
+if ($inquiry_id > 0) {
+    $st = db_prepare("SELECT i.*, c.class_name, s.section_name, u.full_name added_by_name FROM student_inquiries i LEFT JOIN classes c ON i.class_id=c.class_id LEFT JOIN sections s ON i.section_id=s.section_id LEFT JOIN users u ON i.created_by=u.user_id WHERE i.inquiry_id=?");
+    $st->bind_param('i', $inquiry_id);
+    $st->execute();
+    $inquiry = $st->get_result()->fetch_assoc();
+}
+
+$feeRows = [];
+$feeTotal = 0.0;
+if ($inquiry) {
+    $cls = (int) $inquiry['class_id'];
+    $hs = db_prepare("SELECT head_name, amount FROM fee_heads WHERE status=1 AND (class_id=? OR class_id IS NULL) ORDER BY head_id");
+    $hs->bind_param('i', $cls);
+    $hs->execute();
+    $hr = $hs->get_result();
+    while ($row = $hr->fetch_assoc()) {
+        $feeRows[] = $row;
+        $feeTotal += (float) $row['amount'];
+    }
+}
+
+$schoolName = get_setting('school_name', 'HIIFI LMS');
+$schoolAddress = get_setting('school_address', '');
+$schoolPhone = get_setting('school_phone', '');
+$cellLine = trim($schoolAddress . ($schoolAddress !== '' && $schoolPhone !== '' ? ' | ' : '') . $schoolPhone);
+$session = $inquiry ? ($inquiry['session'] ?: '') : '';
+$inquiryDate = $inquiry ? date('d-M-Y', strtotime($inquiry['created_at'])) : '';
+$testDate = $inquiry && $inquiry['test_date'] ? date('d-M-Y', strtotime($inquiry['test_date'])) : '';
+$visitDate = $inquiry && $inquiry['visit_date'] ? date('d-M-Y', strtotime($inquiry['visit_date'])) : '';
+$status = $inquiry ? ($inquiry['status'] ?: 'New') : '';
+$addedBy = $inquiry ? ($inquiry['added_by_name'] ?: 'Admin') : '';
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>assets/img/favicon.png" sizes="32x32" />
+    <title>Student Inquiry Form</title>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/font-awesome-5.min.css">
+    <style>
+        :root {
+            --pri: #0b47be;
+            --pri-light: #eaf0ff;
+            --txt: #0f172a;
+            --muted: #475569;
+            --line: #dbe3f1;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+            color: var(--txt);
+            background: #f5f7fb;
+        }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 8mm auto;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+            padding: 12mm;
+        }
+        .header {
+            border: 2px solid var(--pri);
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .logo-wrap {
+            width: 90px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .logo-wrap img {
+            width: 78px;
+            height: 78px;
+            object-fit: contain;
+        }
+        .title-wrap {
+            text-align: center;
+            flex: 1;
+            min-width: 0;
+        }
+        .school {
+            margin: 0;
+            font-size: 28px;
+            color: var(--pri);
+            font-weight: 900;
+            line-height: 1.2;
+        }
+        .sub {
+            margin-top: 3px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .badge-wrap {
+            width: 120px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .badge {
+            display: inline-block;
+            background: var(--pri);
+            color: #fff;
+            border-radius: 999px;
+            padding: 7px 14px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            font-size: 12px;
+            text-align: center;
+        }
+        .meta {
+            margin-top: 10px;
+            border-top: 1px dashed var(--line);
+            padding-top: 9px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            font-size: 12px;
+        }
+        .meta-item {
+            background: var(--pri-light);
+            border: 1px solid #dbe5ff;
+            border-radius: 8px;
+            padding: 7px 8px;
+        }
+        .meta-item b { color: #1d4ed8; }
+
+        .section {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .section h3 {
+            margin: 0;
+            background: var(--pri);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            padding: 8px 10px;
+            letter-spacing: 0.2px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0;
+        }
+        .cell {
+            display: grid;
+            grid-template-columns: 40% 60%;
+            border-top: 1px solid var(--line);
+        }
+        .cell:nth-child(1),
+        .cell:nth-child(2) { border-top: none; }
+        .cell .k {
+            background: #f8fbff;
+            border-right: 1px solid var(--line);
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #334155;
+            font-weight: 700;
+        }
+        .cell .v {
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #0f172a;
+        }
+        .full {
+            grid-column: 1 / -1;
+            border-top: 1px solid var(--line);
+            padding: 8px 10px;
+            font-size: 12px;
+        }
+
+        .fee-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .fee-table th, .fee-table td {
+            border: 1px solid var(--line);
+            padding: 8px;
+            font-size: 12px;
+        }
+        .fee-table th {
+            background: #f1f5ff;
+            color: #1e40af;
+            text-align: left;
+        }
+        .fee-table td:last-child,
+        .fee-table th:last-child { text-align: right; }
+        .fee-total {
+            text-align: right;
+            margin-top: 6px;
+            font-size: 13px;
+            font-weight: 800;
+            color: #1e3a8a;
+            margin-right: 2%;
+        }
+        .notes {
+            margin-top: 12px;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 8px;
+            font-size: 11px;
+            color: #475569;
+        }
+        @media print {
+            body { background: #fff; }
+            .page {
+                margin: 0;
+                border: none;
+                box-shadow: none;
+                width: 100%;
+                min-height: auto;
+                padding: 8mm;
+            }
+            @page { size: A4 portrait; margin: 8mm; }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="header">
+        <div class="header-top">
+            <div class="logo-wrap">
+                <img src="<?php echo BASE_URL; ?>assets/img/logo.jpg" alt="Logo" />
+            </div>
+            <div class="title-wrap">
+                <h1 class="school"><?php echo e($schoolName); ?></h1>
+                <div class="sub">
+                    <?php echo e($cellLine !== '' ? $cellLine : $schoolAddress); ?>
+                </div>
+            </div>
+            <div class="badge-wrap">
+                <span class="badge">STUDENT INQUIRY FORM</span>
+            </div>
+        </div>
+        <div class="meta">
+            <div class="meta-item"><b>Inquiry #:</b> <?php echo $inquiry ? (int) $inquiry['inquiry_id'] : '--'; ?></div>
+            <div class="meta-item"><b>Inquiry Date:</b> <?php echo e($inquiryDate ?: '--'); ?></div>
+            <div class="meta-item"><b>Admission Confirmation:</b> <?php echo e($inquiry ? ($status ?: 'Pending') : 'Pending'); ?></div>
+            <div class="meta-item"><b>Session Month:</b> <?php echo e($session ?: '--'); ?></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fa fa-user"></i> Student Information</h3>
+        <div class="grid">
+            <div class="cell"><div class="k">Student Name</div><div class="v"><?php echo e(inquiry_field($inquiry['name'] ?? null)); ?></div></div>
+            <div class="cell"><div class="k">Father Name</div><div class="v"><?php echo e(inquiry_field($inquiry['father_name'] ?? null)); ?></div></div>
+            <div class="cell"><div class="k">Gender</div><div class="v">--</div></div>
+            <div class="cell"><div class="k">Date of Birth</div><div class="v">--</div></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fa fa-graduation-cap"></i> Academic Background</h3>
+        <div class="grid">
+            <div class="cell"><div class="k">Previous School</div><div class="v">--</div></div>
+            <div class="cell"><div class="k">Previous Class</div><div class="v">--</div></div>
+            <div class="cell"><div class="k">Previous Total Marks</div><div class="v">--</div></div>
+            <div class="cell"><div class="k">Previous Obtained Marks</div><div class="v">--</div></div>
+            <div class="cell"><div class="k">Test Date</div><div class="v"><?php echo e($testDate ?: '--'); ?></div></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fa fa-book"></i> Applying For</h3>
+        <div class="grid">
+            <div class="cell"><div class="k">Class</div><div class="v"><?php echo e(inquiry_field($inquiry['class_name'] ?? null)); ?></div></div>
+            <div class="cell"><div class="k">Section</div><div class="v"><?php echo e(inquiry_field($inquiry['section_name'] ?? null)); ?></div></div>
+            <div class="cell"><div class="k">Prospectus</div><div class="v">--</div></div>
+            <div class="cell"><div class="k">Student Visited</div><div class="v"><?php echo e($visitDate ?: '--'); ?></div></div>
+            <div class="cell"><div class="k">Admission Confirmation</div><div class="v"><?php echo e($inquiry ? $status : '--'); ?></div></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fa fa-check-circle"></i> Inquiry Tracking</h3>
+        <div class="grid">
+            <div class="cell"><div class="k">Inquiry Record Status</div><div class="v"><?php echo e($inquiry ? $status : '--'); ?></div></div>
+            <div class="cell"><div class="k">Added By</div><div class="v"><?php echo e($inquiry ? $addedBy : '--'); ?></div></div>
+            <div class="cell"><div class="k">Reference</div><div class="v"><?php echo e(inquiry_field($inquiry['admission_source'] ?? null)); ?></div></div>
+            <div class="cell"><div class="k">Confirmation</div><div class="v"><?php echo e($inquiry ? $status : '--'); ?></div></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fa fa-money"></i> Fee Structure (Saved With Inquiry)</h3>
+        <table class="fee-table">
+            <thead>
+                <tr><th>Fee Head</th><th>Amount</th></tr>
+            </thead>
+            <tbody>
+                <?php if (count($feeRows) === 0): ?>
+                    <tr><td>Monthly Fee</td><td>0</td></tr>
+                    <tr><td>Misc Fee</td><td>0</td></tr>
+                <?php else: ?>
+                    <?php foreach ($feeRows as $fr): ?>
+                        <tr><td><?php echo e($fr['head_name']); ?></td><td><?php echo number_format((float) $fr['amount'], 2); ?></td></tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+        <div class="fee-total">Total Estimated Fee: <?php echo $cs = get_setting('currency_symbol', 'Rs.') . number_format($feeTotal, 2); ?></div>
+    </div>
+
+    <div class="section">
+        <h3><i class="fa fa-phone"></i> Contact & Address</h3>
+        <div class="grid">
+            <div class="cell"><div class="k">Father Cell</div><div class="v"><?php echo e(inquiry_field($inquiry['father_cellno'] ?? null)); ?></div></div>
+            <div class="cell"><div class="k">Student Cell</div><div class="v"><?php echo e(inquiry_field($inquiry['phone'] ?? null)); ?></div></div>
+            <div class="cell"><div class="k">Locality</div><div class="v"><?php echo e(inquiry_field($inquiry['locality'] ?? null)); ?></div></div>
+            <div class="cell"><div class="k">Father Occupation</div><div class="v">--</div></div>
+            <div class="full"><b>Address:</b> <?php echo e(inquiry_field($inquiry['address'] ?? null)); ?></div>
+            <div class="full"><b>Remarks:</b> <?php echo e(inquiry_field($inquiry['remarks'] ?? null)); ?></div>
+            <div class="full"><b>Attached Documents:</b> --</div>
+        </div>
+    </div>
+
+    <div class="notes">
+        <b>Instructions:</b>
+        <p>School Policies: (1) Prior permission from parents is required for any student absence. (2) Completing homework is mandatory for all students. (3) Students must wear the complete and clean school uniform. (4) Discipline will be strictly enforced. (5) Monthly fees must be submitted by the due date. (6) Unethical behavior and unhealthy food are not allowed in the school. (7) The curriculum will be completed using only the material provided by the school. (8) After school hours, the responsibility for students rests with the parents.</p>
+        <p>We are committed to providing your children quality education, excellent training, and a positive learning environment. Your cooperation is very important to us, so we can ensure a bright future for our children.</p>
+        <p><strong>Sincerely,</strong> Administration</p>
+    </div>
+</div>
+</body>
+</html>

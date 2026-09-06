@@ -1,4 +1,8 @@
-<!DOCTYPE html><html lang="en"><head>
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
     
     <title>Class Period Selection | EduPortal</title>
     
@@ -103,6 +107,7 @@
 .thStyle{background-color:#00AFEF;color:white;}
 
 </style>
+  </head>
   <script type="text/javascript">
   	
 
@@ -140,10 +145,9 @@ function getTeachers(id,row){
           }
 
 
-  </script><script src="js/ajax_functions.js"></script><style type="text/css">.jqstooltip { position: absolute;left: 0px;top: 0px;visibility: hidden;background: rgb(0, 0, 0) transparent;background-color: rgba(0,0,0,0.6);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";color: white;font: 10px arial, san serif;text-align: left;white-space: nowrap;padding: 5px;border: 1px solid white;box-sizing: content-box;z-index: 10000;}.jqsfield { color: white;font: 10px arial, san serif;text-align: left;}</style></head>
-  
+  </script>
 
- 
+<script src="js/ajax_functions.js"></script> 
 
 
   <body class="nav-md">
@@ -170,95 +174,95 @@ function getTeachers(id,row){
                   <label class="required">Class</label>
  
 
-                  <div class="select2-container chosen-multi-select inputfield form-control" id="s2id_class_id" style="width: 100%;"><a href="javascript:void(0)" onclick="return false;" class="select2-choice" tabindex="-1">   <span class="select2-chosen">Select Class</span><abbr class="select2-search-choice-close"></abbr>   <span class="select2-arrow"><b></b></span></a><input class="select2-focusser select2-offscreen" type="text" id="s2id_autogen1"><div class="select2-drop select2-display-none select2-with-searchbox">   <div class="select2-search">       <input type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="select2-input">   </div>   <ul class="select2-results">   </ul></div></div><select name="class_id" id="class_id" data-placeholder="Select" class="chosen-multi-select inputfield form-control select2-offscreen" onchange="getsec(this.value)" tabindex="-1">
+                  <select name="class_id" id="class_id"  name="term_id"   data-placeholder="Select" class="chosen-multi-select inputfield form-control" onChange="getsec(this.value)"  >
                     <option value="">Select Class</option>
 
                     
-                       <option value="15550">KG-2</option>
+                       <option  value="15550">KG-2</option>
 
 
                             
-                       <option value="15551">1ST</option>
+                       <option  value="15551">1ST</option>
 
 
                             
-                       <option value="15552">2ND</option>
+                       <option  value="15552">2ND</option>
 
 
                             
-                       <option value="15553">3RD</option>
+                       <option  value="15553">3RD</option>
 
 
                             
-                       <option value="15554">4TH</option>
+                       <option  value="15554">4TH</option>
 
 
                             
-                       <option value="15555">5TH</option>
+                       <option  value="15555">5TH</option>
 
 
                             
-                       <option value="15556">6TH</option>
+                       <option  value="15556">6TH</option>
 
 
                             
-                       <option value="15557">7TH</option>
+                       <option  value="15557">7TH</option>
 
 
                             
-                       <option value="15832">8TH</option>
+                       <option  value="15832">8TH</option>
 
 
                             
-                       <option value="15833">9TH</option>
+                       <option  value="15833">9TH</option>
 
 
                             
-                       <option value="15834">10TH</option>
+                       <option  value="15834">10TH</option>
 
 
                             
-                       <option value="15905">BS Computer Science</option>
+                       <option  value="15905">BS Computer Science</option>
 
 
                             
-                       <option value="16136">Bs English</option>
+                       <option  value="16136">Bs English</option>
 
 
                             
-                       <option value="16540">New Fee Head Class</option>
+                       <option  value="16540">New Fee Head Class</option>
 
 
                             
-                       <option value="16613">reminder sms class</option>
+                       <option  value="16613">reminder sms class</option>
 
 
                             
-                       <option value="16766">BSCS</option>
+                       <option  value="16766">BSCS</option>
 
 
                             
-                       <option value="16795">BSIT</option>
+                       <option  value="16795">BSIT</option>
 
 
                             
-                       <option value="16922">Class 7</option>
+                       <option  value="16922">Class 7</option>
 
 
                             
-                       <option value="17073">Pharm-D 2021-26</option>
+                       <option  value="17073">Pharm-D 2021-26</option>
 
 
                             
-                       <option value="17184">MIT</option>
+                       <option  value="17184">MIT</option>
 
 
                             
-                       <option value="17807">14th</option>
+                       <option  value="17807">14th</option>
 
 
                             
-                       <option value="17890">DMS Play Group</option>
+                       <option  value="17890">DMS Play Group</option>
 
 
                             
@@ -270,7 +274,7 @@ function getTeachers(id,row){
                 <div class="col-md-2 col-xs-12" style="padding: 8px;">
                 <div class="form-group ">
                   <label class="required">Section</label>
-                    <select name="section" id="txt_section" class="form-control" onchange="getSubjects(this.value)">
+                    <select name="section" id="txt_section" class="form-control" onChange="getSubjects(this.value)">
                       
                    
                     </select>
@@ -286,7 +290,7 @@ function getTeachers(id,row){
         
                 <div class="form-group ">
                    
-                <button id="month" type="submit" class="btn btn-primary" style="margin-top: 27px;">Search</button>
+                <button id="month"  type="submit" class="btn btn-primary" style="margin-top: 27px;">Search</button>
               
                 </div>
         
@@ -311,12 +315,12 @@ function getTeachers(id,row){
           
 
 
-<form class="form-style-7" action="https://apps.eduportal.pk/Production/parent/InsertMe.php" method="post" enctype="multipart/form-data">
+<form class="form-style-7" action="https://apps.eduportal.pk/Production/parent/InsertMe.php" method="post"  enctype="multipart/form-data">
 
 <input type="hidden" name="action" value="LectureTime"> 
 
-<input type="hidden" value="" name="class_id">
-<input type="hidden" value="" name="section">
+<input type="hidden" value="" name="class_id" />
+<input type="hidden" value="" name="section" />
 
 
 
@@ -349,42 +353,42 @@ function getTeachers(id,row){
         <td> Monday </td>
 
 			  
-        </tr><tr>
+        <tr>
 
         		
       
         <td> Tuesday </td>
 
 			  
-        </tr><tr>
+        <tr>
 
         		
       
         <td> Wednesday </td>
 
 			  
-        </tr><tr>
+        <tr>
 
         		
       
         <td> Thursday </td>
 
 			  
-        </tr><tr>
+        <tr>
 
         		
       
         <td> Friday </td>
 
 			  
-        </tr><tr>
+        <tr>
 
         		
       
         <td> Saturday </td>
 
 			  
-        </tr><tr>
+        <tr>
 
         		
       
@@ -394,7 +398,7 @@ function getTeachers(id,row){
 
 
            
-        </tr></tbody>
+        </tbody>
         
     </table>
 
@@ -452,7 +456,5 @@ function getTeachers(id,row){
     </script>
 
 
-  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;3650377dd59a42ccbb65668736c3a93b&quot;,&quot;r&quot;:1}" crossorigin="anonymous"></script>
-
-
-</body></html>
+  </body>
+</html>

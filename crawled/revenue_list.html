@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="en"><head>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
     
     <title>Revenue List | EduPortal</title>
     
@@ -143,7 +146,18 @@ function getSubCat(id){
     xmlhttp.send();
   }
 </script> 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script><style>
+  </head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- <script>
+$(document).ready(function(){
+  
+    $("#div1").fadeOut();
+    $("#div2").fadeOut("slow");
+    $("#div3").fadeOut(3000);
+ 
+});
+</script> -->
+  <style>
 #snackbar {
   visibility: hidden;
   min-width: 250px;
@@ -185,19 +199,8 @@ function getSubCat(id){
   from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
 }
-</style><style type="text/css">  .JColResizer{/*table-layout:fixed;*/} .JColResizer td, .JColResizer th{overflow:hidden;padding-left:0!important; padding-right:0!important;}  .JCLRgrips{ height:0px; position:relative;} .JCLRgrip{margin-left:-5px; position:absolute; z-index:5; } .JCLRgrip .JColResizer{position:absolute;background-color:red;filter:alpha(opacity=1);opacity:0;width:10px;height:100%;cursor: e-resize;top:0px} .JCLRLastGrip{position:absolute; width:1px; } .JCLRgripDrag{ border-left:1px dotted black;	} .JCLRFlex{width:auto!important;}</style><style type="text/css">.jqstooltip { position: absolute;left: 0px;top: 0px;visibility: hidden;background: rgb(0, 0, 0) transparent;background-color: rgba(0,0,0,0.6);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";color: white;font: 10px arial, san serif;text-align: left;white-space: nowrap;padding: 5px;border: 1px solid white;box-sizing: content-box;z-index: 10000;}.jqsfield { color: white;font: 10px arial, san serif;text-align: left;}</style></head>
-  
-<!-- <script>
-$(document).ready(function(){
-  
-    $("#div1").fadeOut();
-    $("#div2").fadeOut("slow");
-    $("#div3").fadeOut(3000);
- 
-});
-</script> -->
-  
-  <body class="nav-md sidebar-collapsed">
+</style>
+  <body class="nav-md">
     <div class="container body">
       <div class="main_container">
         <div class="col-md-3 left_col">
@@ -731,7 +734,9 @@ $(document).ready(function(){
 
   <!-- Logo Section -->
   <div class="sidebar-logo">
-    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg" onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';" alt="Logo">
+    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg"
+      onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';"
+      alt="Logo" />
   </div>
 
   <div class="ds-branch">
@@ -739,9 +744,9 @@ $(document).ready(function(){
     <div style="font-size:12px;">(2026-2027)</div>
   </div>
 
-  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu active">
+  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
     <!-- Web/Android original menu -->
-    <ul class="side-menu" id="menu-web" style="">
+    <ul class="side-menu" id="menu-web">
       <li><a href="software_demo_videos.php"><i class="fa fa-play"></i><span class="label" style="font-weight: normal !important;">Guidline Videos</span></a></li>
 
                 <li class="has-children">
@@ -750,7 +755,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Front Office</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="front_desk_analytics.php">
                       Front Desk Overview                    </a>
@@ -771,7 +776,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Dashboard</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="dashboard.php">
                       Executive Dashboard                    </a>
@@ -788,7 +793,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Students</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_student.php">
                       Add New Student                    </a>
@@ -809,7 +814,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Attendance</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="mark_attend.php">
                       Mark Attendance                    </a>
@@ -830,7 +835,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Messages</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="new_message.php">
                       New Message                    </a>
@@ -851,7 +856,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Fee Collection</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="monthly_challan.php">
                       Create Challan                    </a>
@@ -876,7 +881,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Examination</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="view_marksheet.php">
                       Add Marks Sheet                    </a>
@@ -897,7 +902,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Timetable</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="period_categories.php">
                       Periods Category                    </a>
@@ -930,7 +935,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Employees/HRM</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_emp.php">
                       Add Employee                    </a>
@@ -959,7 +964,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Datesheet</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="create_datesheet.php">
                       Create Datesheet                    </a>
@@ -984,7 +989,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Transport</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="vehicles.php">
                       Vehicles                    </a>
@@ -1005,7 +1010,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Library</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="list_books.php">
                       Book List                    </a>
@@ -1026,7 +1031,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">PayRoll</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="creat_payroll.php">
                       Create PayRoll                    </a>
@@ -1051,7 +1056,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Parents Portal</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="parents_portal_dashboard.php">
                       Parents Overview                    </a>
@@ -1064,7 +1069,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Expenses</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="manage_expenses.php">
                       Add/View Expenses                    </a>
@@ -1081,7 +1086,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Cards Generator</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="cards.php">
                       Staff Cards                    </a>
@@ -1098,7 +1103,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Point of Sale</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="canteen_dashboard.php">
                       POS Dashboard                    </a>
@@ -1111,7 +1116,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Academic Setup</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="academic_setup.php">
                       Manage Academics                    </a>
@@ -1124,7 +1129,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">System Settings</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="settings.php">
                       Update Settings                    </a>
@@ -1141,12 +1146,12 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Accounts</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_revenue.php">
                       Add Revenue                    </a>
                   </li>
-                                <li class="current-page">
+                                <li>
                     <a href="revenue_list.php">
                       List of Revenues                    </a>
                   </li>
@@ -2216,7 +2221,7 @@ $(document).ready(function(){
 
 <div class="top_nav">
 
-<div class="nav_menu">
+<div class="nav_menu" >
 
 <nav>
 
@@ -2236,11 +2241,13 @@ $(document).ready(function(){
   <div class="searchbar-container" style="width: 260px; min-width: 180px; max-width: 400px; flex: 1 1 260px; margin: 0 0px; padding-bottom: 11px; margin-left:25px; position: relative;">
     
   
-              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="">
+              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" 
+        placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="" >
               
 
     
-  <div id="livesearch" role="listbox" aria-label="Student search results" style="background-color:white; z-index:902; padding:10px;">
+  <div id="livesearch" role="listbox" aria-label="Student search results"
+     style="background-color:white; z-index:902; padding:10px;">
   </div>
 
      
@@ -2265,7 +2272,7 @@ $(document).ready(function(){
         <a href="https://apps.eduportal.pk/Production/manage_expenses.php">Expenses</a>
         <a href="https://apps.eduportal.pk/Production/user_audit_report.php">Users Activities</a>
         <a href="https://apps.eduportal.pk/Production/parents_id.php">View Parents IDs</a>
-        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&amp;to_date=2026-09-30&amp;status=All&amp;type=All&amp;addaccountAdmin=1">Complaint</a>
+        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&to_date=2026-09-30&status=All&type=All&addaccountAdmin=1">Complaint</a>
       </div>
     </div>
   
@@ -2292,11 +2299,11 @@ $(document).ready(function(){
         <div class="usage-card">
           <div class="usage-title" style="color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp SMS</div>
           <div class="usage-metrics">
-            <span>Used: 0</span>
+            <span>Used: 12</span>
             <span>Limit: 10,000</span>
           </div>
           <div class="usage-bar">
-            <div class="usage-bar-fill" style="width: 0%; background:#25D366;"></div>
+            <div class="usage-bar-fill" style="width: 0.12%; background:#25D366;"></div>
           </div>
         </div>
         <div class="usage-card">
@@ -2312,12 +2319,12 @@ $(document).ready(function(){
         <div class="usage-card">
           <div class="usage-title"><i class="fa fa-bar-chart"></i> Total SMS Usage (This Month)</div>
           <div class="usage-metrics">
-            <span>WhatsApp: 0</span>
+            <span>WhatsApp: 12</span>
             <span>SIM: 0</span>
           </div>
           <div class="usage-metrics" style="margin-top:4px;">
-            <span>Total: 0</span>
-            <span>Remaining: 10,000</span>
+            <span>Total: 12</span>
+            <span>Remaining: 9,988</span>
           </div>
         </div>
         <a class="dropdown-item" href="https://apps.eduportal.pk/Production/messages_history.php">
@@ -2388,11 +2395,11 @@ $(document).ready(function(){
 
 
 
+</ul>
 
+</li>
 
-
-
-
+</ul>
 
 </nav>
 
@@ -2633,7 +2640,7 @@ if (quickLinkBtn) {
 
 </script>     
         <!-- page content -->
-          <div class="right_col" role="main" style="min-height: 733px;">
+          <div class="right_col" role="main">
 
             <a href="dashboard.php">Dashboard </a> &nbsp; <i style="" class="fa fa-angle-double-right"></i>  &nbsp; 
             View Revenue List
@@ -2650,22 +2657,22 @@ if (quickLinkBtn) {
             
               
 
-              <div class="col-md-3 col-sm-12 col-xs-12" style="padding:8px; float:left;" id="col1">
+              <div class="col-md-3 col-sm-12 col-xs-12" style="padding:8px; float:left;"  id="col1">
                  <div class="form-group ">
 
                  <label class="required"> From Date</label>
-                 <input name="from" id="from" value="2026-09-01" type="date" class="form-control">
+                 <input name="from"  id="from" value="2026-09-01" type="date" class="form-control"  >
                        
                   </div>
                   </div>                      
              
 
-                  <div class="col-md-3 col-sm-12 col-xs-12" style="padding:8px; float:left;" id="col2">
+                  <div class="col-md-3 col-sm-12 col-xs-12" style="padding:8px; float:left;"  id="col2">
 
                        <div class="form-group ">
 
                           <label class="required"> To Date</label>
-                              <input name="to" id="to" value="2026-09-30" type="date" class="form-control">
+                              <input name="to" id="to" value="2026-09-30" type="date" class="form-control"  >
                        
                           </div>
                   </div>
@@ -2723,7 +2730,7 @@ if (quickLinkBtn) {
               
                 <div class="form-group ">
                 
-                  <a href="print_revenue_voucher.php?from=&amp;to=" class="btn btn-primary">Print</a>
+                  <a href="print_revenue_voucher.php?from=&to=" class="btn btn-primary">Print</a>
 
                 </div>
               
@@ -2735,7 +2742,7 @@ if (quickLinkBtn) {
 
   </div>
   <div class="clearfix"></div>
-</div></section>           
+</section>           
 
 
 
@@ -2744,10 +2751,29 @@ if (quickLinkBtn) {
               </div>
 
 
-<div class="bootstrap-table"><div class="fixed-table-toolbar"><div class="bs-bars pull-left"></div><div class="columns columns-right btn-group pull-right"><button class="btn btn-default" type="button" name="paginationSwitch" aria-label="pagination Switch" title="Hide/Show pagination"><i class="glyphicon glyphicon-collapse-down icon-chevron-down"></i></button><button class="btn btn-default" type="button" name="refresh" aria-label="refresh" title="Refresh"><i class="glyphicon glyphicon-refresh icon-refresh"></i></button><button class="btn btn-default" type="button" name="toggle" aria-label="toggle" title="Toggle"><i class="glyphicon glyphicon-list-alt icon-list-alt"></i></button><div class="keep-open btn-group" title="Columns"><button type="button" aria-label="columns" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><i class="glyphicon glyphicon-th icon-th"></i> <span class="caret"></span></button><ul class="dropdown-menu" role="menu"><li role="menuitem"><label><input type="checkbox" data-field="0" value="0" checked="checked"> S.No</label></li><li role="menuitem"><label><input type="checkbox" data-field="1" value="1" checked="checked"> Student Name</label></li><li role="menuitem"><label><input type="checkbox" data-field="2" value="2" checked="checked"> Month</label></li><li role="menuitem"><label><input type="checkbox" data-field="3" value="3" checked="checked"> Date</label></li><li role="menuitem"><label><input type="checkbox" data-field="4" value="4" checked="checked"> Remarks</label></li><li role="menuitem"><label><input type="checkbox" data-field="5" value="5" checked="checked"> Total</label></li><li role="menuitem"><label><input type="checkbox" data-field="6" value="6" checked="checked"> Action</label></li></ul></div><div class="export btn-group"><button class="btn btn-default dropdown-toggle" aria-label="export type" title="Export data" data-toggle="dropdown" type="button"><i class="glyphicon glyphicon-export icon-share"></i> <span class="caret"></span></button><ul class="dropdown-menu" role="menu"><li role="menuitem" data-type="json"><a href="javascript:void(0)">JSON</a></li><li role="menuitem" data-type="xml"><a href="javascript:void(0)">XML</a></li><li role="menuitem" data-type="csv"><a href="javascript:void(0)">CSV</a></li><li role="menuitem" data-type="txt"><a href="javascript:void(0)">TXT</a></li><li role="menuitem" data-type="sql"><a href="javascript:void(0)">SQL</a></li><li role="menuitem" data-type="excel"><a href="javascript:void(0)">MS-Excel</a></li></ul></div></div><div class="pull-right search"><input class="form-control" type="text" placeholder="Search"></div></div><div class="fixed-table-container" style="padding-bottom: 0px;"><div class="fixed-table-header" style="display: none;"><table></table></div><div class="fixed-table-body"><div class="fixed-table-loading" style="top: 42px;">Loading, please wait...</div><div class="JCLRgrips" style="width: 1150px;"><div class="JCLRgrip" style="left: 126.5px; height: 78px;"><div class="JColResizer"></div></div><div class="JCLRgrip" style="left: 411.5px; height: 78px;"><div class="JColResizer"></div></div><div class="JCLRgrip" style="left: 565.5px; height: 78px;"><div class="JColResizer"></div></div><div class="JCLRgrip" style="left: 691.5px; height: 78px;"><div class="JColResizer"></div></div><div class="JCLRgrip" style="left: 882.5px; height: 78px;"><div class="JColResizer"></div></div><div class="JCLRgrip" style="left: 1013.5px; height: 78px;"><div class="JColResizer"></div></div><div class="JCLRgrip JCLRLastGrip" style="left: 1168.5px; height: 78px;"></div></div><table id="table" data-toggle="table" class="table-bordered table table-hover JColResizer" data-pagination="true" data-search="true" data-show-columns="true" data-show-pagination-switch="true" data-show-refresh="true" data-key-events="true" data-show-toggle="true" data-resizable="true" data-cookie="true" data-show-export="true" data-click-to-select="true" data-toolbar="#toolbar" style="width:100%">
-                      <thead><tr><th style="width: 125px;" data-field="0" tabindex="0"><div class="th-inner ">S.No</div><div class="fht-cell"></div></th><th style="width: 285px;" data-field="1" tabindex="0"><div class="th-inner ">Student Name</div><div class="fht-cell"></div></th><th style="width: 154px;" data-field="2" tabindex="0"><div class="th-inner ">Month</div><div class="fht-cell"></div></th><th style="width: 126px;" data-field="3" tabindex="0"><div class="th-inner ">Date</div><div class="fht-cell"></div></th><th style="width: 191px;" data-field="4" tabindex="0"><div class="th-inner ">Remarks</div><div class="fht-cell"></div></th><th style="width: 131px;" data-field="5" tabindex="0"><div class="th-inner ">Total</div><div class="fht-cell"></div></th><th style="width: 155px;" data-field="6" tabindex="0"><div class="th-inner ">Action</div><div class="fht-cell"></div></th></tr></thead>
-                      <tbody><tr class="no-records-found"><td colspan="7">No matching records found</td></tr></tbody>
-                    </table></div><div class="fixed-table-footer" style="display: none;"><table><tbody><tr></tr></tbody></table></div><div class="fixed-table-pagination" style="display: none;"><div class="pull-left pagination-detail"><span class="pagination-info">Showing 1 to 0 of 0 rows</span><span class="page-list" style="display: none;"><span class="btn-group dropup"><button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"><span class="page-size">10</span> <span class="caret"></span></button><ul class="dropdown-menu" role="menu"><li role="menuitem" class="active"><a href="#">10</a></li></ul></span> rows per page</span></div><div class="pull-right pagination" style="display: none;"><ul class="pagination"><li class="page-pre"><a href="#">‹</a></li><li class="page-next"><a href="#">›</a></li></ul></div></div></div></div><div class="clearfix"></div>
+<table id="table" data-toggle="table" class="table-bordered" data-pagination="true" data-search="true" data-show-columns="true" data-show-pagination-switch="true" data-show-refresh="true" data-key-events="true" data-show-toggle="true" data-resizable="true" data-cookie="true"
+                                        data-show-export="true" data-click-to-select="true" data-toolbar="#toolbar" style="width:100%">
+                      <thead>
+                        <tr>
+                          <th width="1%">S.No</th>
+                          <th width="15%">Student Name</th>
+                          <th width="15%">Month</th>
+                          <th width="15%">Date</th>
+                          <th width="15%">Remarks</th>
+                          <th width="15%">Total</th>
+                         
+                          <th width="15%">Action</th>
+                         
+
+                        </tr>
+                      </thead>
+                      <tbody>
+
+                        
+                      
+
+                      </tbody>
+                    </table>
            
           </div>
         </div>
@@ -2793,13 +2819,12 @@ if (quickLinkBtn) {
 <!-- Custom Theme Scripts -->
 <script src="../build/js/custom.min.js"></script>
 <!-- jQuery Sparklines -->
-<script src="../vendors/jquery-sparkline/dist/jquery.sparkline.min.js"></script>  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;3650377dd59a42ccbb65668736c3a93b&quot;,&quot;r&quot;:1}" crossorigin="anonymous"></script>
-
-
+<script src="../vendors/jquery-sparkline/dist/jquery.sparkline.min.js"></script>  </body>
+</html>
 <script>
 function toastFunction() {
   var x = document.getElementById("snackbar");
   x.className = "show";
   setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
 }
-</script></body></html>
+</script>

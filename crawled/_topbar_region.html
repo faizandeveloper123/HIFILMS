@@ -1,0 +1,421 @@
+<div class="top_nav">
+
+<div class="nav_menu" >
+
+<nav>
+
+
+
+    <div class="flex header" style="padding:0px;">
+
+
+
+  <!-- Branch Name Section - Left Side -->
+  <div class="brand-info" style="width: 260px; min-width: 180px; max-width: 400px; flex: 1 1 260px; margin-right: 0;">
+    <div class="brand-title" style="font-size: 15px; font-weight: 700; color: #212B36; line-height: 1.2;">Test Portal</div>
+    <div class="brand-subtitle" style="font-size: 14px; color: #637381; font-style: normal; margin-top: 4px;">2026-2027</div>
+  </div>
+
+  <!-- Search Section -->
+  <div class="searchbar-container" style="width: 260px; min-width: 180px; max-width: 400px; flex: 1 1 260px; margin: 0 0px; padding-bottom: 11px; margin-left:25px; position: relative;">
+    
+  
+              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" 
+        placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="" >
+              
+
+    
+  <div id="livesearch" role="listbox" aria-label="Student search results"
+     style="background-color:white; z-index:902; padding:10px;">
+  </div>
+
+     
+  </div>
+
+  <!-- Quick Links Section -->
+      <div class="quick-link-btn" style="margin-left: auto; margin-right: 10px;">
+      <button id="quickLinkBtn" class="btn" style="width: 214px; height: 44px; border: 1px solid #e0e0e0; color: #637381; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; border-radius: 22px; font-size: 14px; font-weight: 500; transition: all 0.3s ease; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.background='#FFA500'; this.style.color='white'; this.style.borderColor='#FFA500'; this.style.boxShadow='0 4px 12px rgba(255,165,0,0.3)';" onmouseout="this.style.background='white'; this.style.color='#637381'; this.style.borderColor='#e0e0e0'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)';">
+        <span>Quick Links</span>
+        <i class="fa fa-chevron-down" style="font-size: 12px; margin-left: 8px;"></i>
+      </button>
+      <div id="dropdownContent" class="dropdown-content" style="z-index: 99999; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 200px; display: none;">
+        <a href="https://apps.eduportal.pk/Production/graph_analytics.php">Analytics Dashboard</a>
+        <a href="https://apps.eduportal.pk/Production/data_health_checker.php">Data Health Checker</a>  
+        <a href="https://apps.eduportal.pk/Production/students_reports.php">Students Reports</a>
+        <a href="https://apps.eduportal.pk/Production/customer_tickets.php">Support Tickets</a>
+        <a href="https://apps.eduportal.pk/Production/print_daily_income_exp_report.php">Daily Closing</a>
+        <a href="https://apps.eduportal.pk/Production/print_profitloss_report.php">Monthly Closing</a>
+        <a href="https://apps.eduportal.pk/Production/mark_attend.php">Mark Attendance</a>
+        <a href="https://apps.eduportal.pk/Production/view_challan.php">View Challan</a>
+        <a href="https://apps.eduportal.pk/Production/messages_history.php">View Messages</a>
+        <a href="https://apps.eduportal.pk/Production/manage_expenses.php">Expenses</a>
+        <a href="https://apps.eduportal.pk/Production/user_audit_report.php">Users Activities</a>
+        <a href="https://apps.eduportal.pk/Production/parents_id.php">View Parents IDs</a>
+        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&to_date=2026-09-30&status=All&type=All&addaccountAdmin=1">Complaint</a>
+      </div>
+    </div>
+  
+  <!-- Notifications Section -->
+  <div class="message" style="margin-right: 8px;">
+    <!-- Unread badge for notifications (bell) -->
+    <div id="div1" style="position:absolute; top: 0; left: 0;z-index: 2;" onclick="sms_show();">
+          </div>
+
+    <!-- Contact assigned CSR/Agent via WhatsApp -->
+    <div id="csr_whatsapp_wrap" style="position: relative; height: auto; z-index: 9999; margin-right: 6px;">
+            <a href="https://wa.me/923000228123" target="_blank" rel="noopener" class="chip sms-chip" style="width:35px; border: none;" title="Chat with your Support Representative (Mubeen Arshad) on WhatsApp">
+        <i class="fab fa-whatsapp" style="font-size: 19px; color: #25D366;"></i>
+      </a>
+          </div>
+
+    <!-- Envelope (Messages) -->
+    <div id="msg_wrap" style="position: relative; height: auto; z-index: 9999; margin-right: 6px;">
+      <div class="chip sms-chip" onclick="msg_show();" style="width:35px; border: none">
+        <i class="fa fa-envelope" style="font-size: 18px; color: #808080;"></i>
+      </div>
+      <div class="user-dropdown dropdown-card" id="msg_show_hide" style="display: none; z-index: 99999; width: 24em; position: absolute; right: 0; top: 100%; height: auto;">
+        <div class="dropdown-header"><i class="fa fa-signal"></i> SMS Usage</div>
+        <div class="usage-card">
+          <div class="usage-title" style="color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp SMS</div>
+          <div class="usage-metrics">
+            <span>Used: 12</span>
+            <span>Limit: 10,000</span>
+          </div>
+          <div class="usage-bar">
+            <div class="usage-bar-fill" style="width: 0.12%; background:#25D366;"></div>
+          </div>
+        </div>
+        <div class="usage-card">
+          <div class="usage-title" style="color:#007bff;"><i class="fa fa-mobile"></i> SIM SMS</div>
+          <div class="usage-metrics">
+            <span>Used: 0</span>
+            <span>Limit: 0</span>
+          </div>
+          <div class="usage-bar">
+            <div class="usage-bar-fill" style="width: 0%; background:#007bff;"></div>
+          </div>
+        </div>
+        <div class="usage-card">
+          <div class="usage-title"><i class="fa fa-bar-chart"></i> Total SMS Usage (This Month)</div>
+          <div class="usage-metrics">
+            <span>WhatsApp: 12</span>
+            <span>SIM: 0</span>
+          </div>
+          <div class="usage-metrics" style="margin-top:4px;">
+            <span>Total: 12</span>
+            <span>Remaining: 9,988</span>
+          </div>
+        </div>
+        <a class="dropdown-item" href="https://apps.eduportal.pk/Production/messages_history.php">
+          <i class="fa fa-history"></i> View Messages History
+        </a>
+      </div>
+    </div>
+
+    <!-- Bell (Notifications) -->
+    <div id="div2" style="position: relative; height: auto; z-index: 9999;">
+      <div class="chip sms-chip" onclick="sms_show();" style="width:35px; border: none">
+        <i class="fa fa-bell" style="font-size: 18px; color: #808080;"></i>
+      </div>  
+      <div class="user-dropdown dropdown-card" id="sms_show_hide" style="display: none; z-index: 99999; width: 26em; position: absolute; left: -20em; top: 100%; height: auto;">
+        <div class="dropdown-header"><i class="fa fa-bell"></i> Notifications</div>
+        <div class="dropdown-list">
+                  </div>
+      </div>
+    </div>
+
+    <!-- User Profile Section - Now inside message div for mobile alignment -->
+    <div class="chip user-chip mobile-profile" style="background:white; margin-left: 8px;" onclick="show_hide();">
+      <div class="user-dropdown dropdown-card" id="logout_btn_mobile" style="width:100%; display: none;">
+        <div class="dropdown-header"><i class="fa fa-user-circle"></i> Account</div>
+        <div class="dropdown-section-title">Profile</div>
+        <a href="update_profile.php" class="dropdown-item"><i class="fa fa-user"></i> Profile</a>
+        <a href="customer_tickets.php" class="dropdown-item"><i class="fa fa-ticket-alt"></i> Support Tickets</a>
+        <div class="dropdown-section-title">Invoices</div>
+        <a href="monthly_invoices.php" class="dropdown-item"><i class="fa fa-file-alt"></i> Monthly Invoices</a>
+        <div class="dropdown-section-title">Security</div>
+        <a href="update_pswd.php" class="dropdown-item"><i class="fa fa-key"></i> Change Password</a>
+        <div class="dropdown-section-title">Session</div>
+        <a href="logout.php" class="dropdown-item"><i class="fa fa-sign-out-alt"></i> Logout</a>
+      </div>
+      <div class="avtar"></div>
+      <div class="user-info">
+        <span class="user-name" style="color:black;">
+                  </span>
+        <span class="user-designation">Super Admin</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Section - Desktop version (hidden on mobile) -->
+  <div class="chip user-chip desktop-profile" style="background:white;" onclick="show_hide();">
+    <div class="user-dropdown dropdown-card" id="logout_btn_desktop" style="width:100%; display: none;">
+      <div class="dropdown-header"><i class="fa fa-user-circle"></i> Account</div>
+      <div class="dropdown-section-title">Profile</div>
+      <a href="update_profile.php" class="dropdown-item"><i class="fa fa-user"></i> Profile</a>
+      <a href="customer_tickets.php" class="dropdown-item"><i class="fa fa-ticket-alt"></i> Support Tickets</a>
+      <div class="dropdown-section-title">Invoices</div>
+      <a href="monthly_invoices.php" class="dropdown-item"><i class="fa fa-file-alt"></i> Monthly Invoices</a>
+      <div class="dropdown-section-title">Security</div>
+      <a href="update_pswd.php" class="dropdown-item"><i class="fa fa-key"></i> Change Password</a>
+      <div class="dropdown-section-title">Session</div>
+      <a href="logout.php" class="dropdown-item"><i class="fa fa-sign-out-alt"></i> Logout</a>
+    </div>
+    <div class="avtar"></div>
+    <div class="user-info">
+      <span class="user-name" style="color:black;">
+              </span>
+      <span class="user-designation">Super Admin</span>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+</ul>
+
+</li>
+
+</ul>
+
+</nav>
+
+</div>
+
+</div>
+
+<!-- /top navigation -->
+
+
+
+
+
+
+
+<!-- function for live search header --> 
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+
+
+// SECURITY: Enhanced showResult function with input validation
+function showResult(str) {
+  if (window.__skipSearch === true) {
+    window.__skipSearch = false;
+    return;
+  }
+  // SECURITY: Input validation and sanitization
+  if (!str || str.length == 0) { 
+    document.getElementById("livesearch").innerHTML="";
+    document.getElementById("livesearch").style.display="none";
+    return;
+  }
+  
+  // SECURITY: Limit input length to prevent abuse
+  if (str.length > 100) {
+    str = str.substring(0, 100);
+  }
+  
+  // SECURITY: Basic XSS prevention - escape special characters
+  str = str.replace(/[<>\"'&]/g, function(match) {
+    switch(match) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#x27;';
+      case '&': return '&amp;';
+      default: return match;
+    }
+  });
+  
+  if (window.XMLHttpRequest) {
+    xmlhttp = new XMLHttpRequest();
+  } else {
+    xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  
+  xmlhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      // SECURITY: Use textContent instead of innerHTML to prevent XSS
+      document.getElementById("livesearch").innerHTML = this.responseText;
+      document.getElementById("livesearch").style.display = "block";
+      initSearchResults();
+    }
+  }
+  
+  // SECURITY: URL encode the search parameter
+  xmlhttp.open("GET", "livesearch.php?q=" + encodeURIComponent(str), true);
+  xmlhttp.send();
+}
+
+
+// Keyboard-friendly search results
+var searchIndex = -1;
+function getSearchItems() {
+  return Array.prototype.slice.call(document.querySelectorAll('#livesearch .search-item'));
+}
+function updateActiveResult(index) {
+  var items = getSearchItems();
+  items.forEach(function(item, i) {
+    item.classList.toggle('active', i === index);
+  });
+}
+function initSearchResults() {
+  var items = getSearchItems();
+  searchIndex = -1;
+  updateActiveResult(searchIndex);
+  items.forEach(function(item, i) {
+    item.addEventListener('mouseenter', function() {
+      searchIndex = i;
+      updateActiveResult(searchIndex);
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  var searchInput = document.getElementById('filter');
+  if (!searchInput) return;
+
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === 'Escape') {
+      window.__skipSearch = true;
+    } else {
+      window.__skipSearch = false;
+    }
+    var items = getSearchItems();
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      searchIndex = Math.min(searchIndex + 1, items.length - 1);
+      updateActiveResult(searchIndex);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      searchIndex = Math.max(searchIndex - 1, 0);
+      updateActiveResult(searchIndex);
+    } else if (e.key === 'Enter') {
+      if (searchIndex >= 0 && items[searchIndex]) {
+        window.location.href = items[searchIndex].getAttribute('href');
+      }
+    } else if (e.key === 'Escape') {
+      document.getElementById("livesearch").style.display = "none";
+      searchIndex = -1;
+      updateActiveResult(searchIndex);
+    }
+  });
+});
+
+
+// logout btn hide and show script
+
+
+
+var a;
+
+
+
+function show_hide(){
+    if(a==1) {
+        // Show both mobile and desktop profile dropdowns
+        var mobileDropdown = document.getElementById("logout_btn_mobile");
+        var desktopDropdown = document.getElementById("logout_btn_desktop");
+        
+        if(mobileDropdown) mobileDropdown.style.display = "inline";
+        if(desktopDropdown) desktopDropdown.style.display = "inline";
+        
+        return a=0;
+    } else {
+        // Hide both mobile and desktop profile dropdowns
+        var mobileDropdown = document.getElementById("logout_btn_mobile");
+        var desktopDropdown = document.getElementById("logout_btn_desktop");
+        
+        if(mobileDropdown) mobileDropdown.style.display = "none";
+        if(desktopDropdown) desktopDropdown.style.display = "none";
+        
+        return a=1;
+    }
+}
+
+
+
+
+
+
+
+var a;
+
+
+
+function sms_show(){
+
+
+
+if(a==1)
+
+{
+
+
+
+    // hide messages dropdown if open
+    var msg = document.getElementById("msg_show_hide");
+    if(msg){ msg.style.display = "none"; }
+    document.getElementById("sms_show_hide").style.display="inline";
+
+    return a=0;
+
+
+
+}else{
+
+
+
+    document.getElementById("sms_show_hide").style.display="none";
+
+    return a=1;
+
+}
+
+
+
+}
+
+
+
+
+// toggle messages dropdown
+var b;
+function msg_show(){
+if(b==1)
+{
+  // hide notification if open
+  var notif = document.getElementById("sms_show_hide");
+  if(notif){ notif.style.display = "none"; }
+  document.getElementById("msg_show_hide").style.display="inline";
+  return b=0;
+}else{
+  document.getElementById("msg_show_hide").style.display="none";
+  return b=1;
+}
+}
+
+var quickLinkBtn = document.getElementById("quickLinkBtn");
+if (quickLinkBtn) {
+  quickLinkBtn.addEventListener("click", function() {
+    var dropdown = document.getElementById("dropdownContent");
+    if (!dropdown) return;
+
+    if (dropdown.style.display === "block") {
+      dropdown.style.display = "none";
+    } else {
+      dropdown.style.display = "block";
+    }
+  });
+}
+
+
+</script>
+    <div class="right_col"

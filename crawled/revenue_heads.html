@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="en"><head>
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
     
     <title>Add Revenue Head | EduPortal</title>
     
@@ -121,7 +124,18 @@ function getSubCat(id){
     xmlhttp.send();
   }
 </script> 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script><style>
+  </head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- <script>
+$(document).ready(function(){
+  
+    $("#div1").fadeOut();
+    $("#div2").fadeOut("slow");
+    $("#div3").fadeOut(3000);
+ 
+});
+</script> -->
+  <style>
 #snackbar {
   visibility: hidden;
   min-width: 250px;
@@ -163,19 +177,8 @@ function getSubCat(id){
   from {bottom: 30px; opacity: 1;}
   to {bottom: 0; opacity: 0;}
 }
-</style><style type="text/css">.jqstooltip { position: absolute;left: 0px;top: 0px;visibility: hidden;background: rgb(0, 0, 0) transparent;background-color: rgba(0,0,0,0.6);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";color: white;font: 10px arial, san serif;text-align: left;white-space: nowrap;padding: 5px;border: 1px solid white;box-sizing: content-box;z-index: 10000;}.jqsfield { color: white;font: 10px arial, san serif;text-align: left;}</style></head>
-  
-<!-- <script>
-$(document).ready(function(){
-  
-    $("#div1").fadeOut();
-    $("#div2").fadeOut("slow");
-    $("#div3").fadeOut(3000);
- 
-});
-</script> -->
-  
-  <body class="nav-md sidebar-collapsed">
+</style>
+  <body class="nav-md">
     <div class="container body">
       <div class="main_container">
         <div class="col-md-3 left_col">
@@ -709,7 +712,9 @@ $(document).ready(function(){
 
   <!-- Logo Section -->
   <div class="sidebar-logo">
-    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg" onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';" alt="Logo">
+    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg"
+      onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';"
+      alt="Logo" />
   </div>
 
   <div class="ds-branch">
@@ -717,9 +722,9 @@ $(document).ready(function(){
     <div style="font-size:12px;">(2026-2027)</div>
   </div>
 
-  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu active">
+  <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
     <!-- Web/Android original menu -->
-    <ul class="side-menu" id="menu-web" style="">
+    <ul class="side-menu" id="menu-web">
       <li><a href="software_demo_videos.php"><i class="fa fa-play"></i><span class="label" style="font-weight: normal !important;">Guidline Videos</span></a></li>
 
                 <li class="has-children">
@@ -728,7 +733,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Front Office</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="front_desk_analytics.php">
                       Front Desk Overview                    </a>
@@ -749,7 +754,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Dashboard</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="dashboard.php">
                       Executive Dashboard                    </a>
@@ -766,7 +771,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Students</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_student.php">
                       Add New Student                    </a>
@@ -787,7 +792,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Attendance</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="mark_attend.php">
                       Mark Attendance                    </a>
@@ -808,7 +813,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Messages</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="new_message.php">
                       New Message                    </a>
@@ -829,7 +834,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Fee Collection</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="monthly_challan.php">
                       Create Challan                    </a>
@@ -854,7 +859,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Examination</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="view_marksheet.php">
                       Add Marks Sheet                    </a>
@@ -875,7 +880,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Timetable</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="period_categories.php">
                       Periods Category                    </a>
@@ -908,7 +913,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Employees/HRM</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_emp.php">
                       Add Employee                    </a>
@@ -937,7 +942,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Datesheet</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="create_datesheet.php">
                       Create Datesheet                    </a>
@@ -962,7 +967,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Transport</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="vehicles.php">
                       Vehicles                    </a>
@@ -983,7 +988,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Library</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="list_books.php">
                       Book List                    </a>
@@ -1004,7 +1009,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">PayRoll</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="creat_payroll.php">
                       Create PayRoll                    </a>
@@ -1029,7 +1034,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Parents Portal</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="parents_portal_dashboard.php">
                       Parents Overview                    </a>
@@ -1042,7 +1047,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Expenses</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="manage_expenses.php">
                       Add/View Expenses                    </a>
@@ -1059,7 +1064,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Cards Generator</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="cards.php">
                       Staff Cards                    </a>
@@ -1076,7 +1081,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Point of Sale</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="canteen_dashboard.php">
                       POS Dashboard                    </a>
@@ -1089,7 +1094,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Academic Setup</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="academic_setup.php">
                       Manage Academics                    </a>
@@ -1102,7 +1107,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">System Settings</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="settings.php">
                       Update Settings                    </a>
@@ -1119,7 +1124,7 @@ $(document).ready(function(){
               <span class="label" style="font-weight: normal !important;">Accounts</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_revenue.php">
                       Add Revenue                    </a>
@@ -1128,7 +1133,7 @@ $(document).ready(function(){
                     <a href="revenue_list.php">
                       List of Revenues                    </a>
                   </li>
-                                <li class="current-page">
+                                <li>
                     <a href="revenue_heads.php">
                       Revenue Heads                    </a>
                   </li>
@@ -2194,7 +2199,7 @@ $(document).ready(function(){
 
 <div class="top_nav">
 
-<div class="nav_menu">
+<div class="nav_menu" >
 
 <nav>
 
@@ -2214,11 +2219,13 @@ $(document).ready(function(){
   <div class="searchbar-container" style="width: 260px; min-width: 180px; max-width: 400px; flex: 1 1 260px; margin: 0 0px; padding-bottom: 11px; margin-left:25px; position: relative;">
     
   
-              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="">
+              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" 
+        placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="" >
               
 
     
-  <div id="livesearch" role="listbox" aria-label="Student search results" style="background-color:white; z-index:902; padding:10px;">
+  <div id="livesearch" role="listbox" aria-label="Student search results"
+     style="background-color:white; z-index:902; padding:10px;">
   </div>
 
      
@@ -2243,7 +2250,7 @@ $(document).ready(function(){
         <a href="https://apps.eduportal.pk/Production/manage_expenses.php">Expenses</a>
         <a href="https://apps.eduportal.pk/Production/user_audit_report.php">Users Activities</a>
         <a href="https://apps.eduportal.pk/Production/parents_id.php">View Parents IDs</a>
-        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&amp;to_date=2026-09-30&amp;status=All&amp;type=All&amp;addaccountAdmin=1">Complaint</a>
+        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&to_date=2026-09-30&status=All&type=All&addaccountAdmin=1">Complaint</a>
       </div>
     </div>
   
@@ -2270,11 +2277,11 @@ $(document).ready(function(){
         <div class="usage-card">
           <div class="usage-title" style="color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp SMS</div>
           <div class="usage-metrics">
-            <span>Used: 0</span>
+            <span>Used: 12</span>
             <span>Limit: 10,000</span>
           </div>
           <div class="usage-bar">
-            <div class="usage-bar-fill" style="width: 0%; background:#25D366;"></div>
+            <div class="usage-bar-fill" style="width: 0.12%; background:#25D366;"></div>
           </div>
         </div>
         <div class="usage-card">
@@ -2290,12 +2297,12 @@ $(document).ready(function(){
         <div class="usage-card">
           <div class="usage-title"><i class="fa fa-bar-chart"></i> Total SMS Usage (This Month)</div>
           <div class="usage-metrics">
-            <span>WhatsApp: 0</span>
+            <span>WhatsApp: 12</span>
             <span>SIM: 0</span>
           </div>
           <div class="usage-metrics" style="margin-top:4px;">
-            <span>Total: 0</span>
-            <span>Remaining: 10,000</span>
+            <span>Total: 12</span>
+            <span>Remaining: 9,988</span>
           </div>
         </div>
         <a class="dropdown-item" href="https://apps.eduportal.pk/Production/messages_history.php">
@@ -2366,11 +2373,11 @@ $(document).ready(function(){
 
 
 
+</ul>
 
+</li>
 
-
-
-
+</ul>
 
 </nav>
 
@@ -2611,7 +2618,7 @@ if (quickLinkBtn) {
 
 </script>     
         <!-- page content -->
-          <div class="right_col" role="main" style="min-height: 733px;">
+          <div class="right_col" role="main">
 
             <a href="dashboard.php">Dashboard </a> &nbsp; <i style="" class="fa fa-angle-double-right"></i>  &nbsp; 
              Revenue Head
@@ -2640,8 +2647,8 @@ if (quickLinkBtn) {
                   <div class="x_content">
           
      
-                    <form action="https://apps.eduportal.pk/Production/parent/InsertMe.php" method="post" enctype="multipart/form-data" class="form-horizontal form-label-left">
-          <input type="hidden" name="action" value="add_revenueHead">
+                    <form action="https://apps.eduportal.pk/Production/parent/InsertMe.php" method="post" enctype="multipart/form-data" class="form-horizontal form-label-left" >
+          <input type="hidden" name="action" value="add_revenueHead" />
 
           
                  
@@ -2652,7 +2659,7 @@ if (quickLinkBtn) {
                         </label>
                         <div class="col-md-6 col-sm-6 col-xs-12">
                          
-                           <input class="form-control col-md-7 col-xs-12" name="revenue_head" placeholder="eg Uniform " value="">
+                           <input class="form-control col-md-7 col-xs-12"  name="revenue_head" placeholder="eg Uniform " value="">
                         </div>
                     </div>
 
@@ -2662,8 +2669,8 @@ if (quickLinkBtn) {
                       <div class="form-group">
                         <div class="col-md-6 col-md-offset-3">
                           
-                          <button id="send" type="submit" class="btn btn-primary">Submit</button>
-                          <button type="submit" class="btn btn-primary">Cancel</button>
+                          <button id="send" type="submit" class="btn btn-primary" >Submit</button>
+                          <button type="submit" class="btn btn-primary" >Cancel</button>
 
                         </div>
                       </div>
@@ -2684,7 +2691,7 @@ if (quickLinkBtn) {
 
   </div>
   <div class="clearfix"></div>
-</div></section>           
+</section>           
 
 
 
@@ -2698,7 +2705,7 @@ if (quickLinkBtn) {
           
  
 
-<table id="datatable" class="table table-striped table-bordered" style="background-color: white;">
+<table id="datatable" class="table table-striped table-bordered"style="background-color: white;">
                       <thead>
                         <tr>
                           <th width="1%">S.No</th>
@@ -2721,12 +2728,12 @@ if (quickLinkBtn) {
                           <td>
 
           
-          <a style="padding: 0px 5px; font-size:14px;" href="revenue_heads.php?97a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e1&amp;Rheadup=581" class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
+          <a style="padding: 0px 5px; font-size:14px;"  href="revenue_heads.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&Rheadup=581" style="cursor:pointer;"  class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
 
          
 
          
-        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=581&amp;action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onclick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger"><i class="fa fa-remove"></i> </a>
+        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=581&action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onClick="return confirm('Are you sure you want to delete this record');"  class="btn btn-danger"><i class="fa fa-remove"></i> </a>
 
          
 
@@ -2743,12 +2750,12 @@ if (quickLinkBtn) {
                           <td>
 
           
-          <a style="padding: 0px 5px; font-size:14px;" href="revenue_heads.php?97a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e1&amp;Rheadup=582" class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
+          <a style="padding: 0px 5px; font-size:14px;"  href="revenue_heads.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&Rheadup=582" style="cursor:pointer;"  class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
 
          
 
          
-        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=582&amp;action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onclick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger"><i class="fa fa-remove"></i> </a>
+        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=582&action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onClick="return confirm('Are you sure you want to delete this record');"  class="btn btn-danger"><i class="fa fa-remove"></i> </a>
 
          
 
@@ -2765,12 +2772,12 @@ if (quickLinkBtn) {
                           <td>
 
           
-          <a style="padding: 0px 5px; font-size:14px;" href="revenue_heads.php?97a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e1&amp;Rheadup=583" class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
+          <a style="padding: 0px 5px; font-size:14px;"  href="revenue_heads.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&Rheadup=583" style="cursor:pointer;"  class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
 
          
 
          
-        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=583&amp;action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onclick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger"><i class="fa fa-remove"></i> </a>
+        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=583&action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onClick="return confirm('Are you sure you want to delete this record');"  class="btn btn-danger"><i class="fa fa-remove"></i> </a>
 
          
 
@@ -2787,12 +2794,12 @@ if (quickLinkBtn) {
                           <td>
 
           
-          <a style="padding: 0px 5px; font-size:14px;" href="revenue_heads.php?97a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e1&amp;Rheadup=584" class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
+          <a style="padding: 0px 5px; font-size:14px;"  href="revenue_heads.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&Rheadup=584" style="cursor:pointer;"  class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
 
          
 
          
-        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=584&amp;action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onclick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger"><i class="fa fa-remove"></i> </a>
+        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=584&action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onClick="return confirm('Are you sure you want to delete this record');"  class="btn btn-danger"><i class="fa fa-remove"></i> </a>
 
          
 
@@ -2809,12 +2816,12 @@ if (quickLinkBtn) {
                           <td>
 
           
-          <a style="padding: 0px 5px; font-size:14px;" href="revenue_heads.php?97a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e1&amp;Rheadup=775" class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
+          <a style="padding: 0px 5px; font-size:14px;"  href="revenue_heads.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&Rheadup=775" style="cursor:pointer;"  class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
 
          
 
          
-        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=775&amp;action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onclick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger"><i class="fa fa-remove"></i> </a>
+        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=775&action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onClick="return confirm('Are you sure you want to delete this record');"  class="btn btn-danger"><i class="fa fa-remove"></i> </a>
 
          
 
@@ -2831,12 +2838,12 @@ if (quickLinkBtn) {
                           <td>
 
           
-          <a style="padding: 0px 5px; font-size:14px;" href="revenue_heads.php?97a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e1&amp;Rheadup=806" class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
+          <a style="padding: 0px 5px; font-size:14px;"  href="revenue_heads.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&Rheadup=806" style="cursor:pointer;"  class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
 
          
 
          
-        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=806&amp;action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onclick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger"><i class="fa fa-remove"></i> </a>
+        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=806&action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onClick="return confirm('Are you sure you want to delete this record');"  class="btn btn-danger"><i class="fa fa-remove"></i> </a>
 
          
 
@@ -2853,12 +2860,12 @@ if (quickLinkBtn) {
                           <td>
 
           
-          <a style="padding: 0px 5px; font-size:14px;" href="revenue_heads.php?97a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e1&amp;Rheadup=807" class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
+          <a style="padding: 0px 5px; font-size:14px;"  href="revenue_heads.php?c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&Rheadup=807" style="cursor:pointer;"  class="btn btn-success"> <i class="fa fa-pencil" aria-hidden="true"></i></a> 
 
          
 
          
-        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=807&amp;action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onclick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger"><i class="fa fa-remove"></i> </a>
+        <a href="https://apps.eduportal.pk/Production/parent/InsertMe.php?revenueHeadDelete=807&action=DeleteRevenueHead" style="padding: 0px 5px; font-size:14px;" onClick="return confirm('Are you sure you want to delete this record');"  class="btn btn-danger"><i class="fa fa-remove"></i> </a>
 
          
 
@@ -2887,13 +2894,12 @@ if (quickLinkBtn) {
 <!-- Custom Theme Scripts -->
 <script src="../build/js/custom.min.js"></script>
 <!-- jQuery Sparklines -->
-<script src="../vendors/jquery-sparkline/dist/jquery.sparkline.min.js"></script>  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;3650377dd59a42ccbb65668736c3a93b&quot;,&quot;r&quot;:1}" crossorigin="anonymous"></script>
-
-
+<script src="../vendors/jquery-sparkline/dist/jquery.sparkline.min.js"></script>  </body>
+</html>
 <script>
 function toastFunction() {
   var x = document.getElementById("snackbar");
   x.className = "show";
   setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
 }
-</script></body></html>
+</script>

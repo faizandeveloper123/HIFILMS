@@ -1,4 +1,10 @@
-<!DOCTYPE html><html lang="en"><head>
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <!-- Meta, title, CSS, favicons, etc. -->
     <meta charset="utf-8">
@@ -590,6 +596,8 @@
 .stat-partial .stat-icon     { background: #fef3c7; color: #b45309; }
 .stat-unpaid      { border-left-color: #ef4444; }
 .stat-unpaid .stat-icon      { background: #fee2e2; color: #dc2626; }
+.stat-notgenerated { border-left-color: #8b5cf6; cursor: pointer; }
+.stat-notgenerated .stat-icon { background: #ede9fe; color: #7c3aed; }
 
 @media (max-width: 767px) {
   .stat-card { flex: 1 1 45%; }
@@ -629,7 +637,9 @@
 
 </style>
 
-  <script>
+  </head>
+
+ <script>
     var apiStatus  = 0;
     var branchName = "Test Portal";
 
@@ -659,13 +669,11 @@ function getsec(id){
 
   }
                  
-  </script><style type="text/css">.jqstooltip { position: absolute;left: 0px;top: 0px;visibility: hidden;background: rgb(0, 0, 0) transparent;background-color: rgba(0,0,0,0.6);filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000);-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99000000, endColorstr=#99000000)";color: white;font: 10px arial, san serif;text-align: left;white-space: nowrap;padding: 5px;border: 1px solid white;box-sizing: content-box;z-index: 10000;}.jqsfield { color: white;font: 10px arial, san serif;text-align: left;}</style></head>
-
- 
+  </script>
 
 
 
-  <body class="nav-md sidebar-collapsed">
+  <body class="nav-md">
     <div class="container body">
       <div class="main_container">
         <div class="col-md-3 left_col">
@@ -1199,7 +1207,9 @@ function getsec(id){
 
   <!-- Logo Section -->
   <div class="sidebar-logo">
-    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg" onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';" alt="Logo">
+    <img src="https://apps.eduportal.pk/Production/img/355497hassan.jpeg"
+      onerror="this.onerror=null; this.src='https://efsvolume-backup.s3.amazonaws.com/apps.eduportal-pk.com/img/355497hassan.jpeg';"
+      alt="Logo" />
   </div>
 
   <div class="ds-branch">
@@ -1218,7 +1228,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Front Office</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="front_desk_analytics.php">
                       Front Desk Overview                    </a>
@@ -1239,7 +1249,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Dashboard</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="dashboard.php">
                       Executive Dashboard                    </a>
@@ -1256,7 +1266,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Students</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_student.php">
                       Add New Student                    </a>
@@ -1277,7 +1287,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Attendance</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="mark_attend.php">
                       Mark Attendance                    </a>
@@ -1298,7 +1308,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Messages</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="new_message.php">
                       New Message                    </a>
@@ -1319,7 +1329,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Fee Collection</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="monthly_challan.php">
                       Create Challan                    </a>
@@ -1344,7 +1354,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Examination</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="view_marksheet.php">
                       Add Marks Sheet                    </a>
@@ -1365,7 +1375,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Timetable</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="period_categories.php">
                       Periods Category                    </a>
@@ -1398,7 +1408,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Employees/HRM</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_emp.php">
                       Add Employee                    </a>
@@ -1427,7 +1437,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Datesheet</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="create_datesheet.php">
                       Create Datesheet                    </a>
@@ -1452,7 +1462,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Transport</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="vehicles.php">
                       Vehicles                    </a>
@@ -1473,7 +1483,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Library</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="list_books.php">
                       Book List                    </a>
@@ -1494,7 +1504,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">PayRoll</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="creat_payroll.php">
                       Create PayRoll                    </a>
@@ -1519,7 +1529,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Parents Portal</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="parents_portal_dashboard.php">
                       Parents Overview                    </a>
@@ -1532,7 +1542,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Expenses</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="manage_expenses.php">
                       Add/View Expenses                    </a>
@@ -1549,7 +1559,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Cards Generator</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="cards.php">
                       Staff Cards                    </a>
@@ -1566,7 +1576,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Point of Sale</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="canteen_dashboard.php">
                       POS Dashboard                    </a>
@@ -1579,7 +1589,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Academic Setup</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="academic_setup.php">
                       Manage Academics                    </a>
@@ -1592,7 +1602,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">System Settings</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="settings.php">
                       Update Settings                    </a>
@@ -1609,7 +1619,7 @@ function getsec(id){
               <span class="label" style="font-weight: normal !important;">Accounts</span>
               <span class="fa fa-chevron-right chev"></span>
             </a>
-            <ul class="child_menu" style="display: none;">
+            <ul class="child_menu">
                                 <li>
                     <a href="add_revenue.php">
                       Add Revenue                    </a>
@@ -2684,7 +2694,7 @@ function getsec(id){
 
 <div class="top_nav">
 
-<div class="nav_menu">
+<div class="nav_menu" >
 
 <nav>
 
@@ -2704,11 +2714,13 @@ function getsec(id){
   <div class="searchbar-container" style="width: 260px; min-width: 180px; max-width: 400px; flex: 1 1 260px; margin: 0 0px; padding-bottom: 11px; margin-left:25px; position: relative;">
     
   
-              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="">
+              <input type="text" id="filter" class="" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow: 0 6px 16px rgba(145,158,171,0.15);" 
+        placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)" name="" >
               
 
     
-  <div id="livesearch" role="listbox" aria-label="Student search results" style="background-color:white; z-index:902; padding:10px;">
+  <div id="livesearch" role="listbox" aria-label="Student search results"
+     style="background-color:white; z-index:902; padding:10px;">
   </div>
 
      
@@ -2733,7 +2745,7 @@ function getsec(id){
         <a href="https://apps.eduportal.pk/Production/manage_expenses.php">Expenses</a>
         <a href="https://apps.eduportal.pk/Production/user_audit_report.php">Users Activities</a>
         <a href="https://apps.eduportal.pk/Production/parents_id.php">View Parents IDs</a>
-        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&amp;to_date=2026-09-30&amp;status=All&amp;type=All&amp;addaccountAdmin=1">Complaint</a>
+        <a href="https://apps.eduportal.pk/Production/manage_complaint.php?from_date=2026-09-01&to_date=2026-09-30&status=All&type=All&addaccountAdmin=1">Complaint</a>
       </div>
     </div>
   
@@ -2760,11 +2772,11 @@ function getsec(id){
         <div class="usage-card">
           <div class="usage-title" style="color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp SMS</div>
           <div class="usage-metrics">
-            <span>Used: 0</span>
+            <span>Used: 12</span>
             <span>Limit: 10,000</span>
           </div>
           <div class="usage-bar">
-            <div class="usage-bar-fill" style="width: 0%; background:#25D366;"></div>
+            <div class="usage-bar-fill" style="width: 0.12%; background:#25D366;"></div>
           </div>
         </div>
         <div class="usage-card">
@@ -2780,12 +2792,12 @@ function getsec(id){
         <div class="usage-card">
           <div class="usage-title"><i class="fa fa-bar-chart"></i> Total SMS Usage (This Month)</div>
           <div class="usage-metrics">
-            <span>WhatsApp: 0</span>
+            <span>WhatsApp: 12</span>
             <span>SIM: 0</span>
           </div>
           <div class="usage-metrics" style="margin-top:4px;">
-            <span>Total: 0</span>
-            <span>Remaining: 10,000</span>
+            <span>Total: 12</span>
+            <span>Remaining: 9,988</span>
           </div>
         </div>
         <a class="dropdown-item" href="https://apps.eduportal.pk/Production/messages_history.php">
@@ -2856,11 +2868,11 @@ function getsec(id){
 
 
 
+</ul>
 
+</li>
 
-
-
-
+</ul>
 
 </nav>
 
@@ -3101,7 +3113,7 @@ if (quickLinkBtn) {
 
 </script> 
          <!-- page content -->
-        <div class="right_col" role="main" style="min-height: 733px;">
+        <div class="right_col" role="main">
         <div class="row">
 
 
@@ -3112,7 +3124,7 @@ if (quickLinkBtn) {
               
   <a href="view_challan_new.php"> Fee Collection   </a> &nbsp; <i style="" class="fa fa-angle-double-right"></i>  &nbsp;  View Challan 
 
-  <a href="view_challan_new.php?ss=97a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e197a79035043ec5e9ee517b2cf139d9e1&amp;session=11&amp;month=9&amp;fee=All" class="btn btn-round btn-warning quiklink pull-right"> Class Wise View Challan </a>
+  <a href="view_challan_new.php?ss=c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703c5c96227d2f94fb74630d4bcfce6b703&session=11&month=9&fee=All" class="btn btn-round btn-warning quiklink pull-right"> Class Wise View Challan </a>
 
   
   <!-- <div class="btn-group pull-right">
@@ -3163,43 +3175,43 @@ if (quickLinkBtn) {
                     <select name="session" id="session" class="form-control inputheight">
      
                     
-                           <option value="3">2018-2019</option>
+                           <option  value="3">2018-2019</option>
 
                         
-                           <option value="4">2019-2020</option>
+                           <option  value="4">2019-2020</option>
 
                         
-                           <option value="5">2020-2021</option>
+                           <option  value="5">2020-2021</option>
 
                         
-                           <option value="6">2021-2022</option>
+                           <option  value="6">2021-2022</option>
 
                         
-                           <option value="7">2022-2023</option>
+                           <option  value="7">2022-2023</option>
 
                         
-                           <option value="8">2023-2024</option>
+                           <option  value="8">2023-2024</option>
 
                         
-                           <option value="9">2024-2025</option>
+                           <option  value="9">2024-2025</option>
 
                         
-                           <option value="10">2025-2026</option>
+                           <option  value="10">2025-2026</option>
 
                         
-                           <option selected="" value="11">2026-2027</option>
+                           <option selected value="11">2026-2027</option>
 
                         
-                           <option value="12">2027-2028</option>
+                           <option  value="12">2027-2028</option>
 
                         
-                           <option value="13">2028-2029</option>
+                           <option  value="13">2028-2029</option>
 
                         
-                           <option value="14">2029-2030</option>
+                           <option  value="14">2029-2030</option>
 
                         
-                           <option value="15">2030-2031</option>
+                           <option  value="15">2030-2031</option>
 
                         
                     </select>
@@ -3211,21 +3223,21 @@ if (quickLinkBtn) {
              <div class="fee-filter-field">
                 <div class="form-group">
                                     <label class="required">Class Head</label>
-                  <select name="class_head" id="class_head" class="form-control inputheight" onchange="getClassesByHead(this.value)">
+                  <select name="class_head" id="class_head" class="form-control inputheight" onChange="getClassesByHead(this.value)">
                     <option value="">All</option>
-                                          <option value="27">
+                                          <option  value="27">
                         Hajvery Campus                      </option>
-                                          <option value="29">
+                                          <option  value="29">
                         Main Campus                      </option>
-                                          <option value="94">
+                                          <option  value="94">
                         Pharm-D                      </option>
-                                          <option value="95">
+                                          <option  value="95">
                         Pharm-D 2022-27                      </option>
-                                          <option value="96">
+                                          <option  value="96">
                         Pharm-D 2023-28                      </option>
-                                          <option value="97">
+                                          <option  value="97">
                         Pharm-D 2024-29                      </option>
-                                          <option value="162">
+                                          <option  value="162">
                         Modern Edu                      </option>
                                       </select>
                 </div>
@@ -3235,95 +3247,95 @@ if (quickLinkBtn) {
                 <div class="form-group ">
                   <label class="required">Class</label>
 
-                  <select name="class_id" id="class_id" class="form-control inputheight" onchange="getsec(this.value)">
+                  <select name="class_id" id="class_id" class="form-control inputheight" onChange="getsec(this.value)">
                     <option value="">All</option>
 
                     
-                       <option value="15550">KG-2</option>
+                       <option  value="15550">KG-2</option>
 
 
                             
-                       <option value="15551">1ST</option>
+                       <option  value="15551">1ST</option>
 
 
                             
-                       <option value="15552">2ND</option>
+                       <option  value="15552">2ND</option>
 
 
                             
-                       <option value="15553">3RD</option>
+                       <option  value="15553">3RD</option>
 
 
                             
-                       <option value="15554">4TH</option>
+                       <option  value="15554">4TH</option>
 
 
                             
-                       <option value="15555">5TH</option>
+                       <option  value="15555">5TH</option>
 
 
                             
-                       <option value="15556">6TH</option>
+                       <option  value="15556">6TH</option>
 
 
                             
-                       <option value="15557">7TH</option>
+                       <option  value="15557">7TH</option>
 
 
                             
-                       <option value="15832">8TH</option>
+                       <option  value="15832">8TH</option>
 
 
                             
-                       <option value="15833">9TH</option>
+                       <option  value="15833">9TH</option>
 
 
                             
-                       <option value="15834">10TH</option>
+                       <option  value="15834">10TH</option>
 
 
                             
-                       <option value="15905">BS Computer Science</option>
+                       <option  value="15905">BS Computer Science</option>
 
 
                             
-                       <option value="16136">Bs English</option>
+                       <option  value="16136">Bs English</option>
 
 
                             
-                       <option value="16540">New Fee Head Class</option>
+                       <option  value="16540">New Fee Head Class</option>
 
 
                             
-                       <option value="16613">reminder sms class</option>
+                       <option  value="16613">reminder sms class</option>
 
 
                             
-                       <option value="16766">BSCS</option>
+                       <option  value="16766">BSCS</option>
 
 
                             
-                       <option value="16795">BSIT</option>
+                       <option  value="16795">BSIT</option>
 
 
                             
-                       <option value="16922">Class 7</option>
+                       <option  value="16922">Class 7</option>
 
 
                             
-                       <option value="17073">Pharm-D 2021-26</option>
+                       <option  value="17073">Pharm-D 2021-26</option>
 
 
                             
-                       <option value="17184">MIT</option>
+                       <option  value="17184">MIT</option>
 
 
                             
-                       <option value="17807">14th</option>
+                       <option  value="17807">14th</option>
 
 
                             
-                       <option value="17890">DMS Play Group</option>
+                       <option  value="17890">DMS Play Group</option>
 
 
                             
@@ -3336,191 +3348,191 @@ if (quickLinkBtn) {
                   <label class="required">Section</label>
                     <select name="section" id="txt_section" class="form-control inputheight">
                       <option value="All">All</option>
-                                                   <option value="481">A</option>
+                                                   <option  value="481">A</option>
 
-                                                              <option value="484">BOYS</option>
+                                                              <option  value="484">BOYS</option>
 
-                                                              <option value="487">GIRLS</option>
+                                                              <option  value="487">GIRLS</option>
 
-                                                              <option value="490">B</option>
+                                                              <option  value="490">B</option>
 
-                                                              <option value="491">A</option>
+                                                              <option  value="491">A</option>
 
-                                                              <option value="510">Class Eleven &amp; Twelve</option>
+                                                              <option  value="510">Class Eleven & Twelve</option>
 
-                                                              <option value="544">Green</option>
+                                                              <option  value="544">Green</option>
 
-                                                              <option value="809">Boys Section</option>
+                                                              <option  value="809">Boys Section</option>
 
-                                                              <option value="810">Girls Section</option>
+                                                              <option  value="810">Girls Section</option>
 
-                                                              <option value="1106">A</option>
+                                                              <option  value="1106">A</option>
 
-                                                              <option value="1130">A</option>
+                                                              <option  value="1130">A</option>
 
-                                                              <option value="1246">A</option>
+                                                              <option  value="1246">A</option>
 
-                                                              <option value="1248">Pink</option>
+                                                              <option  value="1248">Pink</option>
 
-                                                              <option value="1467">NURSERY (A)</option>
+                                                              <option  value="1467">NURSERY (A)</option>
 
-                                                              <option value="1538">A</option>
+                                                              <option  value="1538">A</option>
 
-                                                              <option value="1624">Blue</option>
+                                                              <option  value="1624">Blue</option>
 
-                                                              <option value="6315">A</option>
+                                                              <option  value="6315">A</option>
 
-                                                              <option value="7715">A</option>
+                                                              <option  value="7715">A</option>
 
-                                                              <option value="7753">A</option>
+                                                              <option  value="7753">A</option>
 
-                                                              <option value="8025">Violet</option>
+                                                              <option  value="8025">Violet</option>
 
-                                                              <option value="8088">Beggener</option>
+                                                              <option  value="8088">Beggener</option>
 
-                                                              <option value="8382">Qasim</option>
+                                                              <option  value="8382">Qasim</option>
 
-                                                              <option value="8470">unicorm</option>
+                                                              <option  value="8470">unicorm</option>
 
-                                                              <option value="8635">A</option>
+                                                              <option  value="8635">A</option>
 
-                                                              <option value="8878">TSS MRC</option>
+                                                              <option  value="8878">TSS MRC</option>
 
-                                                              <option value="8901">1st A</option>
+                                                              <option  value="8901">1st A</option>
 
-                                                              <option value="8902">1st B</option>
+                                                              <option  value="8902">1st B</option>
 
-                                                              <option value="9140">GREY</option>
+                                                              <option  value="9140">GREY</option>
 
-                                                              <option value="9145">A</option>
+                                                              <option  value="9145">A</option>
 
-                                                              <option value="9146">A</option>
+                                                              <option  value="9146">A</option>
 
-                                                              <option value="10250">Primary</option>
+                                                              <option  value="10250">Primary</option>
 
-                                                              <option value="10544">H</option>
+                                                              <option  value="10544">H</option>
 
-                                                              <option value="10935">Nursary</option>
+                                                              <option  value="10935">Nursary</option>
 
-                                                              <option value="10936">Kg</option>
+                                                              <option  value="10936">Kg</option>
 
-                                                              <option value="11051">Iqbal section</option>
+                                                              <option  value="11051">Iqbal section</option>
 
-                                                              <option value="11052">Iqbal Section (1)</option>
+                                                              <option  value="11052">Iqbal Section (1)</option>
 
-                                                              <option value="11502">SunShine</option>
+                                                              <option  value="11502">SunShine</option>
 
-                                                              <option value="11538">A</option>
+                                                              <option  value="11538">A</option>
 
-                                                              <option value="11671">Allama Iqbal</option>
+                                                              <option  value="11671">Allama Iqbal</option>
 
-                                                              <option value="12138">ICS C</option>
+                                                              <option  value="12138">ICS C</option>
 
-                                                              <option value="12139">Medical Boys A</option>
+                                                              <option  value="12139">Medical Boys A</option>
 
-                                                              <option value="12190">GHAZNAWI</option>
+                                                              <option  value="12190">GHAZNAWI</option>
 
-                                                              <option value="13114">Boys</option>
+                                                              <option  value="13114">Boys</option>
 
-                                                              <option value="13696">2023</option>
+                                                              <option  value="13696">2023</option>
 
-                                                              <option value="14915">A</option>
+                                                              <option  value="14915">A</option>
 
-                                                              <option value="14916">A</option>
+                                                              <option  value="14916">A</option>
 
-                                                              <option value="15332">C</option>
+                                                              <option  value="15332">C</option>
 
-                                                              <option value="15346">FATIMA</option>
+                                                              <option  value="15346">FATIMA</option>
 
-                                                              <option value="15605">0</option>
+                                                              <option  value="15605">0</option>
 
-                                                              <option value="15783">KGII</option>
+                                                              <option  value="15783">KGII</option>
 
-                                                              <option value="15813">A Boys</option>
+                                                              <option  value="15813">A Boys</option>
 
-                                                              <option value="15933">Computer Class</option>
+                                                              <option  value="15933">Computer Class</option>
 
-                                                              <option value="16230">HAZRAT TALHA BIN ABAIDUALLAH RAZI ALLAH ANHA</option>
+                                                              <option  value="16230">HAZRAT TALHA BIN ABAIDUALLAH RAZI ALLAH ANHA</option>
 
-                                                              <option value="16263">old</option>
+                                                              <option  value="16263">old</option>
 
-                                                              <option value="17048">A</option>
+                                                              <option  value="17048">A</option>
 
-                                                              <option value="17292">Sr. Syed</option>
+                                                              <option  value="17292">Sr. Syed</option>
 
-                                                              <option value="17547">A</option>
+                                                              <option  value="17547">A</option>
 
-                                                              <option value="17998">A</option>
+                                                              <option  value="17998">A</option>
 
-                                                              <option value="18279">Platinum</option>
+                                                              <option  value="18279">Platinum</option>
 
-                                                              <option value="18915">Play group</option>
+                                                              <option  value="18915">Play group</option>
 
-                                                              <option value="19735">A</option>
+                                                              <option  value="19735">A</option>
 
-                                                              <option value="19897">Graphic Designing</option>
+                                                              <option  value="19897">Graphic Designing</option>
 
-                                                              <option value="19898">Computer Applications</option>
+                                                              <option  value="19898">Computer Applications</option>
 
-                                                              <option value="19899">Digital Marketing</option>
+                                                              <option  value="19899">Digital Marketing</option>
 
-                                                              <option value="19900">Autocad</option>
+                                                              <option  value="19900">Autocad</option>
 
-                                                              <option value="19901">Safety Inspector</option>
+                                                              <option  value="19901">Safety Inspector</option>
 
-                                                              <option value="19902">Civil Surveyor</option>
+                                                              <option  value="19902">Civil Surveyor</option>
 
-                                                              <option value="19903">Nebosh</option>
+                                                              <option  value="19903">Nebosh</option>
 
-                                                              <option value="19917">S1</option>
+                                                              <option  value="19917">S1</option>
 
-                                                              <option value="19924">A</option>
+                                                              <option  value="19924">A</option>
 
-                                                              <option value="20271">Bright Star</option>
+                                                              <option  value="20271">Bright Star</option>
 
-                                                              <option value="20384">Accademy</option>
+                                                              <option  value="20384">Accademy</option>
 
-                                                              <option value="20422">10</option>
+                                                              <option  value="20422">10</option>
 
-                                                              <option value="20963">ROSE</option>
+                                                              <option  value="20963">ROSE</option>
 
-                                                              <option value="21045">Global</option>
+                                                              <option  value="21045">Global</option>
 
-                                                              <option value="21074">A</option>
+                                                              <option  value="21074">A</option>
 
-                                                              <option value="21526">City</option>
+                                                              <option  value="21526">City</option>
 
-                                                              <option value="21583">IT BOYS</option>
+                                                              <option  value="21583">IT BOYS</option>
 
-                                                              <option value="22134">PHYSICS</option>
+                                                              <option  value="22134">PHYSICS</option>
 
-                                                              <option value="22449">White</option>
+                                                              <option  value="22449">White</option>
 
-                                                              <option value="22578">A</option>
+                                                              <option  value="22578">A</option>
 
-                                                              <option value="23515">A</option>
+                                                              <option  value="23515">A</option>
 
-                                                              <option value="23516">1</option>
+                                                              <option  value="23516">1</option>
 
-                                                              <option value="23517">2</option>
+                                                              <option  value="23517">2</option>
 
-                                                              <option value="24034">Purple</option>
+                                                              <option  value="24034">Purple</option>
 
-                                                              <option value="24103">Section 1</option>
+                                                              <option  value="24103">Section 1</option>
 
-                                                              <option value="24303">A 2024</option>
+                                                              <option  value="24303">A 2024</option>
 
-                                                              <option value="24553">Rayyan Bin Rashad</option>
+                                                              <option  value="24553">Rayyan Bin Rashad</option>
 
-                                                              <option value="24608">IGCSE Business</option>
+                                                              <option  value="24608">IGCSE Business</option>
 
-                                                              <option value="24743">A</option>
+                                                              <option  value="24743">A</option>
 
-                                                              <option value="24900">Ibrahimi</option>
+                                                              <option  value="24900">Ibrahimi</option>
 
-                                                              <option value="25241">A</option>
+                                                              <option  value="25241">A</option>
 
-                                                              <option value="25334">Faroqi</option>
+                                                              <option  value="25334">Faroqi</option>
 
                                                               
                           
@@ -3535,7 +3547,8 @@ if (quickLinkBtn) {
                     <div class="form-group ">
 
                         <label class="required">Challan Month</label>
-                        <input type="text" class="form-control inputheight" id="monthYear" name="monthYear" placeholder="MM/YYYY" value="09/2026">
+                        <input type="text" class="form-control inputheight" id="monthYear" name="monthYear"
+                        placeholder="MM/YYYY" value="09/2026">
                     </div>
 
                 </div>
@@ -3546,12 +3559,12 @@ if (quickLinkBtn) {
 
 
                 <label class="required">Fee Status</label>
-                    <select name="fee" id="feeStatus" onchange="HideDate(this.value);" class="form-control inputheight">
+                    <select name="fee" id="feeStatus" onChange="HideDate(this.value);" class="form-control inputheight">
 
                       <option value="All">All</option>
 
-                      <option value="1">PAID</option>
-                      <option value="0">UNPAID</option>
+                      <option  value='1'>PAID</option>
+                      <option  value='0'>UNPAID</option>
                 
 
                         
@@ -3608,6 +3621,13 @@ if (quickLinkBtn) {
           <div class="stat-value" id="stat_unpaid">0</div>
         </div>
       </div>
+      <div class="stat-card stat-notgenerated" onclick="showNotGeneratedModal()" title="Click to see students without a challan for this month">
+        <div class="stat-icon"><i class="fa fa-exclamation-triangle"></i></div>
+        <div>
+          <div class="stat-label">Challan Not Generated</div>
+          <div class="stat-value" id="stat_notgenerated">0</div>
+        </div>
+      </div>
     </div>
 
   <div id="fee_challans_loader" class="fee-challans-loader">
@@ -3636,7 +3656,7 @@ if (quickLinkBtn) {
           <div class="modal-dialog modal-lg" style="width:80%;">
             <div class="modal-content" style="height:auto;">
               <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">Pay Students Fee</h4>
               </div>
 
@@ -3648,7 +3668,7 @@ if (quickLinkBtn) {
 
                <div class="modal-footer">
                  
-                <button type="submit" class="btn btn-success">Pay Fee</button>
+                <button type="submit" class="btn btn-success" >Pay Fee</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 
               </div>
@@ -3677,7 +3697,7 @@ if (quickLinkBtn) {
 
                <div class="modal-footer">
                  
-                <button type="submit" class="btn btn-success">Update Fee</button>
+                <button type="submit" class="btn btn-success" >Update Fee</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 
               </div>
@@ -3689,18 +3709,36 @@ if (quickLinkBtn) {
       </div>
 
 
+      <!-- Modal: Students without a Challan for the selected month -->
+      <div class="modal fade" id="not_generated_modal" role="dialog">
+        <div class="modal-dialog modal-lg" style="width:85%; max-width: 1100px;">
+          <div class="modal-content" style="height:auto;">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+              <h4 class="modal-title">Students Without a Challan This Month</h4>
+            </div>
+            <div class="modal-body" id="not_generated_content" style="overflow-x: auto;"></div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
       <!-- Modal: View Fee History -->
       <div class="modal fade" id="fee_payments" role="dialog">
         <div class="modal-dialog modal-lg" style="width:95%; max-width: 1200px;">
           <div class="modal-content" style="height:auto;">
             <div class="modal-header" style="padding-bottom:14px;">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">×</button>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
               <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:10px; padding-right:20px;">
                 <div>
                   <h4 class="fee-payments-heading" style="margin:0 0 0 0;">Student Fee History</h4>
                   <div id="fee_payments_student_info" class="fee-student-info-bar"></div>
                 </div>
-                <a id="fee_payments_profile_link" href="#" target="_blank" style="display:none; align-items:center; gap:6px; background:#f28c00; color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap; margin-top:2px; box-shadow:0 2px 6px rgba(0,0,0,0.18); transition:background 0.15s;">
+                <a id="fee_payments_profile_link" href="#" target="_blank"
+                   style="display:none; align-items:center; gap:6px; background:#f28c00; color:#fff; border:none; border-radius:8px; padding:7px 14px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap; margin-top:2px; box-shadow:0 2px 6px rgba(0,0,0,0.18); transition:background 0.15s;">
                   <i class="fa fa-user-circle-o"></i> View Profile
                 </a>
               </div>
@@ -3790,6 +3828,7 @@ if (quickLinkBtn) {
        countTarget.textContent = countVal > 0 ? " (" + countVal + " records)" : "";
      }
      updateFeeStats();
+     loadNotGeneratedStats(session, classId, sectionId, monthYear);
      setProgress(100);
      if (loader) loader.style.display = "none";
      setProgress(0);
@@ -3838,6 +3877,39 @@ function updateFeeStats() {
     paidEl.textContent = statsEl.getAttribute("data-paid") || "0";
     partialEl.textContent = statsEl.getAttribute("data-partial") || "0";
     unpaidEl.textContent = statsEl.getAttribute("data-unpaid") || "0";
+}
+
+// Caches the last-fetched "Challan Not Generated" list so opening the modal
+// doesn't need a second round-trip to the server.
+var notGeneratedHtml = "";
+
+function loadNotGeneratedStats(session, classId, sectionId, monthYear) {
+    var url = "fee_challans_not_generated.php?monthYear=" + monthYear + "&session=" + session + "&class_id=" + classId + "&section=" + sectionId;
+    const xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+        notGeneratedHtml = this.responseText;
+        var wrapper = document.createElement("div");
+        wrapper.innerHTML = notGeneratedHtml;
+        var countEl = wrapper.querySelector("#not_generated_stats");
+        var statEl = document.getElementById("stat_notgenerated");
+        if (statEl) statEl.textContent = countEl ? (countEl.getAttribute("data-count") || "0") : "0";
+    };
+    xhttp.open("GET", url, true);
+    xhttp.send();
+}
+
+function showNotGeneratedModal() {
+    var content = document.getElementById("not_generated_content");
+    if (content) content.innerHTML = notGeneratedHtml || '<div class="fee-empty-state"><p>No data loaded yet.</p><span>Apply a Challan Month filter first.</span></div>';
+    if (typeof $ !== "undefined" && $.fn && $.fn.modal) {
+        $('#not_generated_modal').modal('show');
+        if ($.fn.DataTable && $.fn.DataTable.isDataTable('#notGeneratedTable')) {
+            $('#notGeneratedTable').DataTable().destroy();
+        }
+        if ($.fn.DataTable && document.getElementById('notGeneratedTable')) {
+            $('#notGeneratedTable').DataTable();
+        }
+    }
 }
 
 // Function to show toast notification (optional duration in ms; default 3000)
@@ -5126,6 +5198,5 @@ setTimeout(() => {
 
 
 
-  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v3d52b47920f24c319d37e2661827c42b1787588026925" integrity="sha512-d9sL6GJLXn6fInD1+TVXhTcQOsmxeHfmHAvwGDIxp5TO+uo1fiWW7mHomMj4MLRlCsJDTqXzWLHJFFlPCEIj/A==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;3650377dd59a42ccbb65668736c3a93b&quot;,&quot;r&quot;:1}" crossorigin="anonymous"></script>
-
-</body></html>
+  </body>
+</html>

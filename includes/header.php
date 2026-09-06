@@ -130,8 +130,26 @@
   .left_col { scrollbar-width: thin; scrollbar-color: rgb(100, 98, 101) transparent; border-top-right-radius: 1%; border-bottom-right-radius: 1%; }
   .sidebar-logo { text-align: center; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
   .sidebar-logo img { height: 54px; width: 54px; border-radius: 50%; object-fit: cover; border: 2px solid #ff8c00; box-shadow: 0 4px 14px rgba(255, 140, 0, 0.35); background: #fff; display: block; margin: 0 auto; }
+  #ios_toggle_btn { display: none; position: fixed; top: 12px; left: 12px; z-index: 2004; width: 42px; height: 42px; border-radius: 10px; border: none; background: var(--sb-bg); color: #fff; font-size: 18px; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .3); }
+  #menu-ios { display: none; padding: 8px 10px 16px; }
+  .ios-nav .nav-item { display: flex; align-items: center; gap: 0; text-decoration: none; color: #fff; padding: 12px 16px; border-radius: 8px; margin: 2px 6px; background: transparent; }
+  .ios-nav .nav-item:active { background: rgba(255, 255, 255, 0.08); }
+  .ios-nav .nav-item .nav-icon { display: none; }
+  .ios-nav .nav-item .nav-text { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: .2px; }
+  .ios-nav .submenu { display: none; background: var(--sb-fly); border: 1px solid rgba(255, 255, 255, .05); border-radius: 10px; margin: 4px 8px 8px 12px; padding: 6px 0; box-shadow: 0 8px 24px rgba(0, 0, 0, .25); }
+  .ios-nav .submenu-item { display: block; padding: 12px 16px; font-size: 14px; color: #fff; text-decoration: none; border-radius: 6px; margin: 2px 6px; }
+  .ios-nav .submenu-item:active { background: rgba(255, 255, 255, 0.08); }
+  #ios_sidebar_backdrop { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, .45); z-index: 2002; }
+  body.ios-device .left_col { transform: translateX(-100%); transition: transform .25s ease; width: 260px !important; z-index: 2003; }
+  body.ios-device.ios-sidebar-open .left_col { transform: translateX(0); }
+  body.ios-device .right_col { margin-left: 0 !important; width: 100% !important; }
+  body.ios-device #ios_toggle_btn { display: inline-flex; }
+  body.ios-device.ios-sidebar-open #ios_sidebar_backdrop { display: block; }
+  body.ios-device #menu-web { display: none; }
+  body.ios-device #menu-ios { display: block; }
 </style>
 
+<button id="ios_toggle_btn" aria-label="Toggle sidebar"><i class="fa fa-bars"></i></button>
 <div class="left_col scroll-view" id="dsLeftCol">
   <div class="sidebar-logo">
     <img src="<?php echo BASE_URL; ?>assets/img/logo.jpg" alt="Logo">
@@ -307,8 +325,245 @@
         </a>
       </li>
     </ul>
+
+    <!-- iOS simple menu with requested structure -->
+    <div id="menu-ios" class="ios-nav">
+      <a href="<?php echo BASE_URL; ?>software_demo_videos.php" class="nav-item">
+        <div class="nav-icon"><i class="fa fa-play"></i></div>
+        <div class="nav-text">Guidline Videos</div>
+      </a>
+      <a href="<?php echo BASE_URL; ?>front_desk_analytics.php" class="nav-item">
+        <div class="nav-icon"><i class="fa fa-line-chart"></i></div>
+        <div class="nav-text">Front Desk Analytics</div>
+      </a>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-phone"></i></div>
+        <div class="nav-text">Front Office</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>front_desk_analytics.php" class="submenu-item">Front Desk Overview</a>
+        <a href="<?php echo BASE_URL; ?>student_inquiry.php" class="submenu-item">Admission Inquiries</a>
+        <a href="<?php echo BASE_URL; ?>manage_complaint.php" class="submenu-item">Complaint Hub</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-dashboard"></i></div>
+        <div class="nav-text">Dashboard</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>dashboard.php" class="submenu-item">Executive Dashboard</a>
+        <a href="<?php echo BASE_URL; ?>basic_dashboard.php" class="submenu-item">Staff Dashboard</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-users"></i></div>
+        <div class="nav-text">Students</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>add_student.php" class="submenu-item">Add New Student</a>
+        <a href="<?php echo BASE_URL; ?>students_analytics_dashboard.php" class="submenu-item">Student Analytics</a>
+        <a href="<?php echo BASE_URL; ?>class_promotion.php" class="submenu-item">Class Promotion</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-microphone"></i></div>
+        <div class="nav-text">Attendance</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>mark_attend.php" class="submenu-item">Mark Attendance</a>
+        <a href="<?php echo BASE_URL; ?>mark_attendanceReport_list.php" class="submenu-item">Attendance Analytics</a>
+        <a href="<?php echo BASE_URL; ?>send_msgs.php?attendance=A" class="submenu-item">Send SMS Report</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-envelope"></i></div>
+        <div class="nav-text">Messages</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>new_message.php" class="submenu-item">New Message</a>
+        <a href="<?php echo BASE_URL; ?>messages_history.php" class="submenu-item">View Messages</a>
+        <a href="<?php echo BASE_URL; ?>view_templates.php" class="submenu-item">View Templates</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-money"></i></div>
+        <div class="nav-text">Fee Collection</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>monthly_challan.php" class="submenu-item">Create Challan</a>
+        <a href="<?php echo BASE_URL; ?>view_challan_details.php" class="submenu-item">View Challan</a>
+        <a href="<?php echo BASE_URL; ?>multi_fee_reports.php" class="submenu-item">Fee Reporting</a>
+        <a href="<?php echo BASE_URL; ?>update_fee_settings.php" class="submenu-item">Fee Settings</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-graduation-cap"></i></div>
+        <div class="nav-text">Examination</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>view_marksheet.php" class="submenu-item">Add Marks Sheet</a>
+        <a href="<?php echo BASE_URL; ?>reportcards.php" class="submenu-item">View Marks Sheet</a>
+        <a href="<?php echo BASE_URL; ?>manage_exams.php" class="submenu-item">Academic Setting</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-clock-o"></i></div>
+        <div class="nav-text">Timetable</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>period_categories.php" class="submenu-item">Periods Category</a>
+        <a href="<?php echo BASE_URL; ?>create_period_details.php" class="submenu-item">Create/Manage Periods</a>
+        <a href="<?php echo BASE_URL; ?>class_period.php" class="submenu-item">Assign Periods to Classes</a>
+        <a href="<?php echo BASE_URL; ?>class_period_selection.php" class="submenu-item">Create Timetable</a>
+        <a href="<?php echo BASE_URL; ?>view_class_period_selection.php" class="submenu-item">View Timetable</a>
+        <a href="<?php echo BASE_URL; ?>view_teachers_timetable.php" class="submenu-item">Teachers Timetable</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-user"></i></div>
+        <div class="nav-text">Employees/HRM</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>add_emp.php" class="submenu-item">Add Employee</a>
+        <a href="<?php echo BASE_URL; ?>view_emp.php" class="submenu-item">View Employees</a>
+        <a href="<?php echo BASE_URL; ?>view_emp_attendance.php" class="submenu-item">Staff Attendance</a>
+        <a href="<?php echo BASE_URL; ?>monthly_attendance.php" class="submenu-item">Attendance Report</a>
+        <a href="<?php echo BASE_URL; ?>old_employee.php" class="submenu-item">Old Employees</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-clock-o"></i></div>
+        <div class="nav-text">Datesheet</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>create_datesheet.php" class="submenu-item">Create Datesheet</a>
+        <a href="<?php echo BASE_URL; ?>view_datesheet.php" class="submenu-item">View Datesheet</a>
+        <a href="<?php echo BASE_URL; ?>generate_rollnoSlips.php" class="submenu-item">Generate Roll No Slips</a>
+        <a href="<?php echo BASE_URL; ?>syllabus_management.php" class="submenu-item">Syllabus Management</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-truck"></i></div>
+        <div class="nav-text">Transport</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>vehicles.php" class="submenu-item">Vehicles</a>
+        <a href="<?php echo BASE_URL; ?>route.php" class="submenu-item">Routes</a>
+        <a href="<?php echo BASE_URL; ?>vehicle_route.php" class="submenu-item">Assign Vehicles</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-book"></i></div>
+        <div class="nav-text">Library</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>list_books.php" class="submenu-item">Book List</a>
+        <a href="<?php echo BASE_URL; ?>issue_return.php" class="submenu-item">Issue Return</a>
+        <a href="<?php echo BASE_URL; ?>issue_return_employee.php" class="submenu-item">Employee Issue&amp;Return</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fab fa-paypal"></i></div>
+        <div class="nav-text">PayRoll</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>creat_payroll.php" class="submenu-item">Create PayRoll</a>
+        <a href="<?php echo BASE_URL; ?>view_payroll.php" class="submenu-item">View PayRoll</a>
+        <a href="<?php echo BASE_URL; ?>staff_security.php" class="submenu-item">Staff Security Fee</a>
+        <a href="<?php echo BASE_URL; ?>payroll_setting.php" class="submenu-item">PayRoll Setting</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-home"></i></div>
+        <div class="nav-text">Parents Portal</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>parents_portal_dashboard.php" class="submenu-item">Parents Overview</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-money"></i></div>
+        <div class="nav-text">Expenses</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>manage_expenses.php" class="submenu-item">Add/View Expenses</a>
+        <a href="<?php echo BASE_URL; ?>monthly_expenses_report.php" class="submenu-item">Expenses Report</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-file"></i></div>
+        <div class="nav-text">Cards Generator</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>cards.php" class="submenu-item">Staff Cards</a>
+        <a href="<?php echo BASE_URL; ?>students_card.php" class="submenu-item">Students Cards</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-search"></i></div>
+        <div class="nav-text">Point of Sale</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>canteen_dashboard.php" class="submenu-item">POS Dashboard</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-dollar"></i></div>
+        <div class="nav-text">Academic Setup</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>academic_setup.php" class="submenu-item">Manage Academics</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-gear"></i></div>
+        <div class="nav-text">System Settings</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>settings.php" class="submenu-item">Update Settings</a>
+        <a href="<?php echo BASE_URL; ?>manage_localities.php" class="submenu-item">Manage Localities</a>
+      </div>
+      <a href="#" class="nav-item has-submenu">
+        <div class="nav-icon"><i class="fa fa-calculator"></i></div>
+        <div class="nav-text">Accounts</div>
+      </a>
+      <div class="submenu">
+        <a href="<?php echo BASE_URL; ?>add_revenue.php" class="submenu-item">Add Revenue</a>
+        <a href="<?php echo BASE_URL; ?>revenue_list.php" class="submenu-item">List of Revenues</a>
+        <a href="<?php echo BASE_URL; ?>revenue_heads.php" class="submenu-item">Revenue Heads</a>
+      </div>
+      <a href="#" class="nav-item" onclick="localStorage.clear(); window.location.href='<?php echo BASE_URL; ?>logout.php'; return false;">
+        <div class="nav-icon"><i class="fa fa-sign-out"></i></div>
+        <div class="nav-text">Logout</div>
+      </a>
+    </div>
   </div>
 </div>
+
+<!-- iOS backdrop -->
+<div id="ios_sidebar_backdrop"></div>
+
+<script>
+  (function() {
+    var ua = navigator.userAgent || navigator.vendor || window.opera;
+    var isiOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!isiOS) return;
+    document.body.classList.add('ios-device');
+    var btn = document.getElementById('ios_toggle_btn');
+    var backdrop = document.getElementById('ios_sidebar_backdrop');
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.body.classList.toggle('ios-sidebar-open');
+      }, { passive: false });
+    }
+    if (backdrop) {
+      backdrop.addEventListener('click', function() {
+        document.body.classList.remove('ios-sidebar-open');
+      });
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.body.classList.remove('ios-sidebar-open');
+      }
+    });
+    document.querySelectorAll('#menu-ios .has-submenu').forEach(function(item) {
+      item.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        document.body.classList.add('ios-sidebar-open');
+        var submenu = this.nextElementSibling;
+        document.querySelectorAll('#menu-ios .submenu').forEach(function(sm) {
+          if (sm !== submenu) sm.style.display = 'none';
+        });
+        if (submenu) submenu.style.display = (submenu.style.display === 'block') ? 'none' : 'block';
+      }, { passive: false });
+    });
+  })();
+</script>
 
         <div class="right_col" role="main" style="min-height: 733px;">
 
@@ -323,6 +578,9 @@ $topSession    = get_setting('session_year', '2026-2027');
 $topSmsUsed    = (int) get_setting('whatsapp_sms_used', 0);
 $topSmsLimit   = (int) get_setting('whatsapp_sms_limit', 10000);
 $topSmsPct     = $topSmsLimit > 0 ? min(100, round($topSmsUsed / $topSmsLimit * 100)) : 0;
+$topSimUsed    = (int) get_setting('sim_sms_used', 0);
+$topSimLimit   = (int) get_setting('sim_sms_limit', 0);
+$topSimPct     = $topSimLimit > 0 ? min(100, round($topSimUsed / $topSimLimit * 100)) : 0;
 $topNewComp    = (int) (db_query("SELECT COUNT(*) c FROM complaints WHERE status IN ('new','open')")->fetch_assoc()['c'] ?? 0);
 $topUserName   = e($_SESSION['user_name'] ?? 'Admin');
 ?>
@@ -438,8 +696,9 @@ $topUserName   = e($_SESSION['user_name'] ?? 'Admin');
 </div>
 
 <div class="message" style="margin-right:8px;">
+    <div id="div1" style="position:absolute;top:0;left:0;z-index:2;" onclick="sms_show();"></div>
     <div id="csr_whatsapp_wrap" style="position:relative;height:auto;z-index:9999;margin-right:6px;">
-        <a href="https://wa.me/923000228123" target="_blank" rel="noopener" class="chip sms-chip" style="width:35px;border:none;" title="Chat with Support Representative on WhatsApp">
+        <a href="https://wa.me/923000228123" target="_blank" rel="noopener" class="chip sms-chip" style="width:35px;border:none;" title="Chat with your Support Representative (Mubeen Arshad) on WhatsApp">
             <i class="fab fa-whatsapp" style="font-size:19px;color:#25D366;"></i>
         </a>
     </div>
@@ -453,6 +712,16 @@ $topUserName   = e($_SESSION['user_name'] ?? 'Admin');
                 <div class="usage-title" style="color:#25D366;"><i class="fab fa-whatsapp"></i> WhatsApp SMS</div>
                 <div class="usage-metrics"><span>Used: <?php echo $topSmsUsed; ?></span><span>Limit: <?php echo $topSmsLimit; ?></span></div>
                 <div class="usage-bar"><div class="usage-bar-fill" style="width:<?php echo $topSmsPct; ?>%;background:#25D366;"></div></div>
+            </div>
+            <div class="usage-card">
+                <div class="usage-title" style="color:#007bff;"><i class="fa fa-mobile"></i> SIM SMS</div>
+                <div class="usage-metrics"><span>Used: <?php echo $topSimUsed; ?></span><span>Limit: <?php echo number_format($topSimLimit); ?></span></div>
+                <div class="usage-bar"><div class="usage-bar-fill" style="width:<?php echo $topSimPct; ?>%;background:#007bff;"></div></div>
+            </div>
+            <div class="usage-card">
+                <div class="usage-title"><i class="fa fa-bar-chart"></i> Total SMS Usage (This Month)</div>
+                <div class="usage-metrics"><span>WhatsApp: <?php echo $topSmsUsed; ?></span><span>SIM: <?php echo $topSimUsed; ?></span></div>
+                <div class="usage-metrics" style="margin-top:4px;"><span>Total: <?php echo $topSmsUsed + $topSimUsed; ?></span><span>Remaining: <?php echo number_format(($topSmsLimit - $topSmsUsed) + ($topSimLimit - $topSimUsed)); ?></span></div>
             </div>
             <a class="dropdown-item" href="<?php echo BASE_URL; ?>messages_history.php"><i class="fa fa-history"></i> View Messages History</a>
         </div>

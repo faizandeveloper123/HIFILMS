@@ -1,0 +1,9 @@
+<br />
+<b>Fatal error</b>:  Uncaught mysqli_sql_exception: You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'order by id desc' at line 1 in /home/faci98to/public_html/apps.eduportal.pk/Production/parent/MysqliDb.php:1586
+Stack trace:
+#0 /home/faci98to/public_html/apps.eduportal.pk/Production/parent/MysqliDb.php(1586): mysqli-&gt;prepare('select inquiry_...')
+#1 /home/faci98to/public_html/apps.eduportal.pk/Production/parent/MysqliDb.php(1196): MysqliDb-&gt;_prepareQuery()
+#2 /home/faci98to/public_html/apps.eduportal.pk/Production/parent/MysqliDb.php(506): MysqliDb-&gt;_buildQuery(NULL)
+#3 /home/faci98to/public_html/apps.eduportal.pk/Production/add_inquiry_notes.php(9): MysqliDb-&gt;query('select inquiry_...')
+#4 {main}
+  thrown in <b>/home/faci98to/public_html/apps.eduportal.pk/Production/parent/MysqliDb.php</b> on line <b>1586</b><br />
