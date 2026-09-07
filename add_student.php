@@ -457,8 +457,8 @@ include __DIR__ . '/includes/header.php';
                                         <label>Gender *</label>
                                         <select id="gender" name="gender" class="form-control" required>
                                             <option value="">Select Gender</option>
-                                            <option value="male">Male</option>
-                                            <option value="female">Female</option>
+                                            <option value="MALE">Male</option>
+                                            <option value="FEMALE">Female</option>
                                         </select>
                                     </div>
                                     <div class="form-group col-md-3">
@@ -532,32 +532,27 @@ include __DIR__ . '/includes/header.php';
                             </div>
                         </div>
                     <!-- Photo Upload Box -->
-                    <div class="col-md-4" style="border:1px solid #FFD9B3;border-radius:8px;height:175px;background:linear-gradient(180deg,#FFF9F4,#ffffff);box-shadow:0 2px 8px rgba(255,124,27,.08);padding:12px;">
-                        <div class="col-md-6">
-                            <div id="image-container">
-                                <div style="cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:-20px;">
-                                    <img id="image" src="" alt="Uploaded Image" class="draggable" style="display:none;">
-                                    <img id="sample-image" src="" alt="Sample Image" style="display:none;">
-                                </div>
-                                <canvas id="imageCanvas" style="display:none;"></canvas>
+                    <div class="col-md-4" style="border:1px solid #FFD9B3;border-radius:8px;background:linear-gradient(180deg,#FFF9F4,#ffffff);box-shadow:0 2px 8px rgba(255,124,27,.08);padding:12px;">
+                        <div style="cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                            <div id="photoPreviewArea" style="width:100%;max-width:180px;height:180px;border-radius:50%;border:3px solid #f97316;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#cbd5e1;font-size:48px;">
+                                <i class="fa fa-camera"></i>
                             </div>
+                            <img id="capturedPreviewImg" style="display:none;width:100%;max-width:180px;height:180px;border-radius:50%;object-fit:cover;border:3px solid #f97316;">
                         </div>
-                        <div class="col-md-6">
-                            <br>
-                            <a id="remove-image-btn" class="btn-danger" style="display:none;">Delete Frame</a>
-                            <br><br>
-                            <div class="slider-container">
-                                <label for="zoom-slider">Zoom:</label>
-                                <input type="range" id="zoom-slider" min="0.5" max="2" step="0.05" value="1">
-                            </div>
-                            <div class="slider-container">
-                                <label for="rotate-slider">Rotate:</label>
-                                <input type="range" id="rotate-slider" min="-180" max="180" step="1" value="0">
-                            </div>
-                            <label for="file">Upload Picture</label>
-                            <input type="file" class="form-control" name="img_file" id="fileInput" accept="image/*" placeholder="Class">
-                            <input type="hidden" name="old_file" value="">
+                        <div class="slider-container">
+                            <label for="zoomRange">Zoom:</label>
+                            <input type="range" id="zoomRange" min="1" max="3" step="0.1" value="1" oninput="applyZoom(this.value)">
                         </div>
+                        <div class="slider-container">
+                            <label for="rotateRange">Rotate:</label>
+                            <input type="range" id="rotateRange" min="0" max="360" step="1" value="0" oninput="applyRotate(this.value)">
+                        </div>
+                        <div style="margin-top:8px;display:flex;gap:6px;justify-content:center;">
+                            <button type="button" onclick="document.getElementById('imgFileInput').click();" style="padding:5px 10px;background:#f97316;color:#fff;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;"><i class="fa fa-upload"></i> Upload</button>
+                            <button type="button" onclick="openCameraModal()" style="padding:5px 10px;border:1px solid #f97316;color:#ea580c;background:#fff;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;"><i class="fa fa-camera"></i> Camera</button>
+                        </div>
+                        <input type="file" name="img_file" id="imgFileInput" accept="image/*" style="display:none;" onchange="previewUploadedPhoto(this)">
+                        <input type="hidden" name="old_file" value="">
                     </div>
                 </div>
 
@@ -654,7 +649,7 @@ include __DIR__ . '/includes/header.php';
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="form-group col-md-3"><label>City</label><input type="text" class="form-control" name="city" id="city" placeholder="City"></div>
+                            <div class="form-group col-md-3"><label>City</label><select name="city" id="city" class="form-control"><option value="">Select City</option></select></div>
                             <div class="form-group col-md-3"><label>Email</label><input type="text" class="form-control" name="email" id="email" placeholder="Email"></div>
                         </div>
                     </div>
@@ -1214,5 +1209,65 @@ function getFamilyInfo(code) {
     };
     xhr.send();
 }
+</script>
+<script>
+(function(){
+    function loadFP(cb){
+        if (window.flatpickr) { cb(); return; }
+        if (document.getElementById('fp-css')) { _fpWait(cb); return; }
+        var l = document.createElement('link');
+        l.id = 'fp-css'; l.rel = 'stylesheet';
+        l.href = 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css';
+        document.head.appendChild(l);
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js';
+        s.onload = cb;
+        document.head.appendChild(s);
+    }
+    function _fpWait(cb){
+        if (window.flatpickr) { cb(); return; }
+        setTimeout(function(){ _fpWait(cb); }, 60);
+    }
+    loadFP(function(){
+        flatpickr('#dob', { dateFormat: 'd/m/Y', maxDate: 'today' });
+        flatpickr('#date_of_adms', { dateFormat: 'd/m/Y' });
+    });
+
+    function validateCnic(inp){
+        var v = (inp.value || '').replace(/\D/g, '');
+        if (v.length > 13) v = v.slice(0, 13);
+        if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
+        if (v.length > 13) v = v.slice(0, 13) + '-' + v.slice(12, 13);
+        inp.value = v;
+    }
+    ['cnic','mother_cnic','gardian_cnic'].forEach(function(id){
+        var el = document.getElementById(id);
+        if (el) el.addEventListener('input', function(){ validateCnic(this); });
+    });
+
+    var stateMap = {
+        'Punjab': ['Lahore','Rawalpindi','Faisalabad','Multan','Gujranwala','Sialkot','Bahawalpur','Sargodha','Sheikhupura','Rahim Yar Khan','Jhang','Kasur','Gujrat','Okara','Sahiwal','Mianwali','Dera Ghazi Khan','Attock','Chakwal','Mandi Bahauddin','Vehari','Muzaffargarh','Khanewal','Wazirabad','Hafizabad','Narowal','Burewala','Toba Tek Singh'],
+        'Sindh': ['Karachi','Hyderabad','Sukkur','Larkana','Nawabshah','Mirpur Khas','Badin','Shikarpur','Dadu','Thatta','Jacobabad','Ghorki'],
+        'Balochistan': ['Quetta','Khuzdar','Turbat','Gwadar','Chaman','Sibi','Zhob','Noshki'],
+        'KPK': ['Peshawar','Mardan','Swat','Abbottabad','Kohat','Bannu','Charsadda','Dera Ismail Khan','Nowshera','Mansehra','Haripur','Swabi'],
+        'Gilgit-Baltistan': ['Gilgit','Skardu','Hunza','Nagar','Ghizer','Astore'],
+        'Kashmir (territory)': ['Muzaffarabad','Mirpur','Rawalakot','Kotli','Bhimber'],
+        'FATA (territory)': ['Parachinar','Miranshah','Wana','Kurram'],
+        'Federal': ['Islamabad']
+    };
+    var stateSel = document.getElementById('state');
+    var citySel = document.getElementById('city');
+    function syncCities(){
+        citySel.innerHTML = '<option value="">Select City</option>';
+        var list = stateMap[stateSel.value];
+        if (!list) return;
+        list.forEach(function(c){
+            var o = document.createElement('option');
+            o.value = c; o.textContent = c;
+            citySel.appendChild(o);
+        });
+    }
+    stateSel.addEventListener('change', syncCities);
+})();
 </script>
 <?php include __DIR__ . '/includes/footer.php'; ?>

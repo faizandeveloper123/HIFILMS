@@ -170,7 +170,7 @@
         </ul>
       </li>
       <li class="has-children">
-        <a href="javascript:void(0)"><i class="fa fa-tachometer-alt"></i><span class="label" style="font-weight: normal !important;">Dashboard</span><span class="fa fa-chevron-right chev"></span></a>
+        <a href="javascript:void(0)"><i class="fa fa-dashboard"></i><span class="label" style="font-weight: normal !important;">Dashboard</span><span class="fa fa-chevron-right chev"></span></a>
         <ul class="child_menu" style="display: none;">
           <li><a href="<?php echo BASE_URL; ?>dashboard.php">Executive Dashboard</a></li>
           <li><a href="<?php echo BASE_URL; ?>basic_dashboard.php">Staff Dashboard</a></li>
@@ -226,7 +226,6 @@
           <li><a href="<?php echo BASE_URL; ?>class_period_selection.php">Create Timetable</a></li>
           <li><a href="<?php echo BASE_URL; ?>view_class_period_selection.php">View Timetable</a></li>
           <li><a href="<?php echo BASE_URL; ?>view_teachers_timetable.php">Teachers Timetable</a></li>
-          <li><a href="<?php echo BASE_URL; ?>lesson_plans.php">Lesson Planner</a></li>
         </ul>
       </li>
       <li class="has-children">
@@ -265,7 +264,7 @@
         </ul>
       </li>
       <li class="has-children">
-        <a href="javascript:void(0)"><i class="fab fa-paypal"></i><span class="label" style="font-weight: normal !important;">PayRoll</span><span class="fa fa-chevron-right chev"></span></a>
+        <a href="javascript:void(0)"><i class="fa fa-paypal"></i><span class="label" style="font-weight: normal !important;">PayRoll</span><span class="fa fa-chevron-right chev"></span></a>
         <ul class="child_menu" style="display: none;">
           <li><a href="<?php echo BASE_URL; ?>creat_payroll.php">Create PayRoll</a></li>
           <li><a href="<?php echo BASE_URL; ?>view_payroll.php">View PayRoll</a></li>
@@ -411,7 +410,6 @@
         <a href="<?php echo BASE_URL; ?>class_period_selection.php" class="submenu-item">Create Timetable</a>
         <a href="<?php echo BASE_URL; ?>view_class_period_selection.php" class="submenu-item">View Timetable</a>
         <a href="<?php echo BASE_URL; ?>view_teachers_timetable.php" class="submenu-item">Teachers Timetable</a>
-        <a href="<?php echo BASE_URL; ?>lesson_plans.php" class="submenu-item">Lesson Planner</a>
       </div>
       <a href="#" class="nav-item has-submenu">
         <div class="nav-icon"><i class="fa fa-user"></i></div>
@@ -453,7 +451,7 @@
         <a href="<?php echo BASE_URL; ?>issue_return_employee.php" class="submenu-item">Employee Issue&amp;Return</a>
       </div>
       <a href="#" class="nav-item has-submenu">
-        <div class="nav-icon"><i class="fab fa-paypal"></i></div>
+        <div class="nav-icon"><i class="fa fa-paypal"></i></div>
         <div class="nav-text">PayRoll</div>
       </a>
       <div class="submenu">

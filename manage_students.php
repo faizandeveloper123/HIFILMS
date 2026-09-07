@@ -13,6 +13,33 @@ db_query("CREATE TABLE IF NOT EXISTS class_heads (
 )");
 try { db_query("ALTER TABLE classes ADD COLUMN IF NOT EXISTS class_head_id INT NULL"); } catch (Exception $e) {}
 
+// Additional advanced filters (EduPortal parity)
+$religion_f     = trim($_GET['religion'] ?? '');
+$group_f        = trim($_GET['grp'] ?? '');
+$board_f        = trim($_GET['board'] ?? '');
+$occupation_f   = trim($_GET['occupation'] ?? '');
+$contacts_f     = trim($_GET['contacts'] ?? '');
+$address_f      = trim($_GET['address'] ?? '');
+$age_filter     = trim($_GET['agefilter'] ?? '');
+$age_val        = trim($_GET['age'] ?? '');
+$adm_date_f     = trim($_GET['adm_date'] ?? '');
+$from_date      = trim($_GET['from_date'] ?? '');
+$to_date        = trim($_GET['to_date'] ?? '');
+
+function hifi_calc_age($dob) {
+    if (!$dob || $dob === '0000-00-00') return null;
+    try { return floor((time() - strtotime($dob)) / 31536000); } catch (Exception $e) { return null; }
+}
+$allGroups = [];
+$rg = db_query("SELECT DISTINCT group_shift FROM students WHERE group_shift IS NOT NULL AND group_shift <> '' ORDER BY group_shift");
+if ($rg) { while ($row = $rg->fetch_assoc()) { $allGroups[] = $row['group_shift']; } }
+$allBoards = [];
+$rb = db_query("SELECT DISTINCT board_council FROM students WHERE board_council IS NOT NULL AND board_council <> '' ORDER BY board_council");
+if ($rb) { while ($row = $rb->fetch_assoc()) { $allBoards[] = $row['board_council']; } }
+$allOccupations = [];
+$ro = db_query("SELECT DISTINCT father_occupation FROM students WHERE father_occupation IS NOT NULL AND father_occupation <> '' ORDER BY father_occupation");
+if ($ro) { while ($row = $ro->fetch_assoc()) { $allOccupations[] = $row['father_occupation']; } }
+
 $message = '';
 $error = '';
 
@@ -94,6 +121,14 @@ if ($status_f !== '') {
     $where[] = 's.status = ?';
     $params[] = ($status_f === 'active') ? 1 : 0; $types .= 'i';
 }
+if ($religion_f !== '')     { $where[] = 's.religion = ?';        $params[] = $religion_f; $types .= 's'; }
+if ($group_f !== '')        { $where[] = 's.group_shift = ?';     $params[] = $group_f; $types .= 's'; }
+if ($board_f !== '')        { $where[] = 's.board_council = ?';   $params[] = $board_f; $types .= 's'; }
+if ($occupation_f !== '')   { $where[] = 's.father_occupation = ?'; $params[] = $occupation_f; $types .= 's'; }
+if ($contacts_f !== '')     { $where[] = '(s.phone LIKE ? OR s.father_cellno LIKE ? OR s.email LIKE ?)'; $like = '%' . $contacts_f . '%'; foreach (range(0,2) as $i) { $params[] = $like; $types .= 's'; } }
+if ($address_f !== '')      { $where[] = 's.address LIKE ?'; $params[] = '%' . $address_f . '%'; $types .= 's'; }
+if ($from_date !== '')      { $where[] = 's.admission_date >= ?'; $params[] = $from_date; $types .= 's'; }
+if ($to_date !== '')        { $where[] = 's.admission_date <= ?'; $params[] = $to_date; $types .= 's'; }
 
 $sql = "SELECT s.*, c.class_name, c.class_head_id, ch.class_head_name, sec.section_name
         FROM students s
@@ -113,7 +148,17 @@ if (count($params) > 0) {
 } else {
     $res = db_query($sql);
 }
-while ($row = $res->fetch_assoc()) { $students[] = $row; }
+while ($row = $res->fetch_assoc()) {
+    if ($age_filter !== '' && $age_val !== '') {
+        $a = hifi_calc_age($row['dob'] ?? '');
+        if ($a === null) continue;
+        $av = (int) $age_val;
+        if ($age_filter === 'lt' && !($a < $av)) continue;
+        if ($age_filter === 'gt' && !($a > $av)) continue;
+        if ($age_filter === 'eq' && $a !== $av) continue;
+    }
+    $students[] = $row;
+}
 
 $classes = [];
 $res2 = db_query("Select class_id, class_name FROM classes WHERE status=1 ORDER BY class_name");
@@ -151,6 +196,13 @@ include __DIR__ . '/includes/header.php';
 .pager button { border:1px solid #E5E7EB; background:#fff; border-radius:6px; padding:5px 11px; font-size:13px; }
 .pager button.active { background:#FF7A1B; color:#fff; border-color:#FF7A1B; }
 .pager button:disabled { opacity:.45; }
+.sp-tabs { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px; }
+.sp-tabs .tab-pill { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:20px; background:#fff; border:1px solid #E5E7EB; color:#374151; font-size:13px; font-weight:600; cursor:pointer; text-decoration:none; transition:all .15s; }
+.sp-tabs .tab-pill:hover { border-color:#FF7A1B; color:#FF7A1B; }
+.sp-tabs .tab-pill.active { background:#FF7A1B; border-color:#FF7A1B; color:#fff; }
+.bcrumb { font-size:13px; color:#6B7280; margin-bottom:14px; }
+.bcrumb a { color:#FF7A1B; text-decoration:none; }
+.bcrumb i { margin:0 6px; font-size:11px; color:#C0C7D0; }
 @media print {
   .no-print, .frame-row, .dt-controls, .pager, .search-bar-student, .summary-strip { display:none !important; }
 }
@@ -161,6 +213,23 @@ include __DIR__ . '/includes/header.php';
 
         <?php if ($message): ?><div class="alert alert-success"><?php echo e($message); ?></div><?php endif; ?>
         <?php if ($error): ?><div class="alert alert-danger"><?php echo e($error); ?></div><?php endif; ?>
+
+        <div class="bcrumb">
+            <a href="<?php echo BASE_URL; ?>dashboard.php"><i class="fa fa-home"></i> Dashboard</a>
+            <i class="fa fa-angle-right"></i>
+            <span>Students</span>
+            <i class="fa fa-angle-right"></i>
+            <span>View Students</span>
+        </div>
+
+        <div class="sp-tabs">
+            <a class="tab-pill" href="students_analytics_dashboard.php"><i class="fa fa-bar-chart"></i> Classwise Reports</a>
+            <a class="tab-pill active" href="manage_students.php"><i class="fa fa-users"></i> View Students</a>
+            <span class="tab-pill" style="cursor:default;"><i class="fa fa-exchange"></i> Admissions &amp; Withdrawal Report</span>
+            <span class="tab-pill" style="cursor:default;"><i class="fa fa-id-card"></i> Student Slips</span>
+            <span class="tab-pill" style="cursor:default;"><i class="fa fa-map-marker"></i> Locality Reports</span>
+            <a class="tab-pill" href="add_student.php"><i class="fa fa-plus"></i> Admission Form</a>
+        </div>
 
         <div class="student-head">
             <h3><i class="fa fa-users"></i> Manage Students <span style="font-size:14px; color:#6B7280;">(<?php echo count($students); ?> records)</span></h3>
@@ -250,6 +319,101 @@ include __DIR__ . '/includes/header.php';
                 <a href="manage_students.php" class="btn btn-default" style="width:100%;"><i class="fa fa-refresh"></i></a>
             </div>
         </form>
+
+        <div style="text-align:right; margin-bottom:10px;">
+            <button type="button" class="btn btn-default btn-sm" id="advToggle"><i class="fa fa-search-plus"></i> Advance Search</button>
+        </div>
+
+        <form method="get" action="manage_students.php" class="adv-filter" id="advPanel" style="display:none;">
+            <button type="button" class="close" style="float:right; margin:0;" onclick="document.getElementById('advPanel').style.display='none'; document.getElementById('advToggle').style.display='';"><span>&times;</span></button>
+            <div class="af-sec-label">General &amp; Admission</div>
+            <div class="row" style="margin-bottom:8px;">
+                <div class="form-group col-md-3">
+                    <label>Religion</label>
+                    <input type="text" name="religion" class="form-control" value="<?php echo e($religion_f); ?>" placeholder="e.g. Islam">
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Group / Shift</label>
+                    <select name="grp" class="form-control">
+                        <option value="">All</option>
+                        <?php foreach ($allGroups as $g): ?>
+                            <option value="<?php echo e($g); ?>" <?php echo $group_f === $g ? 'selected' : ''; ?>><?php echo e($g); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Board / Council</label>
+                    <select name="board" class="form-control">
+                        <option value="">All</option>
+                        <?php foreach ($allBoards as $b): ?>
+                            <option value="<?php echo e($b); ?>" <?php echo $board_f === $b ? 'selected' : ''; ?>><?php echo e($b); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group col-md-3">
+                    <label>Father Occupation</label>
+                    <select name="occupation" class="form-control">
+                        <option value="">All</option>
+                        <?php foreach ($allOccupations as $o): ?>
+                            <option value="<?php echo e($o); ?>" <?php echo $occupation_f === $o ? 'selected' : ''; ?>><?php echo e($o); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="af-sec-label">Contact &amp; Address</div>
+            <div class="row" style="margin-bottom:8px;">
+                <div class="form-group col-md-4">
+                    <label>Contacts (Cell / Phone / Email)</label>
+                    <input type="text" name="contacts" class="form-control" value="<?php echo e($contacts_f); ?>" placeholder="Search any contact field">
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Address</label>
+                    <input type="text" name="address" class="form-control" value="<?php echo e($address_f); ?>" placeholder="Address contains">
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Age</label>
+                    <select name="agefilter" class="form-control">
+                        <option value="">--</option>
+                        <option value="lt" <?php echo $age_filter === 'lt' ? 'selected' : ''; ?>&lt;</option>
+                        <option value="gt" <?php echo $age_filter === 'gt' ? 'selected' : ''; ?>&gt;</option>
+                        <option value="eq" <?php echo $age_filter === 'eq' ? 'selected' : ''; ?>=</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-2">
+                    <label>Age (Years)</label>
+                    <input type="number" name="age" class="form-control" value="<?php echo e($age_val); ?>" placeholder="e.g. 5">
+                </div>
+            </div>
+            <div class="af-sec-label">Admission Date Range</div>
+            <div class="row" style="margin-bottom:12px;">
+                <div class="form-group col-md-3">
+                    <label>From</label>
+                    <input type="date" name="from_date" class="form-control" value="<?php echo e($from_date); ?>">
+                </div>
+                <div class="form-group col-md-3">
+                    <label>To</label>
+                    <input type="date" name="to_date" class="form-control" value="<?php echo e($to_date); ?>">
+                </div>
+                <div class="form-group col-md-6" style="display:flex; align-items:flex-end; padding-bottom:6px;">
+                    <button type="submit" class="btn btn-primary" style="margin-right:6px;"><i class="fa fa-search"></i> Apply</button>
+                    <a href="manage_students.php" class="btn btn-default"><i class="fa fa-refresh"></i> Clear</a>
+                </div>
+            </div>
+        </form>
+        <script>
+        (function(){
+            var panel = document.getElementById('advPanel');
+            var toggle = document.getElementById('advToggle');
+            <?php if ($religion_f !== '' || $group_f !== '' || $board_f !== '' || $occupation_f !== '' || $contacts_f !== '' || $address_f !== '' || $age_filter !== '' || $from_date !== '' || $to_date !== ''): ?>
+            panel.style.display = '';
+            toggle.style.display = 'none';
+            <?php endif; ?>
+            toggle.addEventListener('click', function(){
+                panel.style.display = '';
+                toggle.style.display = 'none';
+            });
+        })();
+        </script>
 
         <div class="frame-row no-print">
             <div class="toolbar">
