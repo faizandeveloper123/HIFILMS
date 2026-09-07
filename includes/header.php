@@ -152,7 +152,7 @@
 <button id="ios_toggle_btn" aria-label="Toggle sidebar"><i class="fa fa-bars"></i></button>
 <div class="left_col scroll-view" id="dsLeftCol">
   <div class="sidebar-logo">
-    <img src="<?php echo BASE_URL; ?>assets/img/logo.jpg" alt="Logo">
+    <img src="<?php echo BASE_URL; ?>assets/img/favicon.png" alt="HIFI Logo" style="border-radius:50%">
   </div>
   <div class="ds-branch">
     <div style="font-weight:700; font-size:12px;"><?php echo e(get_setting('school_name', 'HIIFI LMS')); ?></div>
@@ -226,6 +226,7 @@
           <li><a href="<?php echo BASE_URL; ?>class_period_selection.php">Create Timetable</a></li>
           <li><a href="<?php echo BASE_URL; ?>view_class_period_selection.php">View Timetable</a></li>
           <li><a href="<?php echo BASE_URL; ?>view_teachers_timetable.php">Teachers Timetable</a></li>
+          <li><a href="<?php echo BASE_URL; ?>lesson_plans.php">Lesson Planner</a></li>
         </ul>
       </li>
       <li class="has-children">
@@ -410,6 +411,7 @@
         <a href="<?php echo BASE_URL; ?>class_period_selection.php" class="submenu-item">Create Timetable</a>
         <a href="<?php echo BASE_URL; ?>view_class_period_selection.php" class="submenu-item">View Timetable</a>
         <a href="<?php echo BASE_URL; ?>view_teachers_timetable.php" class="submenu-item">Teachers Timetable</a>
+        <a href="<?php echo BASE_URL; ?>lesson_plans.php" class="submenu-item">Lesson Planner</a>
       </div>
       <a href="#" class="nav-item has-submenu">
         <div class="nav-icon"><i class="fa fa-user"></i></div>
