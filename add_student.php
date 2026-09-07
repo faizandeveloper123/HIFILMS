@@ -1215,13 +1215,16 @@ function getFamilyInfo(code) {
     function loadFP(cb){
         if (window.flatpickr) { cb(); return; }
         if (document.getElementById('fp-css')) { _fpWait(cb); return; }
-        var l = document.createElement('link');
-        l.id = 'fp-css'; l.rel = 'stylesheet';
-        l.href = 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css';
-        document.head.appendChild(l);
         var s = document.createElement('script');
         s.src = 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js';
-        s.onload = cb;
+        s.onload = function() {
+            var l = document.createElement('link');
+            l.id = 'fp-css'; l.rel = 'stylesheet';
+            l.href = 'https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css';
+            document.head.appendChild(l);
+            cb();
+        };
+        s.onerror = function(){};
         document.head.appendChild(s);
     }
     function _fpWait(cb){
@@ -1234,11 +1237,11 @@ function getFamilyInfo(code) {
     });
 
     function validateCnic(inp){
-        var v = (inp.value || '').replace(/\D/g, '');
-        if (v.length > 13) v = v.slice(0, 13);
-        if (v.length > 5) v = v.slice(0, 5) + '-' + v.slice(5);
-        if (v.length > 13) v = v.slice(0, 13) + '-' + v.slice(12, 13);
-        inp.value = v;
+        var v = (inp.value || '').replace(/\D/g, '').slice(0, 13);
+        var out = v.slice(0, 5);
+        if (v.length > 5)  out += '-' + v.slice(5, 12);
+        if (v.length > 12) out += '-' + v.slice(12);
+        inp.value = out;
     }
     ['cnic','mother_cnic','gardian_cnic'].forEach(function(id){
         var el = document.getElementById(id);
