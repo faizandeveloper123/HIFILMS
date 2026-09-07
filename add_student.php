@@ -277,20 +277,23 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <style>
-.step-wizard{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #f1f5f9;padding:14px 20px;margin-bottom:18px;}
+.page-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:20px;}
+.top-tabs-row{margin-bottom:0;}
+.step-wizard{background:#f9fafb;border-radius:10px;padding:14px 20px;margin-bottom:18px;border:1px solid #f1f5f9;}
 .step-wizard-compact{display:flex;align-items:center;justify-content:center;gap:0;max-width:400px;margin:0 auto;}
 .step-wizard-item{display:flex;flex-direction:column;align-items:center;cursor:pointer;position:relative;z-index:1;}
-.step-wizard-item .circle{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;transition:all .2s;}
-.step-wizard-item .circle.active{background:#f97316;color:#fff;box-shadow:0 2px 8px rgba(249,115,22,.35);}
-.step-wizard-item .circle.done{background:#10b981;color:#fff;}
-.step-wizard-item .circle.pending{background:#e5e7eb;color:#6b7280;border:2px solid #fff;}
-.step-wizard-item .label{font-size:11px;font-weight:600;margin-top:4px;white-space:nowrap;}
-.step-wizard-item .label.active{color:#ea580c;}
-.step-wizard-item .label.pending{color:#9ca3af;}
+.step-circle{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;transition:all .2s;}
+.step-wizard-item.active .step-circle{background:#f97316;color:#fff;box-shadow:0 2px 8px rgba(249,115,22,.35);}
+.step-wizard-item:not(.active) .step-circle{background:#e5e7eb;color:#6b7280;}
+.step-wizard-item.done .step-circle{background:#10b981;color:#fff;}
+.step-label{font-size:11px;font-weight:600;margin-top:4px;white-space:nowrap;}
+.step-wizard-item.active .step-label{color:#ea580c;}
+.step-wizard-item:not(.active) .step-label{color:#9ca3af;}
+.step-wizard-item.done .step-label{color:#10b981;}
 .step-wizard-line{flex:1;height:2px;background:#e5e7eb;margin:0 -4px;position:relative;top:-10px;}
-.step-wizard-line.active{background:#f97316;}
+.step-wizard-line.done-line{background:#f97316;}
 
-.icon-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:5px;background:#f9fafb;padding:6px;border-radius:8px;margin-bottom:20px;border:1px solid #f3f4f6;}
+.icon-tabs{display:flex;flex-wrap:wrap;align-items:center;gap:5px;background:#f9fafb;padding:6px;border-radius:8px;margin-bottom:20px;border:1px solid #f3f4f6;list-style:none;}
 .icon-tab-item{padding:7px 13px;border-radius:6px;font-size:12px;font-weight:600;color:#4b5563;cursor:pointer;border:none;background:transparent;display:flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap;}
 .icon-tab-item:hover{background:#f3f4f6;}
 .icon-tab-item.active{background:#fff;color:#ea580c;border:1px solid #fed7aa;box-shadow:0 1px 3px rgba(0,0,0,.05);}
@@ -299,25 +302,36 @@ include __DIR__ . '/includes/header.php';
 .wizard-pane{display:none;}
 .wizard-pane.active{display:block;}
 
-.floating-label-group{position:relative;}
-.floating-label-group label{position:absolute;top:-0.6rem;left:0.6rem;background-color:#fff;padding:0 .3rem;font-size:11px;font-weight:500;color:#64748b;border-radius:2px;z-index:10;}
-.custom-input{width:100%;border:1px solid #cbd5e1;border-radius:.375rem;padding:.45rem .75rem;font-size:13px;transition:all .15s ease-in-out;background-color:#fff;}
-.custom-input:focus{outline:none;border-color:#f97316;box-shadow:0 0 0 2px rgba(249,115,22,.2);}
+.wizard-section-title{font-size:14px;font-weight:700;color:#111827;margin:14px 0 12px;border-left:4px solid #8b5cf6;padding-left:12px;}
+.wizard-section-title span{display:inline;}
 
 .field-with-add{display:flex;gap:4px;align-items:flex-start;}
-.field-with-add .flex-1{flex:1;}
+.field-with-add select,.field-with-add input{flex:1;}
 .btn-add-new{margin-top:18px;padding:4px 8px;border:1px solid #fdba74;color:#ea580c;border-radius:4px;font-size:11px;text-decoration:none;font-weight:600;white-space:nowrap;display:inline-block;}
 .btn-add-new:hover{background:#fff7ed;}
+
+.col-fifth{width:20%;float:left;padding:0 10px;position:relative;min-height:1px;}
+@media(max-width:991px){.col-fifth{width:33.33%;}}
+@media(max-width:767px){.col-fifth{width:50%;}}
 
 .photo-box{border:2px dashed #f97316;border-radius:10px;padding:12px;text-align:center;background:#fffba8;}
 .photo-box .photo-preview{width:100%;max-width:180px;height:180px;border-radius:50%;object-fit:cover;border:3px solid #f97316;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#cbd5e1;font-size:48px;}
 .photo-box input[type=range]{width:100%;margin:4px 0;}
 .photo-box .range-labels{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;}
 
-.section-heading{font-size:14px;font-weight:700;color:#111827;margin:14px 0 12px;border-left:4px solid #8b5cf6;padding-left:12px;}
-.section-heading.orange{border-color:#f97316;}
-.section-heading.cyan{border-color:#06b6d4;}
-.section-heading.green{border-color:#10b981;}
+.wizard-actions-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-top:1px solid #f3f4f6;margin-top:20px;}
+.wizard-btn{padding:8px 24px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #d1d5db;background:#fff;color:#4b5563;}
+.wizard-btn-primary{background:#f97316;color:#fff;border:none;box-shadow:0 1px 3px rgba(249,115,22,.3);}
+.wizard-btn-primary:hover{background:#ea580c;}
+
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;}
+.doc-card{border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center;background:#fff;}
+.doc-card-thumb{height:80px;border-radius:8px;background:#f7f9fc;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:8px;}
+.doc-card-thumb i{font-size:30px;color:#cbd5e1;}
+.doc-card-title{font-size:12px;font-weight:600;color:#111827;min-height:28px;}
+.doc-card-status{font-size:11px;color:#94a3b8;}
+.doc-card-upload{display:inline-block;margin-top:6px;font-size:12px;font-weight:600;color:#fff;background:#f97316;padding:5px 12px;border-radius:999px;cursor:pointer;}
+.doc-card-filename{font-size:10px;color:#64748b;margin-top:4px;word-break:break-all;}
 
 ::-webkit-scrollbar{width:6px;height:6px;}
 ::-webkit-scrollbar-track{background:#f1f5f9;}
@@ -325,557 +339,497 @@ include __DIR__ . '/includes/header.php';
 ::-webkit-scrollbar-thumb:hover{background:#94a3b8;}
 </style>
 
-<div style="background:#f1f5f9;min-height:100vh;padding:0 4px 24px;">
-
-<!-- Breadcrumb -->
-<div style="padding:10px 4px;font-size:12.5px;color:#64748b;font-weight:500;">
+<div class="container mt-4" style="padding-left:0;padding-right:0;">
+<div style="padding:10px 0;font-size:12.5px;color:#64748b;font-weight:500;">
     <a href="dashboard.php" style="color:#377dff;text-decoration:none;">Dashboard</a>
     <span style="margin:0 8px;">&raquo;</span>
     <a href="manage_students.php" style="color:#377dff;text-decoration:none;">Students</a>
     <span style="margin:0 8px;">&raquo;</span>
     <span id="bcCurrent" style="color:#1e293b;font-weight:600;">Add New Student</span>
 </div>
-
-<!-- Top Tabs (nav-tabs style) -->
-<div style="background:#fff;border-radius:10px 10px 0 0;border:1px solid #e5e7eb;border-bottom:none;padding:0 0 0;">
-    <div style="display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid #e5e7eb;">
-        <a href="add_student.php" class="nav-tab-top active">
-            <i class="fa fa-user-plus"></i> Add New Student
-        </a>
-        <a href="bulk_stdns.php" class="nav-tab-top">
-            <i class="fa fa-users"></i> Add Multi Students
-        </a>
-        <a href="import_data.php" class="nav-tab-top">
-            <i class="fa fa-upload"></i> Import Students with CSV
-        </a>
-        <a href="adm_form.php" target="_blank" class="nav-tab-top">
-            <i class="fa fa-file-text"></i> Admission Form
-        </a>
-    </div>
-</div>
-<style>
-.nav-tab-top{padding:10px 18px;font-size:12.5px;font-weight:600;color:#4b5563;text-decoration:none;display:flex;align-items:center;gap:7px;border-bottom:2px solid transparent;transition:all .15s;background:#fff;}
-.nav-tab-top:hover{color:#ea580c;background:#fff7ed;}
-.nav-tab-top.active{color:#ea580c;border-bottom-color:#f97316;background:#fff;}
-.nav-tab-top i{font-size:13px;}
-</style>
-
-<!-- Step Wizard -->
-<div class="step-wizard" id="stepProgressContainer">
-    <div class="step-wizard-compact">
-        <div class="step-wizard-item" onclick="goToWizardStep(1)">
-            <div class="circle active" id="ws1c">1</div>
-            <span class="label active" id="ws1l">Student Info</span>
-        </div>
-        <div class="step-wizard-line" id="stepLine1"></div>
-        <div class="step-wizard-item" onclick="goToWizardStep(2)">
-            <div class="circle pending" id="ws2c">2</div>
-            <span class="label pending" id="ws2l">Fee Plan</span>
-        </div>
-    </div>
 </div>
 
-<!-- ================================================================ -->
-<!-- STEP 1: Student Info -->
-<!-- ================================================================ -->
-<section id="step1View" style="margin-bottom:24px;">
+<div class="container mt-4 page-card">
 
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0 0 10px 10px;overflow:hidden;padding:20px;">
-
-        <!-- 5 Icon Tabs -->
-        <div class="icon-tabs">
-            <button type="button" class="icon-tab-item active" data-pane="basic-info" onclick="activateInnerTab(this,'basic-info')">
-                <i class="fa fa-id-card"></i> Basic Information
-            </button>
-            <button type="button" class="icon-tab-item" data-pane="parent-details" onclick="activateInnerTab(this,'parent-details')">
-                <i class="fa fa-user-friends"></i> Parent Details
-            </button>
-            <button type="button" class="icon-tab-item" data-pane="academic-info" onclick="activateInnerTab(this,'academic-info')">
-                <i class="fa fa-graduation-cap"></i> Academic Information
-            </button>
-            <button type="button" class="icon-tab-item" data-pane="contact-info" onclick="activateInnerTab(this,'contact-info')">
-                <i class="fa fa-phone-alt"></i> Contact Information
-            </button>
-            <button type="button" class="icon-tab-item" data-pane="documents" onclick="activateInnerTab(this,'documents')">
-                <i class="fa fa-file-alt"></i> Documents
-            </button>
-        </div>
-
-        <form id="studentForm" action="add_student.php" method="post" enctype="multipart/form-data">
-            <input type="hidden" name="action" value="AddAdmission">
-            <input type="hidden" name="captured_image" id="captured_image" value="">
-            <input type="hidden" name="family_code" id="family_code_value" value="">
-
-            <!-- ======== PANE: Basic Information ======== -->
-            <div class="wizard-pane active" id="pane-basic-info">
-                <div style="display:grid;grid-template-columns:1fr 220px;gap:20px;">
-                    <!-- LEFT: Form Fields -->
-                    <div>
-                        <!-- Row 1 -->
-                        <div class="form-row" style="margin-bottom:12px;">
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Student Name *</label>
-                                    <input type="text" name="first_name" id="fname" class="custom-input" placeholder="Enter student name" required maxlength="35">
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Father Name</label>
-                                    <input type="text" name="lname" id="last_name" class="custom-input" placeholder="Enter father name" maxlength="35">
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Select Family</label>
-                                    <select name="family_search" id="family_search" class="custom-input select2-family">
-                                        <option value="">Select Family</option>
-                                        <?php foreach ($families as $fam): ?>
-                                            <option value="<?php echo e($fam['family_code']); ?>"><?php echo e($fam['family_code']); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Cell Number *</label>
-                                    <input type="text" name="cellno" id="cell_no" class="custom-input" placeholder="Enter cell number" required>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Row 2 -->
-                        <div class="form-row" style="margin-bottom:12px;">
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Session</label>
-                                    <select name="session" id="session" class="custom-input">
-                                        <?php foreach ($sessions as $s): ?>
-                                            <option value="<?php echo e($s); ?>" <?php echo $s === $cur_session ? 'selected' : ''; ?>><?php echo e($s); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Select Class *</label>
-                                    <select name="class" id="class_id" class="custom-input" required onchange="getSection(this.value)">
-                                        <option value="">Select Class</option>
-                                        <?php foreach ($classes as $c): ?>
-                                            <option value="<?php echo $c['class_id']; ?>"><?php echo e($c['class_name']); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Select Section</label>
-                                    <select name="section" id="txt_section" class="custom-input"></select>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>GR-No</label>
-                                    <input type="text" name="com_no" class="custom-input" readonly value="<?php echo e($nextGr); ?>" style="background:#f9fafb;color:#9ca3af;">
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Row 3 -->
-                        <div class="form-row" style="margin-bottom:12px;">
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Gender *</label>
-                                    <select name="gender" id="gender" class="custom-input" required>
-                                        <option value="male">Male</option>
-                                        <option value="female">Female</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Religion *</label>
-                                    <select name="religion" id="religion" class="custom-input" required>
-                                        <option value="Islam" selected>Muslim</option>
-                                        <option value="Hinduism">Hindu</option>
-                                        <option value="Sikhism">Sikh</option>
-                                        <option value="Christianity">Christian</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Date Of Birth</label>
-                                    <input type="text" name="dob" id="dob" class="custom-input" placeholder="dd/mm/yyyy">
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="floating-label-group">
-                                    <label>Date Of Admission</label>
-                                    <input type="text" name="date_of_adms" id="date_of_adms" class="custom-input" placeholder="dd/mm/yyyy" value="<?php echo date('d/m/Y'); ?>">
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Row 4 -->
-                        <div class="form-row">
-                            <div class="form-group col-md-3">
-                                <div class="field-with-add">
-                                    <div class="flex-1 floating-label-group">
-                                        <label>Board/Council</label>
-                                        <select id="board_council" name="board_council" class="custom-input">
-                                            <option value="">Select Board</option>
-                                            <?php foreach ($boards as $b): ?><option value="<?php echo e($b['name']); ?>"><?php echo e($b['name']); ?></option><?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <a href="manage_board.php" target="_blank" class="btn-add-new">+ Add New</a>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="field-with-add">
-                                    <div class="flex-1 floating-label-group">
-                                        <label>Group/Shift</label>
-                                        <select id="group_shift" name="group_shift" class="custom-input">
-                                            <option value="">Select Group</option>
-                                            <?php foreach ($groups as $g): ?><option value="<?php echo e($g['name']); ?>"><?php echo e($g['name']); ?></option><?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <a href="manage_group.php" target="_blank" class="btn-add-new">+ Add New</a>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="field-with-add">
-                                    <div class="flex-1 floating-label-group">
-                                        <label>Admission Source</label>
-                                        <select id="adm_source" name="adm_source" class="custom-input">
-                                            <option value="">Select Source</option>
-                                            <?php foreach ($admSrcs as $a): ?><option value="<?php echo e($a['name']); ?>"><?php echo e($a['name']); ?></option><?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <a href="manage_admission_sources.php" target="_blank" class="btn-add-new">+ Add New</a>
-                                </div>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <div class="field-with-add">
-                                    <div class="flex-1 floating-label-group">
-                                        <label>Choose Locality</label>
-                                        <select name="Locality" id="locality" class="custom-input">
-                                            <option value="">Choose Locality</option>
-                                            <?php foreach ($localities as $l): ?><option value="<?php echo $l['locality_id']; ?>"><?php echo e($l['locality_name']); ?></option><?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <a href="manage_localities.php" target="_blank" class="btn-add-new">+ Add New</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT: Photo Upload -->
-                    <div>
-                        <div class="photo-box">
-                            <div class="photo-preview" id="photoPreviewArea">
-                                <i class="fa fa-camera"></i>
-                            </div>
-                            <img id="capturedPreviewImg" style="display:none;width:100%;max-width:180px;height:180px;border-radius:50%;object-fit:cover;border:3px solid #f97316;margin:0 auto 10px;">
-                            <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Zoom</div>
-                            <input type="range" min="1" max="3" step="0.1" value="1" id="zoomRange" oninput="applyZoom(this.value)">
-                            <div class="range-labels"><span>1x</span><span>3x</span></div>
-                            <div style="font-size:11px;color:#64748b;margin:6px 0;">Rotate</div>
-                            <input type="range" min="0" max="360" step="1" value="0" id="rotateRange" oninput="applyRotate(this.value)">
-                            <div class="range-labels"><span>0&deg;</span><span>360&deg;</span></div>
-                            <div style="margin-top:10px;display:flex;gap:6px;justify-content:center;">
-                                <button type="button" onclick="document.getElementById('imgFileInput').click();" style="padding:5px 10px;background:#f97316;color:#fff;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;"><i class="fa fa-upload"></i> Upload</button>
-                                <button type="button" onclick="openCameraModal()" style="padding:5px 10px;border:1px solid #f97316;color:#ea580c;background:#fff;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;"><i class="fa fa-camera"></i> Camera</button>
-                            </div>
-                            <input type="file" name="img_file" id="imgFileInput" accept="image/*" style="display:none;" onchange="previewUploadedPhoto(this)">
-                        </div>
-                    </div>
-                </div>
+    <div class="top-tabs-row">
+        <ul class="nav nav-tabs" id="studentTabs" role="tablist">
+            <li class="active"><a href="#add-single" data-toggle="tab"><i class="fa fa-user-plus"></i> Add New Student</a></li>
+            <li><a href="bulk_stdns.php"><i class="fa fa-users"></i>&nbsp; Add Multi Students</a></li>
+            <li><a href="import_data.php"><i class="fa fa-upload"></i> &nbsp; Import Students with CSV</a></li>
+            <li><a href="adm_form.php" target="_blank"><i class="fa fa-file-alt"></i> &nbsp; Admission Form</a></li>
+        </ul>
+        <div class="step-wizard step-wizard-compact" id="stepProgressContainer">
+            <div class="step-wizard-item active" id="stepItem1" onclick="goToWizardStep(1)">
+                <div class="step-circle" id="ws1c">1</div>
+                <div class="step-label" id="ws1l">Student Info</div>
             </div>
+            <div class="step-wizard-line" id="stepLine1"></div>
+            <div class="step-wizard-item" id="stepItem2" onclick="goToWizardStep(2)">
+                <div class="step-circle" id="ws2c">2</div>
+                <div class="step-label" id="ws2l">Fee Plan</div>
+            </div>
+        </div>
+    </div>
 
-            <!-- ======== PANE: Parent Details ======== -->
-            <div class="wizard-pane" id="pane-parent-details">
-                <div class="section-heading orange">Family Information</div>
-                <div class="form-row" style="margin-bottom:12px;">
-                    <div class="form-group col-md-2"><div class="floating-label-group"><label>Father CNIC</label><input type="text" class="custom-input" name="cnic" id="cnic" placeholder="CNIC"></div></div>
-                    <div class="form-group col-md-2"><div class="floating-label-group"><label>Father Qualification</label><input type="text" class="custom-input" name="Fqualification" id="father_qualification" placeholder="Father Qualification"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Father Business Address</label><input type="text" class="custom-input" name="Fbusiness_address" id="Fbusiness_address" placeholder="Father Business Address"></div></div>
-                    <div class="form-group col-md-2"><div class="floating-label-group"><label>Father Income</label><input type="text" class="custom-input" name="Fincome" id="father_income" placeholder="Father Income"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Mother Name</label><input type="text" class="custom-input" name="mother_name" id="mother_name" placeholder="Mother Name"></div></div>
-                </div>
-                <div class="form-row" style="margin-bottom:12px;">
-                    <div class="form-group col-md-2"><div class="floating-label-group"><label>Mother CNIC</label><input type="text" class="custom-input" name="mother_cnic" id="mother_cnic" placeholder="Mother CNIC"></div></div>
-                    <div class="form-group col-md-2"><div class="floating-label-group"><label>Mother Qualification</label><input type="text" class="custom-input" name="mother_qualification" id="mother_qualification" placeholder="Mother Qualification"></div></div>
-                    <div class="form-group col-md-2">
-                        <div class="floating-label-group"><label>Mother Activities</label>
-                            <select id="mother_activity" name="mother_activity" class="custom-input">
-                                <option value="">Select</option>
-                                <option value="House Lady">House Lady</option>
-                                <option value="Job Holder">Job Holder</option>
-                            </select>
+    <div class="tab-content" id="studentTabsContent">
+        <div class="tab-pane active" id="add-single">
+
+            <!-- ============ STEP 1: Student Info ============ -->
+            <div id="step1View">
+
+                <ul class="icon-tabs" id="studentWizardTabs">
+                    <li class="icon-tab-item active" data-tab="basic-info"><i class="fa fa-id-card"></i> Basic Information</li>
+                    <li class="icon-tab-item" data-tab="parent-details"><i class="fa fa-user-friends"></i> Parent Details</li>
+                    <li class="icon-tab-item" data-tab="academic-info"><i class="fa fa-graduation-cap"></i> Academic Information</li>
+                    <li class="icon-tab-item" data-tab="contact-info"><i class="fa fa-phone-alt"></i> Contact Information</li>
+                    <li class="icon-tab-item" data-tab="documents"><i class="fa fa-file-alt"></i> Documents</li>
+                </ul>
+
+                <form id="studentForm" action="add_student.php" method="post" enctype="multipart/form-data" class="form-horizontal form-label-left">
+                    <input type="hidden" name="action" value="AddAdmission">
+                    <input type="hidden" name="captured_image" id="captured_image" value="">
+                    <input type="hidden" name="family_code" id="family_code_value" value="">
+
+                    <!-- ===== PANE: Basic Information ===== -->
+                    <div class="wizard-pane active" id="pane-basic-info">
+                        <div style="display:grid;grid-template-columns:1fr 220px;gap:20px;">
+                            <div>
+                                <div class="form-row" style="margin-bottom:12px;">
+                                    <div class="form-group col-md-3">
+                                        <label>Student Name *</label>
+                                        <input type="text" class="form-control" name="first_name" required id="fname" placeholder="Student Name" maxlength="35">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Father Name</label>
+                                        <input type="text" class="form-control" name="lname" id="last_name" placeholder="Father Name" maxlength="35">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Select Family</label>
+                                        <select name="family_search" id="family_search" class="form-control chosen-select" onChange="getFamilyInfo(this.value);">
+                                            <option value="">Select Family</option>
+                                            <?php foreach ($families as $fam): ?>
+                                                <option value="<?php echo e($fam['family_code']); ?>"><?php echo e($fam['family_code']); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Cell Number *</label>
+                                        <input type="text" class="form-control" name="cellno" required id="cell_no" placeholder="Number/ Reporting SMS">
+                                    </div>
+                                </div>
+                                <div class="form-row" style="margin-bottom:12px;">
+                                    <div class="form-group col-md-3">
+                                        <label>Session *</label>
+                                        <select name="session" required id="session" class="form-control">
+                                            <?php foreach ($sessions as $s): ?>
+                                                <option value="<?php echo e($s); ?>" <?php echo $s === $cur_session ? 'selected' : ''; ?>><?php echo e($s); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Select Class *</label>
+                                        <select name="class" required id="class" class="form-control" onChange="getSection(this.value)">
+                                            <option value="">Select Class</option>
+                                            <?php foreach ($classes as $c): ?>
+                                                <option value="<?php echo $c['class_id']; ?>"><?php echo e($c['class_name']); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Select Section *</label>
+                                        <select name="section" required id="txt_section" class="form-control"></select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>GR-No</label>
+                                        <input type="text" value="<?php echo e($nextGr); ?>" class="form-control" name="com_no" id="com_no" readonly style="background:#f9fafb;color:#9ca3af;">
+                                    </div>
+                                </div>
+                                <div class="form-row" style="margin-bottom:12px;">
+                                    <div class="form-group col-md-3">
+                                        <label>Gender *</label>
+                                        <select id="gender" name="gender" class="form-control" required>
+                                            <option value="">Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Religion *</label>
+                                        <select id="religion" name="religion" class="form-control" required>
+                                            <option value="Islam" selected>Muslim</option>
+                                            <option value="Hinduism">Hindu</option>
+                                            <option value="Sikhism">Sikh</option>
+                                            <option value="Christianity">Christian</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Date Of Birth</label>
+                                        <input type="text" class="form-control" name="dob" id="dob" placeholder="dd/mm/yyyy">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label>Date Of Admission</label>
+                                        <input type="text" class="form-control" name="date_of_adms" id="date_of_adms" placeholder="dd/mm/yyyy" value="<?php echo date('d/m/Y'); ?>">
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-3">
+                                        <div class="field-with-add">
+                                            <div>
+                                                <label>Board/Council</label>
+                                                <select id="board_council" name="board_council" class="form-control">
+                                                    <option value="">Select Board</option>
+                                                    <?php foreach ($boards as $b): ?><option value="<?php echo e($b['name']); ?>"><?php echo e($b['name']); ?></option><?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <a href="manage_board.php" target="_blank" class="btn-add-new"><i class="fa fa-plus"></i> Add New</a>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <div class="field-with-add">
+                                            <div>
+                                                <label>Group/Shift</label>
+                                                <select id="group_shift" name="group_shift" class="form-control">
+                                                    <option value="">Select Group</option>
+                                                    <?php foreach ($groups as $g): ?><option value="<?php echo e($g['name']); ?>"><?php echo e($g['name']); ?></option><?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <a href="manage_group.php" target="_blank" class="btn-add-new"><i class="fa fa-plus"></i> Add New</a>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <div class="field-with-add">
+                                            <div>
+                                                <label>Admission Source</label>
+                                                <select id="adm_source" name="adm_source" class="form-control">
+                                                    <option value="">Select Source</option>
+                                                    <?php foreach ($admSrcs as $a): ?><option value="<?php echo e($a['name']); ?>"><?php echo e($a['name']); ?></option><?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <a href="manage_admission_sources.php" target="_blank" class="btn-add-new"><i class="fa fa-plus"></i> Add New</a>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <div class="field-with-add">
+                                            <div>
+                                                <label>Choose Locality</label>
+                                                <select name="Locality" id="locality" class="form-control">
+                                                    <option value="">Choose Locality</option>
+                                                    <?php foreach ($localities as $l): ?><option value="<?php echo $l['locality_id']; ?>"><?php echo e($l['locality_name']); ?></option><?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <a href="manage_localities.php" target="_blank" class="btn-add-new"><i class="fa fa-plus"></i> Add New</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="photo-box">
+                                    <div class="photo-preview" id="photoPreviewArea">
+                                        <i class="fa fa-camera"></i>
+                                    </div>
+                                    <img id="capturedPreviewImg" style="display:none;width:100%;max-width:180px;height:180px;border-radius:50%;object-fit:cover;border:3px solid #f97316;margin:0 auto 10px;">
+                                    <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Zoom</div>
+                                    <input type="range" min="1" max="3" step="0.1" value="1" id="zoomRange" oninput="applyZoom(this.value)">
+                                    <div class="range-labels"><span>1x</span><span>3x</span></div>
+                                    <div style="font-size:11px;color:#64748b;margin:6px 0;">Rotate</div>
+                                    <input type="range" min="0" max="360" step="1" value="0" id="rotateRange" oninput="applyRotate(this.value)">
+                                    <div class="range-labels"><span>0&deg;</span><span>360&deg;</span></div>
+                                    <div style="margin-top:10px;display:flex;gap:6px;justify-content:center;">
+                                        <button type="button" onclick="document.getElementById('imgFileInput').click();" style="padding:5px 10px;background:#f97316;color:#fff;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;"><i class="fa fa-upload"></i> Upload</button>
+                                        <button type="button" onclick="openCameraModal()" style="padding:5px 10px;border:1px solid #f97316;color:#ea580c;background:#fff;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;"><i class="fa fa-camera"></i> Camera</button>
+                                    </div>
+                                    <input type="file" name="img_file" id="imgFileInput" accept="image/*" style="display:none;" onchange="previewUploadedPhoto(this)">
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Mother Designation</label><input type="text" class="custom-input" name="mother_designation" id="mother_designation" placeholder="Mother Designation"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Home Address</label><input type="text" class="custom-input" name="address" id="address" placeholder="Family Home Address"></div></div>
-                </div>
-                <div class="form-row" style="margin-bottom:12px;">
-                    <div class="form-group col-md-3">
-                        <div class="field-with-add">
-                            <div class="flex-1 floating-label-group"><label>Father Occupation</label>
-                                <select name="father_occupation" id="father_occupation" class="custom-input">
-                                    <option value="">Choose Occupation</option>
-                                    <?php foreach ($occupations as $o): ?><option value="<?php echo e($o['name']); ?>"><?php echo e($o['name']); ?></option><?php endforeach; ?>
+
+                    <!-- ===== PANE: Parent Details ===== -->
+                    <div class="wizard-pane" id="pane-parent-details">
+                        <div class="wizard-section-title" style="border-left-color:#9B59D0;"><span>Family Information</span></div>
+                        <div class="form-row" style="margin-bottom:12px;">
+                            <div class="col-fifth form-group"><label>Father CNIC</label><input type="text" class="form-control" name="cnic" id="cnic" placeholder="CNIC"></div>
+                            <div class="col-fifth form-group"><label>Father Qualification</label><input type="text" class="form-control" name="Fqualification" id="father_qualification" placeholder="Father Qualification"></div>
+                            <div class="col-fifth form-group"><label>Father Business Address</label><input type="text" class="form-control" name="Fbusiness_address" id="Fbusiness_address" placeholder="Father Business Address"></div>
+                            <div class="col-fifth form-group"><label>Father Income</label><input type="text" class="form-control" name="Fincome" id="father_income" placeholder="Father Income"></div>
+                            <div class="col-fifth form-group"><label>Mother Name</label><input type="text" class="form-control" name="mother_name" id="mother_name" placeholder="Mother Name"></div>
+                        </div>
+                        <div style="clear:both;"></div>
+                        <div class="form-row" style="margin-bottom:12px;">
+                            <div class="col-fifth form-group"><label>Mother CNIC</label><input type="text" class="form-control" name="mother_cnic" id="mother_cnic" placeholder="Mother CNIC"></div>
+                            <div class="col-fifth form-group"><label>Mother Qualification</label><input type="text" class="form-control" name="mother_qualification" id="mother_qualification" placeholder="Mother Qualification"></div>
+                            <div class="col-fifth form-group">
+                                <label>Mother Activities</label>
+                                <select id="mother_activity" name="mother_activity" class="form-control">
+                                    <option value="">Select</option>
+                                    <option value="House Lady">House Lady</option>
+                                    <option value="Job Holder">Job Holder</option>
                                 </select>
                             </div>
-                            <a href="manage_occupations.php" target="_blank" class="btn-add-new">+ Add New</a>
+                            <div class="col-fifth form-group"><label>Mother Designation</label><input type="text" class="form-control" name="mother_designation" id="mother_designation" placeholder="Mother Designation"></div>
+                            <div class="col-fifth form-group"><label>Home Address</label><input type="text" class="form-control" name="address" id="address" placeholder="Family Home Address"></div>
                         </div>
-                    </div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>B-Form-No</label><input type="text" class="custom-input" name="formBNo" id="formBNo" placeholder="Form-B No"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Cast</label><input type="text" class="custom-input" name="cast" id="cast" placeholder="Cast"></div></div>
-                </div>
-
-                <div class="section-heading">Guardian Information <span style="font-size:12px;color:#9ca3af;font-weight:400;">(in case of death of father)</span></div>
-                <div class="form-row" style="margin-bottom:12px;">
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Guardian Name</label><input type="text" class="custom-input" name="gname" id="gardian_name" placeholder="Guardian Name"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Guardian CNIC</label><input type="text" class="custom-input" name="Gcnic" id="gardian_cnic" placeholder="Guardian CNIC"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Guardian Cell No</label><input type="text" class="custom-input" name="Gcellno" id="gardian_no" placeholder="Guardian Cell No"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Guardian Qualification</label><input type="text" class="custom-input" name="Gqualification" id="gardian_qualification" placeholder="Guardian Qualification"></div></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Guardian Occupation</label><input type="text" class="custom-input" name="Goccupation" id="gardian_occupation" placeholder="Guardian Occupation"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Guardian Income</label><input type="text" class="custom-input" name="Gincome" id="gardian_income" placeholder="Guardian Income"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Guardian Email</label><input type="text" class="custom-input" name="gardian_email" id="gardian_email" placeholder="Guardian Email"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Guardian Address</label><input type="text" class="custom-input" name="Gaddress" id="gardian_address" placeholder="Guardian Address"></div></div>
-                </div>
-            </div>
-
-            <!-- ======== PANE: Academic Information ======== -->
-            <div class="wizard-pane" id="pane-academic-info">
-                <div class="form-row" style="margin-bottom:12px;">
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Previous Class</label><input type="text" class="custom-input" name="old_class" id="old_class" placeholder="Previous Class"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Previous Institute</label><input type="text" class="custom-input" name="old_school" id="old_school" placeholder="Previous Institute"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Total Marks</label><input type="text" class="custom-input" name="old_tmarks" id="old_tmarks" placeholder="Total Marks"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Obtaining Marks</label><input type="text" class="custom-input" name="old_obtmarks" id="old_obtmarks" placeholder="Obtaining Marks"></div></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Admission Form No</label><input type="text" class="custom-input" name="form_no" id="adm-no" placeholder="Form Number"></div></div>
-                    <div class="form-group col-md-6"><div class="floating-label-group"><label>Reason for Previous School Leaving</label><input type="text" class="custom-input" name="school_leaving" id="school_leaving" placeholder="Reason for Previous School Leaving"></div></div>
-                </div>
-            </div>
-
-            <!-- ======== PANE: Contact Information ======== -->
-            <div class="wizard-pane" id="pane-contact-info">
-                <div class="form-row" style="margin-bottom:12px;">
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>WhatsApp No</label><input type="text" class="custom-input" name="whatsapp_number" id="whatsapp_number" placeholder="WhatsApp Number"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Father Cell No</label><input type="text" class="custom-input" name="father_cellno" id="father_cellno" placeholder="Father Cell No"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Mother Cell No</label><input type="text" class="custom-input" name="mother_cell" id="mother_cell" placeholder="Mother Cell Number"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Home Cell No</label><input type="text" class="custom-input" name="home_number" id="home_number" placeholder="Home Cell Number"></div></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Place Of Birth</label><input type="text" class="custom-input" name="place_of_birth" id="place_of_birth" placeholder="Place Of Birth"></div></div>
-                    <div class="form-group col-md-3">
-                        <div class="floating-label-group"><label>Select State</label>
-                            <select name="state" id="state" class="custom-input">
-                                <option value="">Select State</option>
-                                <?php foreach (['Punjab','Sindh','Balochistan','KPK','Gilgit-Baltistan','Kashmir (territory)','FATA (territory)','Federal'] as $st): ?>
-                                    <option value="<?php echo e($st); ?>"><?php echo e($st); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>City</label><input type="text" class="custom-input" name="city" id="city" placeholder="City"></div></div>
-                    <div class="form-group col-md-3"><div class="floating-label-group"><label>Email</label><input type="text" class="custom-input" name="email" id="email" placeholder="Email"></div></div>
-                </div>
-            </div>
-
-            <!-- ======== PANE: Documents ======== -->
-            <div class="wizard-pane" id="pane-documents">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:14px;">
-                    <div style="font-size:12.5px;color:#166534;display:flex;align-items:center;gap:8px;">
-                        <i class="fa fa-info-circle"></i>
-                        <span>Upload the student's documents below. Accepted: JPG, PNG, PDF.</span>
-                    </div>
-                    <a href="add_student_documents.php" target="_blank" style="font-size:12px;font-weight:600;color:#166534;text-decoration:none;border:1px solid #bbf7d0;background:#fff;padding:6px 12px;border-radius:999px;"><i class="fa fa-plus-circle"></i> Manage Document Titles</a>
-                </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;">
-                    <?php foreach ($docTitles as $i => $dt): ?>
-                        <div class="doc-card-item" id="docCard_<?php echo $i; ?>" style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;text-align:center;background:#fff;transition:all .2s;">
-                            <div id="docThumb_<?php echo $i; ?>" style="height:80px;border-radius:8px;background:#f7f9fc;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:8px;">
-                                <i class="fa fa-file-text" style="font-size:30px;color:#cbd5e1;"></i>
+                        <div style="clear:both;"></div>
+                        <div class="form-row" style="margin-bottom:12px;">
+                            <div class="form-group col-md-3">
+                                <div class="field-with-add">
+                                    <div>
+                                        <label>Father Occupation</label>
+                                        <select name="father_occupation" id="father_occupation" class="form-control">
+                                            <option value="">Choose Occupation</option>
+                                            <?php foreach ($occupations as $o): ?><option value="<?php echo e($o['name']); ?>"><?php echo e($o['name']); ?></option><?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <a href="manage_occupations.php" target="_blank" class="btn-add-new"><i class="fa fa-plus"></i> Add New</a>
+                                </div>
                             </div>
-                            <div style="font-size:12px;font-weight:600;color:#111827;min-height:28px;"><?php echo e($dt['name']); ?></div>
-                            <span id="docStatus_<?php echo $i; ?>" style="font-size:11px;color:#94a3b8;">Not Uploaded</span><br>
-                            <label for="docFile_<?php echo $i; ?>" style="display:inline-block;margin-top:6px;font-size:12px;font-weight:600;color:#fff;background:#f97316;padding:5px 12px;border-radius:999px;cursor:pointer;"><i class="fa fa-upload"></i> Choose File</label>
-                            <input type="hidden" name="doc_types[]" value="<?php echo e($dt['name']); ?>">
-                            <input type="file" id="docFile_<?php echo $i; ?>" name="doc_files[]" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="previewStudentDoc(this, <?php echo $i; ?>)">
-                            <div id="docFileName_<?php echo $i; ?>" style="font-size:10px;color:#64748b;margin-top:4px;word-break:break-all;"></div>
+                            <div class="form-group col-md-3"><label>B-Form-No</label><input type="text" class="form-control" name="formBNo" id="formBNo" placeholder="Form-B No"></div>
+                            <div class="form-group col-md-3"><label>Cast</label><input type="text" class="form-control" name="cast" id="cast" placeholder="Cast"></div>
                         </div>
-                    <?php endforeach; ?>
+
+                        <div class="wizard-section-title" style="border-left-color:#9B59D0;"><span>Guardian Information <small style="font-size:12px;color:#9ca3af;font-weight:400;">(in case of death of father)</small></span></div>
+                        <div class="form-row" style="margin-bottom:12px;">
+                            <div class="form-group col-md-3"><label>Guardian Name</label><input type="text" class="form-control" name="gname" id="gardian_name" placeholder="Guardian Name"></div>
+                            <div class="form-group col-md-3"><label>Guardian CNIC</label><input type="text" class="form-control" name="Gcnic" id="gardian_cnic" placeholder="Guardian CNIC"></div>
+                            <div class="form-group col-md-3"><label>Guardian Cell No</label><input type="text" class="form-control" name="Gcellno" id="gardian_no" placeholder="Guardian Cell No"></div>
+                            <div class="form-group col-md-3"><label>Guardian Qualification</label><input type="text" class="form-control" name="Gqualification" id="gardian_qualification" placeholder="Guardian Qualification"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-3"><label>Guardian Occupation</label><input type="text" class="form-control" name="Goccupation" id="gardian_occupation" placeholder="Guardian Occupation"></div>
+                            <div class="form-group col-md-3"><label>Guardian Income</label><input type="text" class="form-control" name="Gincome" id="gardian_income" placeholder="Guardian Income"></div>
+                            <div class="form-group col-md-3"><label>Guardian Email</label><input type="text" class="form-control" name="gardian_email" id="gardian_email" placeholder="Guardian Email"></div>
+                            <div class="form-group col-md-3"><label>Guardian Address</label><input type="text" class="form-control" name="Gaddress" id="gardian_address" placeholder="Guardian Address"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== PANE: Academic Information ===== -->
+                    <div class="wizard-pane" id="pane-academic-info">
+                        <div class="wizard-section-title" style="border-left-color:#2FAE6B;"><span>Admission &amp; Academic Information</span></div>
+                        <div class="form-row" style="margin-bottom:12px;">
+                            <div class="form-group col-md-3"><label>Previous Class</label><input type="text" class="form-control" name="old_class" id="old_class" placeholder="Previous Class"></div>
+                            <div class="form-group col-md-3"><label>Previous Institute</label><input type="text" class="form-control" name="old_school" id="old_school" placeholder="Previous Institute"></div>
+                            <div class="form-group col-md-3"><label>Total Marks</label><input type="text" class="form-control" name="old_tmarks" id="old_tmarks" placeholder="Total Marks"></div>
+                            <div class="form-group col-md-3"><label>Obtaining Marks</label><input type="text" class="form-control" name="old_obtmarks" id="old_obtmarks" placeholder="Obtaining Marks"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-3"><label>Admission Form No</label><input type="text" class="form-control" name="form_no" id="adm-no" placeholder="Form Number"></div>
+                            <div class="form-group col-md-6"><label>Reason for Previous School Leaving</label><input type="text" class="form-control" name="school_leaving" id="school_leaving" placeholder="Reason for Previous School Leaving"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== PANE: Contact Information ===== -->
+                    <div class="wizard-pane" id="pane-contact-info">
+                        <div class="wizard-section-title" style="border-left-color:#17A2B8;"><span>Contact &amp; Address Information</span></div>
+                        <div class="form-row" style="margin-bottom:12px;">
+                            <div class="form-group col-md-3"><label>WhatsApp No</label><input type="text" class="form-control" name="whatsapp_number" id="whatsapp_number" placeholder="WhatsApp Number"></div>
+                            <div class="form-group col-md-3"><label>Father Cell No</label><input type="text" class="form-control" name="father_cellno" id="father_cellno" placeholder="Father Cell No"></div>
+                            <div class="form-group col-md-3"><label>Mother Cell No</label><input type="text" class="form-control" name="mother_cell" id="mother_cell" placeholder="Mother Cell Number"></div>
+                            <div class="form-group col-md-3"><label>Home Cell No</label><input type="text" class="form-control" name="home_number" id="home_number" placeholder="Home Cell Number"></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-3"><label>Place Of Birth</label><input type="text" class="form-control" name="place_of_birth" id="place_of_birth" placeholder="Place Of Birth"></div>
+                            <div class="form-group col-md-3">
+                                <label>Select State</label>
+                                <select name="state" id="state" class="form-control">
+                                    <option value="">Select State</option>
+                                    <?php foreach (['Punjab','Sindh','Balochistan','KPK','Gilgit-Baltistan','Kashmir (territory)','FATA (territory)','Federal'] as $st): ?>
+                                        <option value="<?php echo e($st); ?>"><?php echo e($st); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3"><label>City</label><input type="text" class="form-control" name="city" id="city" placeholder="City"></div>
+                            <div class="form-group col-md-3"><label>Email</label><input type="text" class="form-control" name="email" id="email" placeholder="Email"></div>
+                        </div>
+                    </div>
+
+                    <!-- ===== PANE: Documents ===== -->
+                    <div class="wizard-pane" id="pane-documents">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:14px;">
+                            <div style="font-size:12.5px;color:#166534;display:flex;align-items:center;gap:8px;">
+                                <i class="fa fa-info-circle"></i>
+                                <span>Upload the student's documents below. Accepted: JPG, PNG, PDF.</span>
+                            </div>
+                            <a href="add_student_documents.php" target="_blank" style="font-size:12px;font-weight:600;color:#166534;text-decoration:none;border:1px solid #bbf7d0;background:#fff;padding:6px 12px;border-radius:999px;"><i class="fa fa-plus-circle"></i> Manage Document Titles</a>
+                        </div>
+                        <div class="doc-grid">
+                            <?php foreach ($docTitles as $i => $dt): ?>
+                                <div class="doc-card" id="docCard_<?php echo $i; ?>">
+                                    <div class="doc-card-thumb" id="docThumb_<?php echo $i; ?>">
+                                        <i class="fa fa-file-text"></i>
+                                    </div>
+                                    <div class="doc-card-title"><?php echo e($dt['name']); ?></div>
+                                    <span class="doc-card-status" id="docStatus_<?php echo $i; ?>">Not Uploaded</span><br>
+                                    <label for="docFile_<?php echo $i; ?>" class="doc-card-upload"><i class="fa fa-upload"></i> Choose File</label>
+                                    <input type="hidden" name="doc_types[]" value="<?php echo e($dt['name']); ?>">
+                                    <input type="file" id="docFile_<?php echo $i; ?>" name="doc_files[]" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" onchange="previewStudentDoc(this, <?php echo $i; ?>)">
+                                    <div class="doc-card-filename" id="docFileName_<?php echo $i; ?>"></div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+
+                    <!-- Actions Bar -->
+                    <div class="wizard-actions-bar">
+                        <span style="font-size:12px;color:#9ca3af;font-style:italic;">* Marked fields are mandatory</span>
+                        <div style="display:flex;gap:12px;">
+                            <a href="manage_students.php" class="wizard-btn">Cancel</a>
+                            <button type="button" onclick="submitStep1()" class="wizard-btn wizard-btn-primary">Save Student</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============ STEP 2: Fee Plan ============ -->
+    <section id="step2View" style="display:none;margin-bottom:24px;">
+        <div style="background:#fff;border:1px solid #fff7ed;border-radius:0.75rem;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:center;gap:16px;">
+            <div id="step2Avatar" style="width:48px;height:48px;border-radius:50%;background:#f97316;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;box-shadow:0 2px 8px rgba(249,115,22,.3);">
+                <i class="fa fa-user"></i>
+            </div>
+            <div>
+                <h2 style="font-size:18px;font-weight:700;color:#111827;line-height:1.2;margin:0;" id="step2StudentName">--</h2>
+                <div style="display:flex;gap:16px;font-size:12px;color:#6b7280;font-weight:500;margin-top:4px;">
+                    <span style="display:flex;align-items:center;gap:4px;"><i class="fa fa-graduation-cap" style="color:#f97316;"></i> <span id="step2StudentClass">--</span></span>
+                    <span style="display:flex;align-items:center;gap:4px;"><i class="fa fa-phone" style="color:#f97316;"></i> <span id="step2StudentCell">--</span></span>
                 </div>
             </div>
+        </div>
 
-            <!-- Step 1 Footer -->
-            <div style="margin-top:28px;padding-top:16px;border-top:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center;">
-                <span style="font-size:12px;color:#9ca3af;font-style:italic;">* Marked fields are mandatory</span>
-                <div style="display:flex;gap:12px;">
-                    <a href="manage_students.php" style="padding:8px 24px;border:1px solid #d1d5db;color:#4b5563;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">Cancel</a>
-                    <button type="button" onclick="submitStep1()" style="padding:8px 24px;background:#f97316;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(249,115,22,.3);">Save Student</button>
-                </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;padding:20px;margin-top:14px;">
+            <div style="border-left:4px solid #f97316;padding-left:12px;margin-bottom:24px;">
+                <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Manage Student Fee <span style="font-size:12px;font-weight:400;color:#f97316;">(Monthly Fee Parameters)</span></h3>
             </div>
-        </form>
-    </div>
-</section>
 
-<!-- ================================================================ -->
-<!-- STEP 2: Fee Plan (inline) -->
-<!-- ================================================================ -->
-<section id="step2View" style="margin-bottom:24px;display:none;">
-    <div style="background:#fff;border:1px solid #fff7ed;border-radius:0.75rem;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);display:flex;align-items:center;gap:16px;">
-        <div id="step2Avatar" style="width:48px;height:48px;border-radius:50%;background:#f97316;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;box-shadow:0 2px 8px rgba(249,115,22,.3);">
-            <i class="fa fa-user"></i>
-        </div>
-        <div>
-            <h2 style="font-size:18px;font-weight:700;color:#111827;line-height:1.2;margin:0;" id="step2StudentName">--</h2>
-            <div style="display:flex;gap:16px;font-size:12px;color:#6b7280;font-weight:500;margin-top:4px;">
-                <span style="display:flex;align-items:center;gap:4px;"><i class="fa fa-graduation-cap" style="color:#f97316;"></i> <span id="step2StudentClass">--</span></span>
-                <span style="display:flex;align-items:center;gap:4px;"><i class="fa fa-phone" style="color:#f97316;"></i> <span id="step2StudentCell">--</span></span>
-            </div>
-        </div>
-    </div>
-
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;padding:20px;margin-top:14px;">
-        <div style="border-left:4px solid #f97316;padding-left:12px;margin-bottom:24px;">
-            <h3 style="font-size:16px;font-weight:700;color:#111827;margin:0;">Manage Student Fee <span style="font-size:12px;font-weight:400;color:#f97316;">(Monthly Fee Parameters)</span></h3>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;">
-            <div class="floating-label-group">
-                <label>Payment Mode</label>
-                <select id="inputPaymentMode" class="custom-input">
-                    <option>Monthly</option>
-                    <option>Quarterly</option>
-                    <option>Annual</option>
-                </select>
-            </div>
-            <div class="floating-label-group">
-                <label>Discount Package</label>
-                <select id="inputDiscountPackage" class="custom-input">
-                    <option value="">Select Discount</option>
-                    <option value="sibling">Sibling Discount 10%</option>
-                    <option value="merit">Merit Scholarship 20%</option>
-                </select>
-            </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;">
-            <div class="floating-label-group"><label>Monthly Fee</label><input type="number" id="inputMonthlyFee" class="custom-input" placeholder="0.00"></div>
-            <div class="floating-label-group"><label>Course Package</label><input type="number" id="inputCoursePackage" class="custom-input" placeholder="0.00"></div>
-            <div class="floating-label-group"><label>Old Balance</label><input type="number" id="inputOldBalance" class="custom-input" placeholder="0.00"></div>
-            <div class="floating-label-group"><label>Transport</label><input type="number" id="inputTransportFee" class="custom-input" placeholder="0.00"></div>
-        </div>
-        <div style="margin-bottom:16px;">
-            <div class="floating-label-group"><label>Discount Reason</label><input type="text" id="inputDiscountReason" class="custom-input" placeholder="Enter reason if discount applied"></div>
-        </div>
-
-        <div style="margin-top:32px;padding-top:16px;border-top:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:12px;color:#9ca3af;font-style:italic;">Amounts auto-filled from class fee settings &mdash; adjust if required.</span>
-            <button type="button" onclick="saveFeePlan()" style="padding:8px 24px;background:#f97316;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 1px 3px rgba(249,115,22,.3);">Save Fee Plan</button>
-        </div>
-    </div>
-</section>
-
-<!-- ================================================================ -->
-<!-- STEP 3: Finish -->
-<!-- ================================================================ -->
-<section id="step3View" style="margin-bottom:24px;display:none;">
-    <div id="successBanner" style="background:#10b981;color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:500;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.1);">
-        <span>Congrats! Your record is added successfully...</span>
-        <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:#fff;font-weight:700;font-size:16px;cursor:pointer;">&times;</button>
-    </div>
-
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;padding:40px;text-align:center;max-width:720px;margin:16px auto 0;">
-        <div style="width:64px;height:64px;background:#10b981;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px;box-shadow:0 4px 12px rgba(16,185,129,.25);">
-            <i class="fa fa-check"></i>
-        </div>
-        <h2 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 16px;">Fee Plan Saved Successfully</h2>
-        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:24px;">
-            <button onclick="goToWizardStep(1);resetWizard();" style="padding:10px 20px;background:#f97316;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 1px 3px rgba(249,115,22,.3);">
-                <i class="fa fa-user-plus"></i> Add New Student
-            </button>
-            <button onclick="viewProfile();" style="padding:10px 20px;border:2px solid #f97316;color:#ea580c;background:#fff;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
-                <i class="fa fa-address-card"></i> View Profile
-            </button>
-            <a href="adm_form.php" target="_blank" style="padding:10px 20px;border:1px solid #fdba74;color:#ea580c;background:#fff;border-radius:6px;font-size:12px;font-weight:500;text-decoration:none;">Admission Form</a>
-        </div>
-    </div>
-</section>
-
-<!-- ================================================================ -->
-<!-- PROFILE VIEW -->
-<!-- ================================================================ -->
-<section id="profileView" style="display:none;margin-bottom:24px;">
-    <div style="background:linear-gradient(135deg,#f97316 0%,#ec4899 50%,#8b5cf6 100%);border-radius:0.75rem;padding:20px;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.1);position:relative;overflow:hidden;">
-        <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;">
-            <div style="display:flex;align-items:center;gap:16px;">
-                <div id="profAvatar" style="width:80px;height:80px;border-radius:50%;background:#fff;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;">
-                    <img id="profAvatarImg" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23374151'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M12 14l9-5-9-5-9 5 9 5z'/><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z'/></svg>">
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:20px;">
+                <div>
+                    <label>Payment Mode</label>
+                    <select id="inputPaymentMode" class="form-control">
+                        <option>Monthly</option>
+                        <option>Quarterly</option>
+                        <option>Annual</option>
+                    </select>
                 </div>
                 <div>
-                    <h2 id="profName" style="font-size:22px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin:0;">--</h2>
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px;margin-top:6px;">
-                        <span style="background:rgba(0,0,0,.2);backdrop-filter:blur(4px);padding:2px 10px;border-radius:999px;font-weight:500;">&bull; <span id="profClassSec">--</span></span>
-                        <span style="background:rgba(0,0,0,.2);backdrop-filter:blur(4px);padding:2px 10px;border-radius:999px;font-weight:500;">&bull; GR# <span id="profGRNo">--</span></span>
-                        <span style="background:rgba(0,0,0,.2);backdrop-filter:blur(4px);padding:2px 10px;border-radius:999px;font-weight:500;">&bull; Session: <span id="profSession">--</span></span>
-                    </div>
-                    <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px;margin-top:6px;">
-                        <span style="background:rgba(255,255,255,.2);padding:2px 8px;border-radius:4px;font-weight:500;display:flex;align-items:center;gap:4px;"><i class="fa fa-venus-mars" style="font-size:10px;"></i> <span id="profGender">--</span></span>
-                        <span style="background:rgba(255,255,255,.2);padding:2px 8px;border-radius:4px;font-weight:500;display:flex;align-items:center;gap:4px;"><i class="fa fa-calendar-check" style="font-size:10px;"></i> Admitted: <span id="profDOA">--</span></span>
-                        <span style="background:#10b981;color:#fff;font-weight:700;padding:2px 12px;border-radius:999px;font-size:10px;display:flex;align-items:center;gap:4px;">
-                            <span style="width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.5s infinite;"></span> Active
-                        </span>
-                    </div>
+                    <label>Discount Package</label>
+                    <select id="inputDiscountPackage" class="form-control">
+                        <option value="">Select Discount</option>
+                        <option value="sibling">Sibling Discount 10%</option>
+                        <option value="merit">Merit Scholarship 20%</option>
+                    </select>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:16px;">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;overflow:hidden;display:flex;flex-direction:column;">
-            <div style="background:#f97316;padding:10px 16px;color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px;">
-                <i class="fa fa-user"></i> Student Information
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;">
+                <div><label>Monthly Fee</label><input type="number" id="inputMonthlyFee" class="form-control" placeholder="0.00"></div>
+                <div><label>Course Package</label><input type="number" id="inputCoursePackage" class="form-control" placeholder="0.00"></div>
+                <div><label>Old Balance</label><input type="number" id="inputOldBalance" class="form-control" placeholder="0.00"></div>
+                <div><label>Transport</label><input type="number" id="inputTransportFee" class="form-control" placeholder="0.00"></div>
             </div>
-            <div style="padding:16px;font-size:12px;flex:1;">
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Father Name</span><span id="cardFatherName" style="font-weight:600;color:#1e293b;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Mother Name</span><span id="cardMotherName" style="color:#9ca3af;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Religion</span><span id="cardReligion" style="font-weight:600;color:#1e293b;text-transform:uppercase;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="color:#6b7280;">Date of Birth</span><span id="cardDOB" style="font-weight:600;color:#1e293b;">--</span></div>
+            <div style="margin-bottom:16px;">
+                <label>Discount Reason</label>
+                <input type="text" id="inputDiscountReason" class="form-control" placeholder="Enter reason if discount applied">
             </div>
-        </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;overflow:hidden;display:flex;flex-direction:column;">
-            <div style="background:#10b981;padding:10px 16px;color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px;">
-                <i class="fa fa-address-book"></i> Contact & Address Details
-            </div>
-            <div style="padding:16px;font-size:12px;flex:1;">
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Cell Number</span><span id="cardCellNumber" style="font-weight:600;color:#1e293b;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">WhatsApp</span><span id="cardWhatsApp" style="color:#9ca3af;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Father Contact</span><span id="cardFatherCell" style="color:#9ca3af;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Mother Contact</span><span id="cardMotherCell" style="color:#9ca3af;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Home Contact</span><span id="cardHomeNumber" style="color:#9ca3af;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="color:#6b7280;">Address</span><span id="cardAddress" style="color:#9ca3af;">--</span></div>
+
+            <div style="margin-top:32px;padding-top:16px;border-top:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:12px;color:#9ca3af;font-style:italic;">Amounts auto-filled from class fee settings &mdash; adjust if required.</span>
+                <button type="button" onclick="saveFeePlan()" class="wizard-btn wizard-btn-primary">Save Fee Plan</button>
             </div>
         </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;overflow:hidden;display:flex;flex-direction:column;">
-            <div style="background:#8b5cf6;padding:10px 16px;color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px;">
-                <i class="fa fa-mobile"></i> Mobile App Login Details
+    </section>
+
+    <!-- ============ STEP 3: Finish ============ -->
+    <section id="step3View" style="display:none;margin-bottom:24px;">
+        <div id="successBanner" style="background:#10b981;color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:500;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.1);">
+            <span>Congrats! Your record is added successfully...</span>
+            <button onclick="this.parentElement.style.display='none'" style="background:none;border:none;color:#fff;font-weight:700;font-size:16px;cursor:pointer;">&times;</button>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;padding:40px;text-align:center;max-width:720px;margin:16px auto 0;">
+            <div style="width:64px;height:64px;background:#10b981;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px;box-shadow:0 4px 12px rgba(16,185,129,.25);">
+                <i class="fa fa-check"></i>
             </div>
-            <div style="padding:16px;font-size:12px;flex:1;">
-                <div style="background:#f5f3ff;border:1px solid #ede9fe;border-radius:6px;padding:8px;color:#6d28d9;font-size:11px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                    <i class="fa fa-circle-info" style="color:#7c3aed;"></i>
-                    <span>Parent app login credentials for this account.</span>
+            <h2 style="font-size:20px;font-weight:700;color:#111827;margin:0 0 16px;">Fee Plan Saved Successfully</h2>
+            <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:24px;">
+                <button onclick="goToWizardStep(1);resetWizard();" class="wizard-btn wizard-btn-primary" style="display:flex;align-items:center;gap:6px;">
+                    <i class="fa fa-user-plus"></i> Add New Student
+                </button>
+                <button onclick="viewProfile();" class="wizard-btn" style="border:2px solid #f97316;color:#ea580c;display:flex;align-items:center;gap:6px;">
+                    <i class="fa fa-address-card"></i> View Profile
+                </button>
+                <a href="adm_form.php" target="_blank" class="wizard-btn" style="border:1px solid #fdba74;color:#ea580c;text-decoration:none;display:flex;align-items:center;gap:6px;">Admission Form</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============ PROFILE VIEW ============ -->
+    <section id="profileView" style="display:none;margin-bottom:24px;">
+        <div style="background:linear-gradient(135deg,#f97316 0%,#ec4899 50%,#8b5cf6 100%);border-radius:0.75rem;padding:20px;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.1);position:relative;overflow:hidden;">
+            <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:16px;">
+                <div style="display:flex;align-items:center;gap:16px;">
+                    <div id="profAvatar" style="width:80px;height:80px;border-radius:50%;background:#fff;padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.15);flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                        <img id="profAvatarImg" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23374151'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M12 14l9-5-9-5-9 5 9 5z'/><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z'/></svg>">
+                    </div>
+                    <div>
+                        <h2 id="profName" style="font-size:22px;font-weight:900;letter-spacing:.5px;text-transform:uppercase;margin:0;">--</h2>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px;margin-top:6px;">
+                            <span style="background:rgba(0,0,0,.2);backdrop-filter:blur(4px);padding:2px 10px;border-radius:999px;font-weight:500;">&bull; <span id="profClassSec">--</span></span>
+                            <span style="background:rgba(0,0,0,.2);backdrop-filter:blur(4px);padding:2px 10px;border-radius:999px;font-weight:500;">&bull; GR# <span id="profGRNo">--</span></span>
+                            <span style="background:rgba(0,0,0,.2);backdrop-filter:blur(4px);padding:2px 10px;border-radius:999px;font-weight:500;">&bull; Session: <span id="profSession">--</span></span>
+                        </div>
+                        <div style="display:flex;flex-wrap:wrap;gap:6px;font-size:11px;margin-top:6px;">
+                            <span style="background:rgba(255,255,255,.2);padding:2px 8px;border-radius:4px;font-weight:500;display:flex;align-items:center;gap:4px;"><i class="fa fa-venus-mars" style="font-size:10px;"></i> <span id="profGender">--</span></span>
+                            <span style="background:rgba(255,255,255,.2);padding:2px 8px;border-radius:4px;font-weight:500;display:flex;align-items:center;gap:4px;"><i class="fa fa-calendar-check" style="font-size:10px;"></i> Admitted: <span id="profDOA">--</span></span>
+                            <span style="background:#10b981;color:#fff;font-weight:700;padding:2px 12px;border-radius:999px;font-size:10px;display:flex;align-items:center;gap:4px;">
+                                <span style="width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse 1.5s infinite;"></span> Active
+                            </span>
+                        </div>
+                    </div>
                 </div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Username</span><span style="color:#9ca3af;">--</span></div>
-                <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="color:#6b7280;">Password</span><span style="color:#9ca3af;">--</span></div>
             </div>
         </div>
-    </div>
-</section>
+
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:16px;">
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;overflow:hidden;display:flex;flex-direction:column;">
+                <div style="background:#f97316;padding:10px 16px;color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px;">
+                    <i class="fa fa-user"></i> Student Information
+                </div>
+                <div style="padding:16px;font-size:12px;flex:1;">
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Father Name</span><span id="cardFatherName" style="font-weight:600;color:#1e293b;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Mother Name</span><span id="cardMotherName" style="color:#9ca3af;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Religion</span><span id="cardReligion" style="font-weight:600;color:#1e293b;text-transform:uppercase;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="color:#6b7280;">Date of Birth</span><span id="cardDOB" style="font-weight:600;color:#1e293b;">--</span></div>
+                </div>
+            </div>
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;overflow:hidden;display:flex;flex-direction:column;">
+                <div style="background:#10b981;padding:10px 16px;color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px;">
+                    <i class="fa fa-address-book"></i> Contact &amp; Address Details
+                </div>
+                <div style="padding:16px;font-size:12px;flex:1;">
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Cell Number</span><span id="cardCellNumber" style="font-weight:600;color:#1e293b;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">WhatsApp</span><span id="cardWhatsApp" style="color:#9ca3af;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Father Contact</span><span id="cardFatherCell" style="color:#9ca3af;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Mother Contact</span><span id="cardMotherCell" style="color:#9ca3af;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Home Contact</span><span id="cardHomeNumber" style="color:#9ca3af;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="color:#6b7280;">Address</span><span id="cardAddress" style="color:#9ca3af;">--</span></div>
+                </div>
+            </div>
+            <div style="background:#fff;border:1px solid #e5e7eb;border-radius:0.75rem;overflow:hidden;display:flex;flex-direction:column;">
+                <div style="background:#8b5cf6;padding:10px 16px;color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;gap:8px;">
+                    <i class="fa fa-mobile"></i> Mobile App Login Details
+                </div>
+                <div style="padding:16px;font-size:12px;flex:1;">
+                    <div style="background:#f5f3ff;border:1px solid #ede9fe;border-radius:6px;padding:8px;color:#6d28d9;font-size:11px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                        <i class="fa fa-circle-info" style="color:#7c3aed;"></i>
+                        <span>Parent app login credentials for this account.</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6;"><span style="color:#6b7280;">Username</span><span style="color:#9ca3af;">--</span></div>
+                    <div style="display:flex;justify-content:space-between;padding:6px 0;"><span style="color:#6b7280;">Password</span><span style="color:#9ca3af;">--</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
 
 </div>
 
@@ -913,16 +867,15 @@ var studentState = {
     homeNumber:'', locality:'', uploadedImageData:null
 };
 
-function activateInnerTab(btn, paneId) {
-    document.querySelectorAll('.icon-tab-item').forEach(function(b) {
-        b.classList.remove('active');
-        b.querySelectorAll('i').forEach(function(i){ i.style.color = '#9ca3af'; });
+document.querySelectorAll('.icon-tab-item').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.icon-tab-item').forEach(function(t) { t.classList.remove('active'); });
+        this.classList.add('active');
+        var tabName = this.getAttribute('data-tab');
+        document.querySelectorAll('.wizard-pane').forEach(function(p) { p.classList.remove('active'); });
+        document.getElementById('pane-' + tabName).classList.add('active');
     });
-    btn.classList.add('active');
-    btn.querySelector('i').style.color = '#f97316';
-    document.querySelectorAll('.wizard-pane').forEach(function(p) { p.classList.remove('active'); });
-    document.getElementById('pane-' + paneId).classList.add('active');
-}
+});
 
 function goToWizardStep(step) {
     document.getElementById('step1View').style.display = 'none';
@@ -933,33 +886,39 @@ function goToWizardStep(step) {
 
     currentWizardStep = step;
     var bc = document.getElementById('bcCurrent');
-
+    var item1 = document.getElementById('stepItem1');
+    var item2 = document.getElementById('stepItem2');
     var c1 = document.getElementById('ws1c');
     var l1 = document.getElementById('ws1l');
     var c2 = document.getElementById('ws2c');
     var l2 = document.getElementById('ws2l');
     var line1 = document.getElementById('stepLine1');
 
-    c1.className = 'circle pending'; l1.className = 'label pending'; c1.innerHTML = '1';
-    c2.className = 'circle pending'; l2.className = 'label pending'; c2.innerHTML = '2';
+    item1.className = 'step-wizard-item';
+    item2.className = 'step-wizard-item';
+    c1.textContent = '1';
+    c2.textContent = '2';
     line1.className = 'step-wizard-line';
 
     if (step === 1) {
         document.getElementById('step1View').style.display = '';
         bc.textContent = 'Add New Student';
-        c1.className = 'circle active'; l1.className = 'label active';
+        item1.classList.add('active');
     } else if (step === 2) {
         document.getElementById('step2View').style.display = '';
         bc.textContent = 'Create Fee Plan';
-        c1.className = 'circle done'; l1.className = 'label active'; c1.innerHTML = '<i class="fa fa-check" style="font-size:12px;"></i>';
-        c2.className = 'circle active'; l2.className = 'label active';
-        line1.className = 'step-wizard-line active';
+        item1.classList.add('done');
+        c1.innerHTML = '<i class="fa fa-check" style="font-size:12px;"></i>';
+        item2.classList.add('active');
+        line1.classList.add('done-line');
     } else if (step === 3) {
         document.getElementById('step3View').style.display = '';
         bc.textContent = 'Finish';
-        c1.className = 'circle done'; l1.className = 'label active'; c1.innerHTML = '<i class="fa fa-check" style="font-size:12px;"></i>';
-        c2.className = 'circle done'; l2.className = 'label active'; c2.innerHTML = '<i class="fa fa-check" style="font-size:12px;"></i>';
-        line1.className = 'step-wizard-line active';
+        item1.classList.add('done');
+        c1.innerHTML = '<i class="fa fa-check" style="font-size:12px;"></i>';
+        item2.classList.add('done');
+        c2.innerHTML = '<i class="fa fa-check" style="font-size:12px;"></i>';
+        line1.classList.add('done-line');
     }
     window.scrollTo({top:0, behavior:'smooth'});
 }
@@ -1024,7 +983,7 @@ function collectStudentState() {
     studentState.fatherName = document.getElementById('last_name').value || '';
     studentState.cell = document.getElementById('cell_no').value || '';
     studentState.session = document.getElementById('session').value || '';
-    var clsEl = document.getElementById('class_id');
+    var clsEl = document.getElementById('class');
     var secEl = document.getElementById('txt_section');
     var clsName = clsEl.options[clsEl.selectedIndex] ? clsEl.options[clsEl.selectedIndex].text : '';
     var secName = secEl.options[secEl.selectedIndex] ? secEl.options[secEl.selectedIndex].text : '';
@@ -1188,58 +1147,53 @@ function useCapturedPhoto() {
     }
 }
 
-(function() {
-    var fs = document.getElementById('family_search');
-    if (!fs) return;
-    fs.addEventListener('change', function() {
-        var code = this.value;
-        document.getElementById('family_code_value').value = code || '';
-        if (!code) return;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', HIIFI_BASE + 'ajax_get_family_by_code.php?code=' + encodeURIComponent(code));
-        xhr.onload = function() {
-            var data;
-            try { data = JSON.parse(xhr.responseText); } catch(e) { return; }
-            if (!data) return;
-            var map = {
-                'last_name': data.father_name,
-                'cnic': data.father_cnic,
-                'father_qualification': data.father_qualification,
-                'father_occupation': data.father_occupation,
-                'Fbusiness_address': data.father_business_address,
-                'father_income': data.father_income,
-                'mother_name': data.mother_name,
-                'mother_cnic': data.mother_cnic,
-                'mother_qualification': data.mother_qualification,
-                'mother_activity': data.mother_activity,
-                'mother_designation': data.mother_designation,
-                'address': data.address,
-                'gardian_name': data.guardian_name,
-                'gardian_cnic': data.guardian_cnic,
-                'gardian_no': data.guardian_cellno,
-                'gardian_qualification': data.guardian_qualification,
-                'gardian_occupation': data.guardian_occupation,
-                'gardian_income': data.guardian_income,
-                'gardian_email': data.guardian_email,
-                'gardian_address': data.guardian_address
-            };
-            Object.keys(map).forEach(function(id) {
-                var el = document.getElementById(id);
-                if (el && map[id] !== null && map[id] !== undefined) {
-                    if (el.tagName === 'SELECT') {
-                        if (el.querySelector('option[value="' + map[id] + '"]')) el.value = map[id];
-                    } else {
-                        el.value = map[id];
-                    }
-                }
-            });
-            if (data.locality_id) {
-                var loc = document.getElementById('locality');
-                if (loc) loc.value = data.locality_id;
-            }
+function getFamilyInfo(code) {
+    document.getElementById('family_code_value').value = code || '';
+    if (!code) return;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', HIIFI_BASE + 'ajax_get_family_by_code.php?code=' + encodeURIComponent(code));
+    xhr.onload = function() {
+        var data;
+        try { data = JSON.parse(xhr.responseText); } catch(e) { return; }
+        if (!data) return;
+        var map = {
+            'last_name': data.father_name,
+            'cnic': data.father_cnic,
+            'father_qualification': data.father_qualification,
+            'father_occupation': data.father_occupation,
+            'Fbusiness_address': data.father_business_address,
+            'father_income': data.father_income,
+            'mother_name': data.mother_name,
+            'mother_cnic': data.mother_cnic,
+            'mother_qualification': data.mother_qualification,
+            'mother_activity': data.mother_activity,
+            'mother_designation': data.mother_designation,
+            'address': data.address,
+            'gardian_name': data.guardian_name,
+            'gardian_cnic': data.guardian_cnic,
+            'gardian_no': data.guardian_cellno,
+            'gardian_qualification': data.guardian_qualification,
+            'gardian_occupation': data.guardian_occupation,
+            'gardian_income': data.guardian_income,
+            'gardian_email': data.guardian_email,
+            'gardian_address': data.guardian_address
         };
-        xhr.send();
-    });
-})();
+        Object.keys(map).forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && map[id] !== null && map[id] !== undefined) {
+                if (el.tagName === 'SELECT') {
+                    if (el.querySelector('option[value="' + map[id] + '"]')) el.value = map[id];
+                } else {
+                    el.value = map[id];
+                }
+            }
+        });
+        if (data.locality_id) {
+            var loc = document.getElementById('locality');
+            if (loc) loc.value = data.locality_id;
+        }
+    };
+    xhr.send();
+}
 </script>
 <?php include __DIR__ . '/includes/footer.php'; ?>
