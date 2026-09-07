@@ -315,9 +315,16 @@ include __DIR__ . '/includes/header.php';
 @media(max-width:767px){.col-fifth{width:50%;}}
 
 .photo-box{border:2px dashed #f97316;border-radius:10px;padding:12px;text-align:center;background:#fffba8;}
-.photo-box .photo-preview{width:100%;max-width:180px;height:180px;border-radius:50%;object-fit:cover;border:3px solid #f97316;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#f9fafb;color:#cbd5e1;font-size:48px;}
-.photo-box input[type=range]{width:100%;margin:4px 0;}
-.photo-box .range-labels{display:flex;justify-content:space-between;font-size:10px;color:#9ca3af;}
+.slider-container{margin:6px 0;}
+.slider-container label{font-size:11px;color:#64748b;display:block;margin-bottom:2px;}
+.slider-container input[type=range]{width:100%;margin:4px 0;}
+.mandatory-note{font-size:12px;color:#9ca3af;font-style:italic;}
+.wizard-actions-buttons{display:flex;gap:12px;align-items:center;}
+.doc-pane-intro{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:14px;}
+.doc-pane-intro-text{font-size:12.5px;color:#166534;display:flex;align-items:center;gap:8px;}
+.doc-pane-manage-btn{font-size:12px;font-weight:600;color:#166534;text-decoration:none;border:1px solid #bbf7d0;background:#fff;padding:6px 12px;border-radius:999px;}
+.has-feedback-left{position:relative;}
+.has-feedback-left input{padding-left:35px;}
 
 .wizard-actions-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-top:1px solid #f3f4f6;margin-top:20px;}
 .wizard-btn{padding:8px 24px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #d1d5db;background:#fff;color:#4b5563;}
@@ -391,9 +398,10 @@ include __DIR__ . '/includes/header.php';
                     <input type="hidden" name="family_code" id="family_code_value" value="">
 
                     <!-- ===== PANE: Basic Information ===== -->
-                    <div class="wizard-pane active" id="pane-basic-info">
-                        <div style="display:grid;grid-template-columns:1fr 220px;gap:20px;">
-                            <div>
+            <div class="wizard-pane active" id="pane-basic-info">
+                <div class="form-row">
+                    <!-- Main Column with Inputs -->
+                    <div class="col-md-8" style="padding-left:0px;">
                                 <div class="form-row" style="margin-bottom:12px;">
                                     <div class="form-group col-md-3">
                                         <label>Student Name *</label>
@@ -522,28 +530,36 @@ include __DIR__ . '/includes/header.php';
                                     </div>
                                 </div>
                             </div>
-
-                            <div>
-                                <div class="photo-box">
-                                    <div class="photo-preview" id="photoPreviewArea">
-                                        <i class="fa fa-camera"></i>
-                                    </div>
-                                    <img id="capturedPreviewImg" style="display:none;width:100%;max-width:180px;height:180px;border-radius:50%;object-fit:cover;border:3px solid #f97316;margin:0 auto 10px;">
-                                    <div style="font-size:11px;color:#64748b;margin-bottom:6px;">Zoom</div>
-                                    <input type="range" min="1" max="3" step="0.1" value="1" id="zoomRange" oninput="applyZoom(this.value)">
-                                    <div class="range-labels"><span>1x</span><span>3x</span></div>
-                                    <div style="font-size:11px;color:#64748b;margin:6px 0;">Rotate</div>
-                                    <input type="range" min="0" max="360" step="1" value="0" id="rotateRange" oninput="applyRotate(this.value)">
-                                    <div class="range-labels"><span>0&deg;</span><span>360&deg;</span></div>
-                                    <div style="margin-top:10px;display:flex;gap:6px;justify-content:center;">
-                                        <button type="button" onclick="document.getElementById('imgFileInput').click();" style="padding:5px 10px;background:#f97316;color:#fff;border:none;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;"><i class="fa fa-upload"></i> Upload</button>
-                                        <button type="button" onclick="openCameraModal()" style="padding:5px 10px;border:1px solid #f97316;color:#ea580c;background:#fff;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;"><i class="fa fa-camera"></i> Camera</button>
-                                    </div>
-                                    <input type="file" name="img_file" id="imgFileInput" accept="image/*" style="display:none;" onchange="previewUploadedPhoto(this)">
+                        </div>
+                    <!-- Photo Upload Box -->
+                    <div class="col-md-4" style="border:1px solid #FFD9B3;border-radius:8px;height:175px;background:linear-gradient(180deg,#FFF9F4,#ffffff);box-shadow:0 2px 8px rgba(255,124,27,.08);padding:12px;">
+                        <div class="col-md-6">
+                            <div id="image-container">
+                                <div style="cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:-20px;">
+                                    <img id="image" src="" alt="Uploaded Image" class="draggable" style="display:none;">
+                                    <img id="sample-image" src="" alt="Sample Image" style="display:none;">
                                 </div>
+                                <canvas id="imageCanvas" style="display:none;"></canvas>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <br>
+                            <a id="remove-image-btn" class="btn-danger" style="display:none;">Delete Frame</a>
+                            <br><br>
+                            <div class="slider-container">
+                                <label for="zoom-slider">Zoom:</label>
+                                <input type="range" id="zoom-slider" min="0.5" max="2" step="0.05" value="1">
+                            </div>
+                            <div class="slider-container">
+                                <label for="rotate-slider">Rotate:</label>
+                                <input type="range" id="rotate-slider" min="-180" max="180" step="1" value="0">
+                            </div>
+                            <label for="file">Upload Picture</label>
+                            <input type="file" class="form-control" name="img_file" id="fileInput" accept="image/*" placeholder="Class">
+                            <input type="hidden" name="old_file" value="">
+                        </div>
                     </div>
+                </div>
 
                     <!-- ===== PANE: Parent Details ===== -->
                     <div class="wizard-pane" id="pane-parent-details">
@@ -645,12 +661,15 @@ include __DIR__ . '/includes/header.php';
 
                     <!-- ===== PANE: Documents ===== -->
                     <div class="wizard-pane" id="pane-documents">
-                        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;margin-bottom:14px;">
-                            <div style="font-size:12.5px;color:#166534;display:flex;align-items:center;gap:8px;">
+                        <div class="wizard-section-title"><span>Student Documents</span></div>
+                        <div class="doc-pane-intro">
+                            <div class="doc-pane-intro-text">
                                 <i class="fa fa-info-circle"></i>
-                                <span>Upload the student's documents below. Accepted: JPG, PNG, PDF.</span>
+                                <span>Upload the student's documents below. Accepted formats: JPG, JPEG, PNG, PDF.</span>
                             </div>
-                            <a href="add_student_documents.php" target="_blank" style="font-size:12px;font-weight:600;color:#166534;text-decoration:none;border:1px solid #bbf7d0;background:#fff;padding:6px 12px;border-radius:999px;"><i class="fa fa-plus-circle"></i> Manage Document Titles</a>
+                            <a href="add_student_documents.php" target="_blank" class="doc-pane-manage-btn">
+                                <i class="fa fa-plus-circle"></i> Manage Document Titles
+                            </a>
                         </div>
                         <div class="doc-grid">
                             <?php foreach ($docTitles as $i => $dt): ?>
@@ -671,10 +690,10 @@ include __DIR__ . '/includes/header.php';
 
                     <!-- Actions Bar -->
                     <div class="wizard-actions-bar">
-                        <span style="font-size:12px;color:#9ca3af;font-style:italic;">* Marked fields are mandatory</span>
-                        <div style="display:flex;gap:12px;">
-                            <a href="manage_students.php" class="wizard-btn">Cancel</a>
-                            <button type="button" onclick="submitStep1()" class="wizard-btn wizard-btn-primary">Save Student</button>
+                        <div class="mandatory-note">* Marked fields are mandatory</div>
+                        <div class="wizard-actions-buttons">
+                            <button type="button" class="wizard-btn" id="btnCancel">Cancel</button>
+                            <button type="button" class="wizard-btn wizard-btn-primary" id="btnSaveStudent" onclick="submitStep1()">Save Student</button>
                         </div>
                     </div>
                 </form>
