@@ -1,0 +1,25 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy HIFILMS to lms.biztrack.uk
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via rsync over SSH
+        uses: easingthemes/ssh-deploy@v5.1.0
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
+          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
+          REMOTE_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          TARGET: ${{ secrets.DEPLOY_PATH || '/var/www/lms-biztrack' }}
+          EXCLUDE: "/.git/, /.github/, deploy*.tar, deploy_list.txt, deploy_logo.tar, config.php"
+          ARGS: "-rlgoDzvc --delete --omit-dir-times"
