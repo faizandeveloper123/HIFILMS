@@ -412,7 +412,7 @@ $stateMapDef = [
 ?>
 
 <!-- ===================== LEFT SIDEBAR ===================== -->
-<aside id="sidebar" class="w-[230px] shrink-0 flex flex-col bg-brand-sidebar text-slate-300 transition-all duration-300 overflow-hidden">
+<aside id="sidebar" class="fixed z-40 inset-y-0 left-0 w-[230px] flex flex-col bg-brand-sidebar text-slate-300 transition-transform duration-300 -translate-x-full lg:translate-x-0">
     <div class="h-[56px] shrink-0 flex items-center gap-2.5 px-4 border-b border-white/[0.08]">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-orange to-amber-500 flex items-center justify-center text-white font-bold text-sm">H</div>
         <div class="min-w-0">
@@ -424,7 +424,7 @@ $stateMapDef = [
     <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
         <p class="px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Menu</p>
         <?php foreach ($navItems as $ni): ?>
-        <a href="<?php echo BASE_URL . $ni['href']; ?>" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition">
+        <a href="<?php echo BASE_URL . $ni['href']; ?>" onclick="closeSidebar()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition">
             <i class="<?php echo $ni['icon']; ?> w-4 text-center text-slate-400"></i>
             <span><?php echo $ni['title']; ?></span>
         </a>
@@ -439,12 +439,15 @@ $stateMapDef = [
     </div>
 </aside>
 
+<!-- Mobile backdrop -->
+<div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/50 hidden lg:hidden" onclick="closeSidebar()"></div>
+
 <!-- ===================== MAIN AREA ===================== -->
-<div class="flex-1 flex flex-col min-w-0">
+<div class="flex-1 flex flex-col min-w-0 w-full lg:pl-[230px]">
 
     <!-- Top Header -->
     <header class="h-[56px] shrink-0 bg-white border-b border-brand-border flex items-center px-4 gap-3">
-        <button onclick="toggleSidebar()" class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition">
+        <button onclick="toggleSidebar()" class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition lg:hidden">
             <i class="fa-solid fa-bars-staggered text-[15px]"></i>
         </button>
         <div class="relative w-full max-w-[420px] hidden md:block">
@@ -479,7 +482,7 @@ $stateMapDef = [
     </header>
 
     <!-- Content -->
-    <main id="main-content" class="flex-1 overflow-y-auto p-5">
+    <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-5">
 
         <?php if ($error !== ''): ?>
         <div class="mb-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-[13px]">
@@ -499,16 +502,16 @@ $stateMapDef = [
 
         <!-- Top Sub Tabs -->
         <div class="flex items-center gap-1 bg-white border border-brand-border rounded-xl p-1.5 mb-5 overflow-x-auto">
-            <button id="tab-btn-single" onclick="switchMainView('single')" class="tab-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap">
+            <button id="tab-btn-single" onclick="switchMainView('single')" class="tab-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
                 <i class="fa-solid fa-user-plus"></i> Add New Student
             </button>
-            <button id="tab-btn-multi" onclick="switchMainView('multi')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap">
+            <button id="tab-btn-multi" onclick="switchMainView('multi')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
                 <i class="fa-solid fa-users"></i> Add Multi Students
             </button>
-            <button id="tab-btn-import" onclick="switchMainView('import')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap">
+            <button id="tab-btn-import" onclick="switchMainView('import')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
                 <i class="fa-solid fa-file-csv"></i> Import CSV
             </button>
-            <button id="tab-btn-form" onclick="switchMainView('form')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap">
+            <button id="tab-btn-form" onclick="switchMainView('form')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
                 <i class="fa-solid fa-file-lines"></i> Admission Form
             </button>
         </div>
@@ -546,20 +549,20 @@ $stateMapDef = [
             </div>
 
             <!-- Inner Tabs -->
-            <div class="flex items-center gap-1 mb-4 flex-wrap">
-                <button id="subtab-basic" onclick="switchFormTab('basic')" class="subtab-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap">
+            <div class="flex items-center gap-1 mb-4 overflow-x-auto">
+                <button id="subtab-basic" onclick="switchFormTab('basic')" class="subtab-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
                     <i class="fa-solid fa-id-card"></i> Basic Info
                 </button>
-                <button id="subtab-parent" onclick="switchFormTab('parent')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap">
+                <button id="subtab-parent" onclick="switchFormTab('parent')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
                     <i class="fa-solid fa-people-roof"></i> Parent &amp; Guardian Info
                 </button>
-                <button id="subtab-academic" onclick="switchFormTab('academic')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap">
+                <button id="subtab-academic" onclick="switchFormTab('academic')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
                     <i class="fa-solid fa-graduation-cap"></i> Academic Info
                 </button>
-                <button id="subtab-contact" onclick="switchFormTab('contact')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap">
+                <button id="subtab-contact" onclick="switchFormTab('contact')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
                     <i class="fa-solid fa-address-book"></i> Contact Info
                 </button>
-                <button id="subtab-documents" onclick="switchFormTab('documents')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap">
+                <button id="subtab-documents" onclick="switchFormTab('documents')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
                     <i class="fa-solid fa-paperclip"></i> Documents
                 </button>
             </div>
@@ -579,7 +582,7 @@ $stateMapDef = [
                         <!-- BASIC TAB -->
                         <div id="form-basic">
                             <div class="bg-white border border-brand-border rounded-xl p-5 space-y-4">
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label required">Student Name</label>
                                         <input type="text" class="fieldset-input" name="first_name" id="first_name" placeholder="Enter Full Name" required>
@@ -698,7 +701,7 @@ $stateMapDef = [
                                 <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
                                     <i class="fa-solid fa-user-tie text-brand-orange"></i> Father &amp; Mother Information
                                 </h3>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Father CNIC</label>
                                         <input type="text" class="fieldset-input" name="cnic" id="cnic" placeholder="00000-0000000-0" maxlength="13" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,13); document.getElementById('fcnic-limit-msg').style.display=(this.value.length>0 && this.value.length<13)?'block':'none';">
@@ -773,7 +776,7 @@ $stateMapDef = [
                                 <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
                                     <i class="fa-solid fa-user-shield text-brand-orange"></i> Guardian Information
                                 </h3>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Guardian Name</label>
                                         <input type="text" class="fieldset-input" name="gname" id="gardian_name" placeholder="Full name">
@@ -816,7 +819,7 @@ $stateMapDef = [
                                 <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
                                     <i class="fa-solid fa-school-circle-check text-brand-orange"></i> Previous Education
                                 </h3>
-                                <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Previous Class</label>
                                         <input type="text" class="fieldset-input" name="old_class" id="old_class" placeholder="Last attended class">
@@ -851,7 +854,7 @@ $stateMapDef = [
                                 <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
                                     <i class="fa-solid fa-location-dot text-brand-orange"></i> Address &amp; Contact Information
                                 </h3>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Whatsapp Number</label>
                                         <input type="text" class="fieldset-input" name="whatsapp_number" id="whatsapp_number" placeholder="03XX-XXXXXXX" inputmode="tel">
@@ -898,7 +901,7 @@ $stateMapDef = [
                                     <i class="fa-solid fa-paperclip text-brand-orange"></i> Attached Documents
                                 </h3>
                                 <p class="text-[11px] text-slate-400 mb-4">Upload PDF, JPG or PNG files. Multiple documents supported.</p>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <?php foreach ($docTitles as $di => $doc): ?>
                                     <div id="doc-card-<?php echo $doc['id']; ?>" class="border border-dashed border-brand-border rounded-xl p-3">
                                         <input type="hidden" name="doc_types[]" value="<?php echo e($doc['name']); ?>">
@@ -1077,7 +1080,16 @@ var modalSaveCallback = null;
 
 function toggleSidebar() {
     var sb = document.getElementById('sidebar');
-    sb.classList.toggle('-ml-[240px]');
+    var bk = document.getElementById('sidebar-backdrop');
+    sb.classList.toggle('-translate-x-full');
+    if (bk) bk.classList.toggle('hidden');
+}
+
+function closeSidebar() {
+    var sb = document.getElementById('sidebar');
+    var bk = document.getElementById('sidebar-backdrop');
+    if (sb) sb.classList.add('-translate-x-full');
+    if (bk) bk.classList.add('hidden');
 }
 
 function switchMainView(view) {
@@ -1499,8 +1511,7 @@ function clearImportedData() {
 
 window.onload = function () {
     multiIndex = 0;
-    currentCount = 0;
-    count = 0;
+    for (var i = 0; i < 5; i++) addMultiRow();
     csvRecords = initialCSVData.map(function (r) { return Object.assign({}, r); });
     renderCSVTable();
 };
