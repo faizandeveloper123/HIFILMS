@@ -1,0 +1,653 @@
+﻿/* Style for active tab */
+.nav-tabs > li.active > a {
+  background-color: #FF7C1B !important; /* Active tab background color */
+  color: white !important; /* Text color of active tab */
+  border: 1px solid #FF7C1B; /* Border of active tab */
+}
+/* Default inactive tab styles */
+.nav-tabs > li > a {
+  color: gray; /* Default text color for inactive tabs */
+  border: 1px solid #ddd; /* Border for inactive tabs */
+}
+.nav-tabs > li > a:hover {
+  background-color: #f1f1f1; /* Hover effect for inactive tabs */
+}
+/* Optional: Adjust padding for tabs */
+.nav-tabs > li > a {
+  padding: 10px 15px;
+}
+    .tab-content {
+      margin-top: 20px;
+    }
+    /* Card wrapper for the whole Add Student panel, with a colorful top accent bar */
+    .page-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 6px 24px rgba(20, 30, 60, 0.08);
+      padding: 20px 24px 24px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .page-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #FF7C1B, #FFB25E, #4F86C6, #2FAE6B, #9B59D0);
+    }
+    /* Top row: outer tabs + step wizard side by side */
+    .top-tabs-row {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: nowrap;
+      row-gap: 10px;
+    }
+    .top-tabs-row .nav-tabs {
+      margin-bottom: 0;
+      flex: 0 0 auto;
+    }
+    /* Step Wizard */
+    .step-wizard {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      width: 90%;
+      margin: 20px auto 30px auto;
+    }
+    .step-wizard-compact {
+      width: 40%;
+      margin: 0 0 0 14px;
+      justify-content: space-between;
+      flex: 0 0 auto;
+      min-width: 140px;
+    }
+    .step-wizard-compact .step-wizard-item {
+      flex: none;
+    }
+    .step-wizard-compact .step-circle {
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+    }
+    .step-wizard-compact .step-label {
+      font-size: 8px;
+      width: auto;
+      white-space: nowrap;
+      margin-top: 3px;
+    }
+    .step-wizard-compact .step-wizard-line {
+      flex: 1 1 auto;
+      width: auto;
+      min-width: 10px;
+      margin-top: 10px;
+    }
+    .step-wizard-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #e2e6ea;
+      background: #fff;
+      color: #999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 13px;
+      z-index: 1;
+      transition: all 0.25s ease;
+    }
+    .step-wizard-item.active .step-circle,
+    .step-wizard-item.completed .step-circle {
+      background: linear-gradient(135deg, #FF9142, #FF7C1B);
+      border-color: #FF7C1B;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(255, 124, 27, 0.4);
+      transform: scale(1.08);
+    }
+    .step-label {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #777;
+      text-align: center;
+      width: 110px;
+    }
+    .step-wizard-item.active .step-label {
+      color: #FF7C1B;
+      font-weight: 700;
+    }
+    .step-wizard-line {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: #e2e6ea;
+      margin-top: 16px;
+    }
+    .step-wizard-line.completed {
+      background: linear-gradient(90deg, #FF7C1B, #FFB25E);
+    }
+    /* Icon Tabs */
+    .icon-tabs {
+      display: flex;
+      list-style: none;
+      padding: 6px;
+      margin: 0 0 20px 0;
+      border-bottom: none;
+      background: #f4f6f9;
+      border-radius: 10px;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .icon-tab-item {
+      padding: 9px 16px;
+      cursor: pointer;
+      color: #666;
+      font-size: 13px;
+      border-bottom: none;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .icon-tab-item:hover {
+      background: #ffffff;
+      color: #444;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .icon-tab-item i {
+      margin-right: 6px;
+    }
+    .icon-tab-item:nth-child(1) i { color: #4F86C6; }
+    .icon-tab-item:nth-child(2) i { color: #9B59D0; }
+    .icon-tab-item:nth-child(3) i { color: #2FAE6B; }
+    .icon-tab-item:nth-child(4) i { color: #17A2B8; }
+    .icon-tab-item:nth-child(5) i { color: #8a8f98; }
+    .icon-tab-item.active {
+      color: #FF7C1B;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(255, 124, 27, 0.25);
+      font-weight: 600;
+    }
+    .icon-tab-item.active i {
+      color: #FF7C1B;
+    }
+    .wizard-pane {
+      display: none;
+    }
+    .wizard-pane.active {
+      display: block;
+    }
+    .wizard-section-title {
+      margin: 10px 0 15px 0;
+      padding-left: 12px;
+      border-left: 4px solid #FF7C1B;
+    }
+    .wizard-section-title span {
+      font-weight: bold;
+      font-size: 19px;
+    }
+    /* .form-row is a custom class (not Bootstrap's .row) and has no clearfix,
+       which lets floated .col-md-* children of unequal height wrap into the
+       wrong column. Flexbox removes floats from the equation entirely. */
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    /* 5-equal-columns layout (Bootstrap's grid only goes down to thirds/quarters) */
+    .col-fifth {
+      flex: 0 0 20%;
+      max-width: 20%;
+      padding-left: 15px;
+      padding-right: 15px;
+      position: relative;
+    }
+    .wizard-actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #e2e2e2;
+      margin-top: 25px;
+      padding-top: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .mandatory-note {
+      color: #999;
+      font-size: 12px;
+    }
+    .wizard-actions-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .wizard-btn {
+      padding: 9px 22px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #d5d9de;
+      background: #fff;
+      color: #555;
+      transition: all 0.2s ease;
+    }
+    .wizard-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    }
+    .wizard-btn-outline {
+      border-color: #FF7C1B;
+      color: #FF7C1B;
+      background: #fff;
+    }
+    .wizard-btn-outline:hover {
+      background: #FFF4EB;
+    }
+    .wizard-btn-primary {
+      background: linear-gradient(135deg, #FF9142, #FF7C1B);
+      border-color: #FF7C1B;
+      color: #fff;
+      box-shadow: 0 4px 10px rgba(255, 124, 27, 0.35);
+    }
+    .wizard-btn-primary:hover {
+      box-shadow: 0 6px 14px rgba(255, 124, 27, 0.45);
+    }
+    /* Dropdown + "Add New" shortcut, used for Board/Council, Group/Shift, Admission Source, Locality */
+    .field-with-add {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .field-with-add select {
+      flex: 1;
+      min-width: 0;
+    }
+    .btn-add-new {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 30px;
+      padding: 0 10px;
+      white-space: nowrap;
+      border: 1px solid #FF7C1B;
+      color: #FF7C1B;
+      background: #fff;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .btn-add-new:hover,
+    .btn-add-new:focus {
+      background: #FF7C1B;
+      color: #fff;
+      text-decoration: none;
+    }
+    /* Form control styles */
+    .form-control {
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      padding: 19px 15px;
+      width: 100%;
+      font-size: 16px;
+      background-color: #fff;
+      transition: border-color 0.3s ease;
+    }
+      select.form-control {
+      line-height: normal;
+      height: auto;
+      padding: 7px 12px;
+      vertical-align: middle;
+      }
+    .form-control:focus {
+      border-color: #ff8c00;
+      box-shadow: 0 0 5px rgba(255, 140, 0, 0.5);
+    }
+    .form-group label {
+      position: absolute;
+      left: 15px;
+      top: -10px;
+      font-size: 11px;
+      color: #666;
+      background-color: white;
+      padding: 0 5px;
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+    .form-control:focus + label {
+      color: #ff8c00;
+    }
+    .form-control::placeholder {
+      color: transparent;
+    }
+      input[type="date"].form-control {
+      line-height: normal;
+      height: auto;
+      padding: 8px 12px;
+      vertical-align: middle;
+      text-align: left; /* Ensure the text is left-aligned */
+      }
+      input[type="file"].form-control {
+      line-height: normal;
+      height: auto;
+      padding: 8px 12px;
+      vertical-align: middle;
+      }
+        .btn {
+            background-color: #FF7C1B;
+            border-color: #FF7C1B;
+            color: white;
+        }
+        #image-container {
+            width: 125px;
+            height: 140px;
+            margin: 12px 0px 6px 0px ;
+            border: 2px dashed #FFC68A;
+            border-radius: 6px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background-color: #fff;
+            position: relative;
+        }
+          #image {
+          display: none;
+          position: absolute;
+          max-width: 100%;
+          max-height: 100%;
+          object-fit: contain;  /* Ensures the image scales to fit within the box */
+          transition: transform 0.2s ease; /* Smooth zoom and rotation transition */
+          }
+        #image, #sample-image {
+            display: none;
+            position: absolute;
+            transition: transform 0.2s ease; /* Smooth zoom and rotation transition */
+        }
+        /* Fixed position for the sample image */
+        #sample-image {
+            pointer-events: none; /* Prevent interactions with the sample image */
+        }
+        /* Draggable image style */
+        .draggable {
+            cursor: move;
+        }
+        /* Zoom and rotate control sliders */
+          .slider-container {
+          display: flex;
+          align-items: center;
+          }
+          .slider-container label {
+          margin-right: 10px; /* Adds some space between the label and the slider */
+          }
+        #zoom-slider, #rotate-slider {
+            width: 100px;
+        }
+        /* Show sample image button */
+        #show-image-btn, #remove-image-btn {
+          margin-top: 0px;
+          padding: 5px 6px;
+          font-size: 10px;
+          cursor: pointer;
+      }
+      .field-help {
+        margin-top: 6px;
+        font-size: 11px;
+        line-height: 1.4;
+        color: #5a6f93;
+      }
+      .field-help a {
+        color: #0b47be;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .field-help a:hover {
+        text-decoration: underline;
+      }
+      .inline-link {
+        margin-left: 6px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .inline-link a {
+        color: #0b47be;
+        text-decoration: none;
+      }
+      .inline-link a:hover {
+        text-decoration: underline;
+      }
+      /* ===== Documents pane (modern card grid, compact) ===== */
+      .doc-pane-intro {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+        padding: 8px 12px;
+        background: #FFF4EB;
+        border: 1px solid #FFDCB8;
+        border-radius: 8px;
+        color: #8a4b12;
+        font-size: 12px;
+        flex-wrap: wrap;
+      }
+      .doc-pane-intro-text {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .doc-pane-intro i {
+        color: #FF7C1B;
+        font-size: 14px;
+      }
+      .doc-pane-manage-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        background: #FF7C1B;
+        border-radius: 6px;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .doc-pane-manage-btn:hover {
+        background: #e56f14;
+        color: #fff;
+        text-decoration: none;
+      }
+      .doc-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
+      }
+      .doc-card {
+        background: #fff;
+        border: 1px solid #e7e9ee;
+        border-radius: 8px;
+        padding: 8px;
+        text-align: center;
+        transition: all 0.2s ease;
+        position: relative;
+      }
+      .doc-card:hover {
+        box-shadow: 0 4px 10px rgba(20, 30, 60, 0.08);
+        transform: translateY(-1px);
+        border-color: #FFDCB8;
+      }
+      .doc-card-thumb {
+        width: 100%;
+        height: 62px;
+        border-radius: 6px;
+        background: #f4f6f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin-bottom: 6px;
+        border: 1px dashed #d9dee5;
+      }
+      .doc-card-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .doc-card-thumb i {
+        font-size: 22px;
+        color: #b9c0cb;
+      }
+      .doc-card.has-file .doc-card-thumb {
+        border-style: solid;
+        border-color: #cdeedd;
+      }
+      .doc-card-title {
+        font-size: 11px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .doc-card-status {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 20px;
+        margin-bottom: 6px;
+        background: #eee;
+        color: #888;
+      }
+      .doc-card.has-file .doc-card-status {
+        background: #E4F8ED;
+        color: #1E9A57;
+      }
+      .doc-card-upload {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        width: 100%;
+        padding: 4px 0;
+        font-size: 10px;
+        font-weight: 600;
+        color: #FF7C1B;
+        background: #fff;
+        border: 1px solid #FF7C1B;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .doc-card-upload:hover {
+        background: #FF7C1B;
+        color: #fff;
+      }
+      .doc-card-filename {
+        margin-top: 4px;
+        font-size: 9px;
+        color: #888;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .doc-card input[type="file"] {
+        display: none;
+      }
+      .doc-empty-state {
+        text-align: center;
+        padding: 30px 20px;
+        color: #999;
+      }
+      .doc-empty-state i {
+        font-size: 32px;
+        display: block;
+        margin-bottom: 10px;
+        color: #d9dee5;
+      }
+      .doc-empty-state a {
+        color: #FF7C1B;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .doc-empty-state a:hover {
+        text-decoration: underline;
+      }
+      /* ===== Parent Details tab (compact layout) ===== */
+      #pane-parent-details .wizard-section-title {
+        margin: 4px 0 10px 0;
+      }
+      #pane-parent-details .row {
+        margin-top: 2px !important;
+      }
+      #pane-parent-details .form-row {
+        margin-bottom: 2px;
+      }
+      #pane-parent-details .form-group {
+        margin-bottom: 10px;
+      }
+      #pane-parent-details .col-fifth {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      #pane-parent-details .form-group.col-md-3 {
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      #pane-parent-details .form-control {
+        padding: 9px 12px;
+        font-size: 13px;
+      }
+      #pane-parent-details select.form-control {
+        padding: 6px 10px;
+      }
+      #pane-parent-details .form-group label {
+        font-size: 10px;
+        top: -8px;
+      }
+      #pane-parent-details .field-with-add {
+        gap: 6px;
+      }
+      #pane-parent-details .btn-add-new {
+        height: 26px;
+        font-size: 11px;
+      }
+      #pane-parent-details hr {
+        margin: 10px 0;
+      }
+      /* Searchable "Select Family" dropdown (select2) â match native select.form-control box so height stays identical */
+      #family_search + .select2-container {
+        width: 100% !important;
+      }
+      #family_search + .select2-container .select2-choice {
+        height: auto;
+        padding: 7px 12px;
+        line-height: normal;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+        color: #555;
+      }
+      #family_search + .select2-container .select2-choice .select2-chosen {
+        line-height: normal;
+      }
+      #family_search + .select2-container .select2-choice .select2-arrow {
+        border-radius: 0 4px 4px 0;
+        background: none;
+        border-left: none;
+      }
+      #family_search + .select2-container.select2-dropdown-open .select2-choice,
+      #family_search + .select2-container-active .select2-choice {
+        border-color: #ff8c00;
+        box-shadow: 0 0 5px rgba(255, 140, 0, 0.5);
+      }
+

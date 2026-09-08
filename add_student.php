@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 require_login();
@@ -271,42 +271,172 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'AddAd
     }
 }
 
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title><?php echo e($page_title . ' | ' . get_setting('school_name', 'HIFILMS')); ?></title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            colors: {
-                brand: {
-                    orange: '#FF6B2C',
-                    orangeHover: '#EA5A1F',
-                    sidebar: '#161922',
-                    sidebarActive: '#232735',
-                    bg: '#f5f6f8',
-                    border: '#e7e7e7',
-                    textDark: '#1f2430',
-                    textMuted: '#6b7280',
-                    blueBtn: '#3B82F6',
-                    greenBtn: '#22C55E',
-                    redBtn: '#EF4444'
-                }
-            },
-            fontFamily: {
-                sans: ['Inter', 'sans-serif']
+/* ---------------- AJAX / JSON handlers (lookup, multi-save, CSV import) ---------------- */
+if (($_POST['action'] ?? '') === 'AddLookup') {
+    header('Content-Type: application/json');
+    $tableMap = ['boards', 'groups', 'admission_sources', 'document_titles', 'localities'];
+    $table = $_POST['table'] ?? '';
+    $name  = trim($_POST['name'] ?? '');
+    $id    = 0;
+    if (!in_array($table, $tableMap, true) || $name === '') {
+        echo json_encode(['ok' => false, 'msg' => 'Invalid request']);
+        exit;
+    }
+    try {
+        if ($table === 'localities') {
+            $st = db_prepare('INSERT INTO localities (locality_name, status) VALUES (?, 1)');
+            $st->bind_param('s', $name);
+            $st->execute();
+            $id = $st->insert_id;
+        } else {
+            $st = db_prepare("INSERT INTO `$table` (name) VALUES (?)");
+            $st->bind_param('s', $name);
+            $st->execute();
+            $id = $st->insert_id;
+        }
+        echo json_encode(['ok' => true, 'id' => $id, 'name' => $name]);
+    } catch (Exception $ex) {
+        echo json_encode(['ok' => false, 'msg' => $ex->getMessage()]);
+    }
+    exit;
+}
+
+if (($_POST['action'] ?? '') === 'SaveMultiStudents') {
+    header('Content-Type: application/json');
+    $rows      = json_decode($_POST['rows'] ?? '[]', true);
+    $session   = trim($_POST['session'] ?? '');
+    $class_id  = (int)($_POST['class_id'] ?? 0);
+    $section_id = (int)($_POST['section_id'] ?? 0);
+    $inserted  = 0;
+    if (is_array($rows)) {
+        $adm = date('Y-m-d');
+        foreach ($rows as $r) {
+            $name   = trim($r['name'] ?? '');
+            $father = trim($r['father'] ?? '');
+            $cell   = trim($r['cell'] ?? '');
+            $rc = $class_id > 0 ? $class_id : (int)($r['class_id'] ?? 0);
+            $rs = $section_id > 0 ? $section_id : 0;
+            if ($name === '' || $rc === 0) continue;
+            $gender = ($r['gender'] ?? '') === 'Female' ? 'female' : 'male';
+            $sid = 0;
+            if ($rs > 0) {
+                $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, section_id, session, gender, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)');
+                $stmt->bind_param('sssiissd', $name, $father, $cell, $rc, $rs, $session, $gender, $adm);
+                $stmt->execute();
+                $sid = $stmt->insert_id;
+            } else {
+                $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, session, gender, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, 1)');
+                $stmt->bind_param('sssissd', $name, $father, $cell, $rc, $session, $gender, $adm);
+                $stmt->execute();
+                $sid = $stmt->insert_id;
+            }
+            if ($sid > 0) {
+                $gr = substr(date('Y'), 2) . '-' . str_pad($sid, 4, '0', STR_PAD_LEFT);
+                $u = db_prepare('UPDATE students SET gr_no = ? WHERE student_id = ?');
+                $u->bind_param('si', $gr, $sid);
+                $u->execute();
+                $inserted++;
             }
         }
     }
+    echo json_encode(['ok' => true, 'inserted' => $inserted]);
+    exit;
 }
-</script>
+
+if (($_POST['action'] ?? '') === 'ImportCSV') {
+    header('Content-Type: application/json');
+    $rows     = json_decode($_POST['rows'] ?? '[]', true);
+    $session  = trim($_POST['session'] ?? '');
+    $inserted = 0;
+    $skipped  = 0;
+    if (is_array($rows)) {
+        $classCache = [];
+        $sectionCache = [];
+        $adm = date('Y-m-d');
+        foreach ($rows as $r) {
+            $name    = trim($r['name'] ?? '');
+            $father  = trim($r['father'] ?? '');
+            $cell    = trim($r['cell'] ?? '');
+            $cn      = trim($r['class'] ?? '');
+            $sn      = trim($r['section'] ?? '');
+            if ($name === '' || $cn === '') { $skipped++; continue; }
+            if (!isset($classCache[$cn])) {
+                $st = db_prepare('SELECT class_id FROM classes WHERE class_name = ?');
+                $st->bind_param('s', $cn);
+                $st->execute();
+                $res = $st->get_result()->fetch_assoc();
+                $classCache[$cn] = $res ? (int)$res['class_id'] : 0;
+            }
+            $cid = $classCache[$cn];
+            if ($cid === 0) { $skipped++; continue; }
+            $sid = 0;
+            if ($sn !== '') {
+                $key = $cid . '|' . $sn;
+                if (!isset($sectionCache[$key])) {
+                    $st = db_prepare('SELECT section_id FROM sections WHERE class_id = ? AND section_name = ?');
+                    $st->bind_param('is', $cid, $sn);
+                    $st->execute();
+                    $res = $st->get_result()->fetch_assoc();
+                    $sectionCache[$key] = $res ? (int)$res['section_id'] : 0;
+                }
+                $sid = $sectionCache[$key];
+            }
+            $gender  = strtolower(trim($r['gender'] ?? '')) === 'female' ? 'female' : 'male';
+            $religion = trim($r['religion'] ?? '') !== '' ? $r['religion'] : 'Islam';
+            $dob = null;
+            if (!empty($r['dob'])) {
+                $dt = DateTime::createFromFormat('Y-m-d', trim($r['dob']));
+                $dob = $dt ? $dt->format('Y-m-d') : null;
+            }
+            $newId = 0;
+            if ($sid > 0) {
+                $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, section_id, session, gender, religion, dob, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
+                $stmt->bind_param('sssiisssss', $name, $father, $cell, $cid, $sid, $session, $gender, $religion, $dob, $adm);
+                $stmt->execute();
+                $newId = $stmt->insert_id;
+            } else {
+                $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, session, gender, religion, dob, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
+                $stmt->bind_param('sssissdss', $name, $father, $cell, $cid, $session, $gender, $religion, $dob, $adm);
+                $stmt->execute();
+                $newId = $stmt->insert_id;
+            }
+            if ($newId > 0) {
+                $gr = substr(date('Y'), 2) . '-' . str_pad($newId, 4, '0', STR_PAD_LEFT);
+                $u = db_prepare('UPDATE students SET gr_no = ? WHERE student_id = ?');
+                $u->bind_param('si', $gr, $newId);
+                $u->execute();
+                $inserted++;
+            }
+        }
+    }
+    echo json_encode(['ok' => true, 'inserted' => $inserted, 'skipped' => $skipped]);
+    exit;
+}
+
+?>
+
+<?php
+$stateMapDef = [
+    'Punjab' => ['Lahore','Rawalpindi','Faisalabad','Multan','Gujranwala','Sialkot','Bahawalpur','Sargodha','Sheikhupura','Rahim Yar Khan','Jhang','Kasur','Gujrat','Okara','Sahiwal','Mianwali','Dera Ghazi Khan','Attock','Chakwal','Mandi Bahauddin','Vehari','Muzaffargarh','Khanewal','Wazirabad','Hafizabad','Narowal','Burewala','Toba Tek Singh'],
+    'Sindh' => ['Karachi','Hyderabad','Sukkur','Larkana','Nawabshah','Mirpur Khas','Badin','Shikarpur','Dadu','Thatta','Jacobabad','Ghorki'],
+    'Balochistan' => ['Quetta','Khuzdar','Turbat','Gwadar','Chaman','Sibi','Zhob','Noshki'],
+    'KPK' => ['Peshawar','Mardan','Swat','Abbottabad','Kohat','Bannu','Charsadda','Dera Ismail Khan','Nowshera','Mansehra','Haripur','Swabi'],
+    'Gilgit-Baltistan' => ['Gilgit','Skardu','Hunza','Nagar','Ghizer','Astore'],
+    'Kashmir (territory)' => ['Muzaffarabad','Mirpur','Rawalakot','Kotli','Bhimber'],
+    'FATA (territory)' => ['Parachinar','Miranshah','Wana','Kurram'],
+    'Federal' => ['Islamabad']
+];
+?>
+
+<?php include __DIR__ . '/includes/header.php'; ?>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<style>
+.right_col { padding: 0; }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 .fieldset-box {
     position: relative;
@@ -379,110 +509,7 @@ input[type=range] { accent-color: #FF6B2C; }
 }
 .photo-controls:disabled { opacity: .4; pointer-events: none; }
 </style>
-</head>
-<body class="flex h-screen overflow-hidden bg-slate-100 antialiased">
-
-<?php
-$navItems = [
-    ['title' => 'Front Office',       'icon' => 'fa-solid fa-building-columns',          'href' => 'student_inquiry.php'],
-    ['title' => 'Dashboard',          'icon' => 'fa-solid fa-gauge-high',                'href' => 'dashboard.php'],
-    ['title' => 'Students',           'icon' => 'fa-solid fa-user-graduate',             'href' => 'manage_students.php'],
-    ['title' => 'Attendance',         'icon' => 'fa-solid fa-clipboard-user',            'href' => 'mark_attend.php'],
-    ['title' => 'Messages',           'icon' => 'fa-solid fa-comments',                  'href' => 'messages_history.php'],
-    ['title' => 'Fee Collection',     'icon' => 'fa-solid fa-hand-holding-dollar',       'href' => 'fee_challans.php'],
-    ['title' => 'Examination',        'icon' => 'fa-solid fa-file-pen',                  'href' => 'manage_exams.php'],
-    ['title' => 'Timetable',          'icon' => 'fa-solid fa-calendar-days',             'href' => 'class_period.php'],
-    ['title' => 'Employees / HR',     'icon' => 'fa-solid fa-users',                     'href' => 'view_emp.php'],
-    ['title' => 'Datesheet',          'icon' => 'fa-solid fa-table-list',                'href' => 'view_datesheet.php'],
-    ['title' => 'Transport',          'icon' => 'fa-solid fa-bus-simple',                'href' => 'vehicles.php'],
-];
-$topUserName = e($_SESSION['user_name'] ?? 'Admin');
-$topUserRole = e($_SESSION['user_role'] ?? 'admin');
-$initials = strtoupper(substr(trim(preg_replace('/[^A-Za-z]/', '', $topUserName)), 0, 1) ?: 'A');
-$stateMapDef = [
-    'Punjab' => ['Lahore','Rawalpindi','Faisalabad','Multan','Gujranwala','Sialkot','Bahawalpur','Sargodha','Sheikhupura','Rahim Yar Khan','Jhang','Kasur','Gujrat','Okara','Sahiwal','Mianwali','Dera Ghazi Khan','Attock','Chakwal','Mandi Bahauddin','Vehari','Muzaffargarh','Khanewal','Wazirabad','Hafizabad','Narowal','Burewala','Toba Tek Singh'],
-    'Sindh' => ['Karachi','Hyderabad','Sukkur','Larkana','Nawabshah','Mirpur Khas','Badin','Shikarpur','Dadu','Thatta','Jacobabad','Ghorki'],
-    'Balochistan' => ['Quetta','Khuzdar','Turbat','Gwadar','Chaman','Sibi','Zhob','Noshki'],
-    'KPK' => ['Peshawar','Mardan','Swat','Abbottabad','Kohat','Bannu','Charsadda','Dera Ismail Khan','Nowshera','Mansehra','Haripur','Swabi'],
-    'Gilgit-Baltistan' => ['Gilgit','Skardu','Hunza','Nagar','Ghizer','Astore'],
-    'Kashmir (territory)' => ['Muzaffarabad','Mirpur','Rawalakot','Kotli','Bhimber'],
-    'FATA (territory)' => ['Parachinar','Miranshah','Wana','Kurram'],
-    'Federal' => ['Islamabad']
-];
-?>
-
-<!-- ===================== LEFT SIDEBAR ===================== -->
-<aside id="sidebar" class="fixed z-40 inset-y-0 left-0 w-[230px] flex flex-col bg-brand-sidebar text-slate-300 transition-transform duration-300 -translate-x-full lg:translate-x-0">
-    <div class="h-[56px] shrink-0 flex items-center gap-2.5 px-4 border-b border-white/[0.08]">
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-orange to-amber-500 flex items-center justify-center text-white font-bold text-sm">H</div>
-        <div class="min-w-0">
-            <p class="text-white font-semibold text-sm leading-tight truncate"><?php echo e(get_setting('school_name', 'HIFILMS')); ?></p>
-            <p class="text-[10px] text-slate-400 leading-tight">Session <?php echo e(get_setting('session_year', '2026-2027')); ?></p>
-        </div>
-    </div>
-
-    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        <p class="px-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Menu</p>
-        <?php foreach ($navItems as $ni): ?>
-        <a href="<?php echo BASE_URL . $ni['href']; ?>" onclick="closeSidebar()" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition">
-            <i class="<?php echo $ni['icon']; ?> w-4 text-center text-slate-400"></i>
-            <span><?php echo $ni['title']; ?></span>
-        </a>
-        <?php endforeach; ?>
-    </nav>
-
-    <div class="px-3 py-3 border-t border-white/[0.08]">
-        <a href="<?php echo BASE_URL; ?>logout.php" class="flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition">
-            <i class="fa-solid fa-arrow-right-from-bracket w-4 text-center"></i>
-            <span>Logout</span>
-        </a>
-    </div>
-</aside>
-
-<!-- Mobile backdrop -->
-<div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/50 hidden lg:hidden" onclick="closeSidebar()"></div>
-
-<!-- ===================== MAIN AREA ===================== -->
-<div class="flex-1 flex flex-col min-w-0 w-full lg:pl-[230px]">
-
-    <!-- Top Header -->
-    <header class="h-[56px] shrink-0 bg-white border-b border-brand-border flex items-center px-4 gap-3">
-        <button onclick="toggleSidebar()" class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition lg:hidden">
-            <i class="fa-solid fa-bars-staggered text-[15px]"></i>
-        </button>
-        <div class="relative w-full max-w-[420px] hidden md:block">
-            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-            <input type="text" placeholder="Search students, staff, reports..." class="w-full h-9 pl-9 pr-3 rounded-lg bg-slate-100 text-[13px] text-slate-700 outline-none focus:ring-2 focus:ring-brand-orange/50 placeholder:text-slate-400">
-        </div>
-        <select class="hidden lg:block h-9 px-3 rounded-lg bg-slate-100 text-[12px] text-slate-600 outline-none focus:ring-2 focus:ring-brand-orange/50 border-none">
-            <option>Quick Links</option>
-            <option>Admission Form</option>
-            <option>Fee Collection</option>
-            <option>Attendance</option>
-            <option>Result Cards</option>
-        </select>
-        <select class="hidden sm:block h-9 px-3 rounded-lg bg-slate-100 text-[12px] text-slate-600 outline-none focus:ring-2 focus:ring-brand-orange/50 border-none">
-            <option>2026-2027</option>
-            <option>2025-2026</option>
-            <option>2024-2025</option>
-        </select>
-
-        <div class="ml-auto flex items-center gap-1.5">
-            <button class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition"><i class="fa-brands fa-whatsapp text-[17px] text-emerald-500"></i></button>
-            <button class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition relative"><i class="fa-solid fa-envelope text-[15px]"></i><span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-brand-orange"></span></button>
-            <button class="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition relative"><i class="fa-solid fa-bell text-[15px]"></i><span class="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center font-bold">3</span></button>
-            <div class="flex items-center gap-2 pl-2 ml-1 border-l border-brand-border">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-orange to-amber-500 text-white text-[12px] font-bold flex items-center justify-center"><?php echo $initials; ?></div>
-                <div class="hidden sm:block leading-tight">
-                    <p class="text-[12px] font-semibold text-slate-700"><?php echo $topUserName; ?></p>
-                    <p class="text-[10px] text-slate-400"><?php echo ucfirst($topUserRole); ?></p>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Content -->
-    <main id="main-content" class="flex-1 overflow-y-auto p-4 sm:p-5">
+<main id="main-content" class="p-4 sm:p-5">
 
         <?php if ($error !== ''): ?>
         <div class="mb-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-[13px]">
@@ -503,17 +530,17 @@ $stateMapDef = [
         <!-- Top Sub Tabs -->
         <div class="flex items-center gap-1 bg-white border border-brand-border rounded-xl p-1.5 mb-5 overflow-x-auto">
             <button id="tab-btn-single" onclick="switchMainView('single')" class="tab-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
-                <i class="fa-solid fa-user-plus"></i> Add New Student
+                <i class="fa fa-user-plus"></i> Add New Student
             </button>
-            <button id="tab-btn-multi" onclick="switchMainView('multi')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
-                <i class="fa-solid fa-users"></i> Add Multi Students
-            </button>
-            <button id="tab-btn-import" onclick="switchMainView('import')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
-                <i class="fa-solid fa-file-csv"></i> Import CSV
-            </button>
-            <button id="tab-btn-form" onclick="switchMainView('form')" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
-                <i class="fa-solid fa-file-lines"></i> Admission Form
-            </button>
+            <a id="tab-btn-multi" href="<?php echo BASE_URL; ?>bulk_stdns.php" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0 no-underline">
+                <i class="fa fa-users"></i> Add Multi Students
+            </a>
+            <a id="tab-btn-import" href="<?php echo BASE_URL; ?>import_data.php" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0 no-underline">
+                <i class="fa fa-upload"></i> Import Students with CSV
+            </a>
+            <a id="tab-btn-form" href="<?php echo BASE_URL; ?>adm_form.php" target="_blank" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0 no-underline">
+                <i class="fa fa-file-alt"></i> Admission Form
+            </a>
         </div>
 
         <!-- ===================== VIEW: SINGLE STUDENT ===================== -->
@@ -521,28 +548,20 @@ $stateMapDef = [
 
             <!-- Step Tracker -->
             <div class="bg-white border border-brand-border rounded-xl p-4 mb-5">
-                <div class="flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-brand-orange text-white text-[13px] font-bold flex items-center justify-center shadow">1</div>
                         <div>
                             <p class="text-[13px] font-semibold text-slate-700">Student Info</p>
-                            <p class="text-[11px] text-slate-400">Name, class, contact details</p>
+                            <p class="text-[11px] text-slate-400">Name, class &amp; contact details</p>
                         </div>
                     </div>
-                    <div class="hidden md:block w-16 border-t-2 border-dashed border-slate-200"></div>
+                    <div class="hidden md:block flex-1 max-w-[120px] border-t-2 border-dashed border-slate-200"></div>
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-500 text-[13px] font-bold flex items-center justify-center">2</div>
                         <div>
                             <p class="text-[13px] font-semibold text-slate-700">Fee &amp; Parent Info</p>
                             <p class="text-[11px] text-slate-400">Guardians &amp; fee plan setup</p>
-                        </div>
-                    </div>
-                    <div class="hidden md:block w-16 border-t-2 border-dashed border-slate-200"></div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-500 text-[13px] font-bold flex items-center justify-center">3</div>
-                        <div>
-                            <p class="text-[13px] font-semibold text-slate-700">Submission</p>
-                            <p class="text-[11px] text-slate-400">Documents &amp; final review</p>
                         </div>
                     </div>
                 </div>
@@ -551,16 +570,16 @@ $stateMapDef = [
             <!-- Inner Tabs -->
             <div class="flex items-center gap-1 mb-4 overflow-x-auto">
                 <button id="subtab-basic" onclick="switchFormTab('basic')" class="subtab-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-id-card"></i> Basic Info
+                    <i class="fa-solid fa-id-card"></i> Basic Information
                 </button>
                 <button id="subtab-parent" onclick="switchFormTab('parent')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-people-roof"></i> Parent &amp; Guardian Info
+                    <i class="fa-solid fa-people-roof"></i> Parent Details
                 </button>
                 <button id="subtab-academic" onclick="switchFormTab('academic')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-graduation-cap"></i> Academic Info
+                    <i class="fa-solid fa-graduation-cap"></i> Academic Information
                 </button>
                 <button id="subtab-contact" onclick="switchFormTab('contact')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-address-book"></i> Contact Info
+                    <i class="fa-solid fa-address-book"></i> Contact Information
                 </button>
                 <button id="subtab-documents" onclick="switchFormTab('documents')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
                     <i class="fa-solid fa-paperclip"></i> Documents
@@ -634,38 +653,47 @@ $stateMapDef = [
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Board / Council</label>
-                                        <select name="board_council" id="board_council" class="fieldset-select">
-                                            <option value="">Select Board</option>
-                                            <?php foreach ($boards as $b): ?>
-                                            <option value="<?php echo $b['id']; ?>"><?php echo e($b['name']); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <div class="flex items-center gap-1.5">
+                                            <select name="board_council" id="board_council" class="fieldset-select flex-1">
+                                                <option value="">Select Board</option>
+                                                <?php foreach ($boards as $b): ?>
+                                                <option value="<?php echo $b['id']; ?>"><?php echo e($b['name']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <a href="<?php echo BASE_URL; ?>manage_board.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Board"><i class="fa fa-plus text-[10px]"></i> Add New</a>
+                                        </div>
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Group / Shift</label>
-                                        <select name="group_shift" id="group_shift" class="fieldset-select">
-                                            <option value="">Select Group</option>
-                                            <?php foreach ($groups as $g): ?>
-                                            <option value="<?php echo $g['id']; ?>"><?php echo e($g['name']); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <div class="flex items-center gap-1.5">
+                                            <select name="group_shift" id="group_shift" class="fieldset-select flex-1">
+                                                <option value="">Select Group</option>
+                                                <?php foreach ($groups as $g): ?>
+                                                <option value="<?php echo $g['id']; ?>"><?php echo e($g['name']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <a href="<?php echo BASE_URL; ?>manage_group.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Group"><i class="fa fa-plus text-[10px]"></i> Add New</a>
+                                        </div>
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Admission Source</label>
-                                        <select name="adm_source" id="adm_source" class="fieldset-select">
-                                            <option value="">Select Source</option>
-                                            <?php foreach ($admSrcs as $a): ?>
-                                            <option value="<?php echo $a['id']; ?>"><?php echo e($a['name']); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <div class="flex items-center gap-1.5">
+                                            <select name="adm_source" id="adm_source" class="fieldset-select flex-1">
+                                                <option value="">Select Source</option>
+                                                <?php foreach ($admSrcs as $a): ?>
+                                                <option value="<?php echo $a['id']; ?>"><?php echo e($a['name']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <a href="<?php echo BASE_URL; ?>manage_admission_sources.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Source"><i class="fa fa-plus text-[10px]"></i> Add New</a>
+                                        </div>
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Date of Birth</label>
-                                        <input type="date" class="fieldset-input" name="dob" id="dob" value="<?php echo date('Y-m-d'); ?>">
+                                        <input type="text" class="fieldset-input" name="dob" id="dob" placeholder="dd/mm/yyyy" value="<?php echo date('d/m/Y'); ?>" autocomplete="off">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Date of Admission</label>
-                                        <input type="date" class="fieldset-input" name="date_of_adms" id="date_of_adms" value="<?php echo date('Y-m-d'); ?>">
+                                        <input type="text" class="fieldset-input" name="date_of_adms" id="date_of_adms" placeholder="dd/mm/yyyy" value="<?php echo date('d/m/Y'); ?>" autocomplete="off">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label required">Gender</label>
@@ -684,12 +712,15 @@ $stateMapDef = [
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Locality</label>
-                                        <select name="Locality" id="locality" class="fieldset-select">
-                                            <option value="">Select Locality</option>
-                                            <?php foreach ($localities as $loc): ?>
-                                            <option value="<?php echo $loc['locality_id']; ?>"><?php echo e($loc['locality_name']); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                        <div class="flex items-center gap-1.5">
+                                            <select name="Locality" id="locality" class="fieldset-select flex-1">
+                                                <option value="">Select Locality</option>
+                                                <?php foreach ($localities as $loc): ?>
+                                                <option value="<?php echo $loc['locality_id']; ?>"><?php echo e($loc['locality_name']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <a href="<?php echo BASE_URL; ?>manage_localities.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Locality"><i class="fa fa-plus text-[10px]"></i> Add New</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -713,16 +744,15 @@ $stateMapDef = [
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Father Occupation</label>
-                                        <select name="father_occupation" id="father_occupation" class="fieldset-select">
-                                            <option value="">Select Occupation</option>
-                                            <?php foreach ($occupations as $o): ?>
-                                            <option value="<?php echo $o['id']; ?>"><?php echo e($o['name']); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </div>
-                                    <div class="fieldset-box">
-                                        <label class="fieldset-label">Father Cell No</label>
-                                        <input type="text" class="fieldset-input" name="father_cellno" id="father_cellno" placeholder="03XX-XXXXXXX" inputmode="tel">
+                                        <div class="flex items-center gap-1.5">
+                                            <select name="father_occupation" id="father_occupation" class="fieldset-select flex-1">
+                                                <option value="">Select Occupation</option>
+                                                <?php foreach ($occupations as $o): ?>
+                                                <option value="<?php echo $o['id']; ?>"><?php echo e($o['name']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <a href="<?php echo BASE_URL; ?>manage_occupations.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Occupation"><i class="fa fa-plus text-[10px]"></i> Add New</a>
+                                        </div>
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Father Business Address</label>
@@ -758,16 +788,16 @@ $stateMapDef = [
                                         <input type="text" class="fieldset-input" name="mother_designation" id="mother_designation" placeholder="Designation">
                                     </div>
                                     <div class="fieldset-box">
-                                        <label class="fieldset-label">Mother Cell No</label>
-                                        <input type="text" class="fieldset-input" name="mother_cell" id="mother_cell" placeholder="03XX-XXXXXXX" inputmode="tel">
-                                    </div>
-                                    <div class="fieldset-box">
                                         <label class="fieldset-label">B-Form No</label>
                                         <input type="text" class="fieldset-input" name="formBNo" id="formBNo" placeholder="B-Form number">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Cast</label>
                                         <input type="text" class="fieldset-input" name="cast" id="cast" placeholder="Caste">
+                                    </div>
+                                    <div class="fieldset-box col-span-2">
+                                        <label class="fieldset-label">Home Address</label>
+                                        <textarea class="fieldset-input fieldset-area" name="address" id="address" placeholder="Complete residential address"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -856,20 +886,24 @@ $stateMapDef = [
                                 </h3>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <div class="fieldset-box">
-                                        <label class="fieldset-label">Whatsapp Number</label>
+                                        <label class="fieldset-label">Whatsapp No</label>
                                         <input type="text" class="fieldset-input" name="whatsapp_number" id="whatsapp_number" placeholder="03XX-XXXXXXX" inputmode="tel">
                                     </div>
                                     <div class="fieldset-box">
-                                        <label class="fieldset-label">Home Number</label>
+                                        <label class="fieldset-label">Father Cell No</label>
+                                        <input type="text" class="fieldset-input" name="father_cellno" id="father_cellno" placeholder="03XX-XXXXXXX" inputmode="tel">
+                                    </div>
+                                    <div class="fieldset-box">
+                                        <label class="fieldset-label">Mother Cell No</label>
+                                        <input type="text" class="fieldset-input" name="mother_cell" id="mother_cell" placeholder="03XX-XXXXXXX" inputmode="tel">
+                                    </div>
+                                    <div class="fieldset-box">
+                                        <label class="fieldset-label">Home Cell No</label>
                                         <input type="text" class="fieldset-input" name="home_number" id="home_number" placeholder="Landline (optional)">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Place of Birth</label>
                                         <input type="text" class="fieldset-input" name="place_of_birth" id="place_of_birth" placeholder="City of birth">
-                                    </div>
-                                    <div class="fieldset-box">
-                                        <label class="fieldset-label">Email</label>
-                                        <input type="email" class="fieldset-input" name="email" id="email" placeholder="student@email.com">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">State / Province</label>
@@ -886,9 +920,9 @@ $stateMapDef = [
                                             <option value="" disabled selected>Select City</option>
                                         </select>
                                     </div>
-                                    <div class="fieldset-box col-span-2">
-                                        <label class="fieldset-label">Home Address</label>
-                                        <textarea class="fieldset-input fieldset-area" name="address" id="address" placeholder="Complete residential address"></textarea>
+                                    <div class="fieldset-box">
+                                        <label class="fieldset-label">Email</label>
+                                        <input type="email" class="fieldset-input" name="email" id="email" placeholder="student@email.com">
                                     </div>
                                 </div>
                             </div>
@@ -897,19 +931,33 @@ $stateMapDef = [
                         <!-- DOCUMENTS TAB -->
                         <div id="form-documents" class="hidden">
                             <div class="bg-white border border-brand-border rounded-xl p-5">
-                                <h3 class="text-[13px] font-bold text-slate-700 mb-1 flex items-center gap-2">
-                                    <i class="fa-solid fa-paperclip text-brand-orange"></i> Attached Documents
-                                </h3>
-                                <p class="text-[11px] text-slate-400 mb-4">Upload PDF, JPG or PNG files. Multiple documents supported.</p>
+                                <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
+                                    <div>
+                                        <h3 class="text-[13px] font-bold text-slate-700 mb-1 flex items-center gap-2">
+                                            <i class="fa-solid fa-paperclip text-brand-orange"></i> Student Documents
+                                        </h3>
+                                        <p class="text-[11px] text-slate-400"><i class="fa fa-info-circle mr-1"></i>Upload the student's documents below. Accepted formats: JPG, JPEG, PNG, PDF.</p>
+                                    </div>
+                                    <a href="<?php echo BASE_URL; ?>add_student_documents.php" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-border bg-orange-50 hover:bg-orange-100 text-brand-orange text-[11px] font-semibold transition no-underline">
+                                        <i class="fa fa-plus-circle"></i> Manage Document Titles
+                                    </a>
+                                </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                     <?php foreach ($docTitles as $di => $doc): ?>
-                                    <div id="doc-card-<?php echo $doc['id']; ?>" class="border border-dashed border-brand-border rounded-xl p-3">
-                                        <input type="hidden" name="doc_types[]" value="<?php echo e($doc['name']); ?>">
-                                        <label class="text-[12px] font-semibold text-slate-600 block mb-2 leading-tight"><?php echo e($doc['name']); ?></label>
-                                        <div class="flex items-center justify-between gap-2">
-                                            <input type="file" name="doc_files[]" class="text-[10px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[11px] file:font-medium file:bg-orange-50 file:text-brand-orange hover:file:bg-orange-100 cursor-pointer file:cursor-pointer" accept=".pdf,.jpg,.jpeg,.png" onchange="previewStudentDoc(this)">
-                                            <button type="button" onclick="openModal('Document: <?php echo e($doc['name']); ?>')" class="shrink-0 w-6 h-6 rounded-md text-brand-orange hover:bg-orange-50 flex items-center justify-center" title="More options"><i class="fa-solid fa-ellipsis-vertical text-[11px]"></i></button>
+                                    <div id="doc-card-<?php echo $doc['id']; ?>" class="border border-dashed border-brand-border rounded-xl p-3 text-center">
+                                        <div class="w-10 h-10 mx-auto rounded-lg bg-orange-50 text-brand-orange flex items-center justify-center mb-2">
+                                            <i class="fa-regular fa-file-lines text-[16px]"></i>
                                         </div>
+                                        <label class="text-[12px] font-semibold text-slate-600 block mb-1.5 leading-tight"><?php echo e($doc['name']); ?></label>
+                                        <span id="docStatus_<?php echo $di; ?>" class="doc-card-status inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 mb-2">Not Uploaded</span>
+                                        <div class="mb-2">
+                                            <label for="docFile_<?php echo $di; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-blueBtn hover:bg-blue-600 text-white text-[11px] font-semibold transition cursor-pointer">
+                                                <i class="fa fa-upload"></i> Choose File
+                                            </label>
+                                        </div>
+                                        <input type="hidden" name="doc_types[]" value="<?php echo e($doc['name']); ?>">
+                                        <input type="file" id="docFile_<?php echo $di; ?>" name="doc_files[]" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="previewStudentDoc(this, <?php echo $di; ?>)">
+                                        <div class="doc-card-filename" id="docFileName_<?php echo $di; ?>"></div>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -942,7 +990,7 @@ $stateMapDef = [
                             </div>
 
                             <div id="photo-frame" class="hidden relative w-44 h-48 mx-auto rounded-xl overflow-hidden border border-slate-200 bg-white">
-                                <img id="photo-preview" class="w-full h-full object-cover absolute inset-0" style="transform-origin:center;">
+                                <img id="photo-preview" class="w-full h-full object-cover absolute inset-0 select-none" style="transform-origin:center; cursor:grab;" onmousedown="posPhotoDrag(event)">
                                 <button type="button" id="photo-delete-btn" onclick="deletePhotoFrame(event)" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500 text-white text-[11px] flex items-center justify-center shadow hover:bg-red-600 transition z-10"><i class="fa-solid fa-xmark"></i></button>
                             </div>
 
@@ -1049,48 +1097,13 @@ $stateMapDef = [
         </div>
 
     </main>
-</div>
-
-<!-- ===================== MODAL ===================== -->
-<div id="add-modal" class="hidden flex items-center justify-center fixed inset-0 z-50 bg-black/50">
-    <div class="bg-white rounded-xl w-[420px] max-w-[95%] shadow-xl">
-        <div class="flex items-center justify-between px-4 py-3 border-b border-brand-border">
-            <h3 id="modal-title" class="text-[14px] font-bold text-slate-700">Add New</h3>
-            <button onclick="closeModal()" class="w-7 h-7 rounded-lg hover:bg-slate-100 text-slate-400 flex items-center justify-center transition"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="p-4 space-y-3">
-            <div class="fieldset-box">
-                <label id="modal-field-label" class="fieldset-label">Title</label>
-                <input type="text" id="modal-input" class="fieldset-input" placeholder="Enter value">
-            </div>
-            <div class="flex items-center justify-end gap-2 pt-1">
-                <button onclick="closeModal()" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[12px] font-medium transition">Cancel</button>
-                <button onclick="submitModalItem()" class="px-5 py-2 rounded-lg bg-brand-orange hover:bg-brand-orangeHover text-white text-[12px] font-semibold transition"><i class="fa-solid fa-check"></i> Save</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- ===================== TOAST ===================== -->
 <div id="toast-container" class="fixed top-4 right-4 z-[100] space-y-2 w-[320px] max-w-[90vw]"></div>
 
 <script>
 var HIIFI_BASE = '<?php echo BASE_URL; ?>';
-var modalSaveCallback = null;
 
-function toggleSidebar() {
-    var sb = document.getElementById('sidebar');
-    var bk = document.getElementById('sidebar-backdrop');
-    sb.classList.toggle('-translate-x-full');
-    if (bk) bk.classList.toggle('hidden');
-}
-
-function closeSidebar() {
-    var sb = document.getElementById('sidebar');
-    var bk = document.getElementById('sidebar-backdrop');
-    if (sb) sb.classList.add('-translate-x-full');
-    if (bk) bk.classList.add('hidden');
-}
 
 function switchMainView(view) {
     if (view === 'form') { window.location = HIIFI_BASE + 'adm_form.php'; return; }
@@ -1135,27 +1148,6 @@ function showToast(msg, type) {
     setTimeout(function () { el.classList.add('remove'); setTimeout(function () { el.remove(); }, 260); }, 3200);
 }
 
-function openModal(title, label) {
-    document.getElementById('modal-title').textContent = title || 'Add New';
-    document.getElementById('modal-field-label').textContent = label || 'Title';
-    document.getElementById('modal-input').value = '';
-    document.getElementById('modal-input').focus();
-    document.getElementById('add-modal').classList.remove('hidden');
-}
-
-function closeModal() {
-    document.getElementById('add-modal').classList.add('hidden');
-    modalSaveCallback = null;
-}
-
-function submitModalItem() {
-    var val = document.getElementById('modal-input').value.trim();
-    if (!val) { showToast('Please enter a value first', 'warning'); return; }
-    if (modalSaveCallback) modalSaveCallback(val);
-    closeModal();
-    showToast('Saved successfully', 'success');
-}
-
 /* ---------------- Photo ---------------- */
 function handlePhotoUpload(e) {
     var input = e.target;
@@ -1179,6 +1171,43 @@ function handlePhotoUpload(e) {
     };
     reader.readAsDataURL(file);
 }
+
+/* drag-to-position the photo inside the frame */
+var _photoDrag = null;
+function posPhotoDrag(e) {
+    e.preventDefault();
+    var img = document.getElementById('photo-preview');
+    _photoDrag = {
+        startX: e.clientX,
+        startY: e.clientY,
+        orgLeft: parseInt(img.style.left) || 0,
+        orgTop: parseInt(img.style.top) || 0,
+        img: img
+    };
+    onPosPhotoMove(e);
+}
+function onPosPhotoMove(e) {
+    if (!_photoDrag) return;
+    var dx = e.clientX - _photoDrag.startX;
+    var dy = e.clientY - _photoDrag.startY;
+    var img = _photoDrag.img;
+    var frame = img.parentElement;
+    var fw = frame.offsetWidth;
+    var fh = frame.offsetHeight;
+    var sw = (img.naturalWidth || fw) / fw;
+    var sh = (img.naturalHeight || fh) / fh;
+    var maxX = Math.round(fw * (sw - 1) / 2);
+    var maxY = Math.round(fh * (sh - 1) / 2);
+    var nx = _photoDrag.orgLeft + dx;
+    var ny = _photoDrag.orgTop + dy;
+    if (nx > maxX) nx = maxX;
+    if (nx < -maxX) nx = -maxX;
+    if (ny > maxY) ny = maxY;
+    if (ny < -maxY) ny = -maxY;
+    img.style.left = nx + 'px';
+    img.style.top = ny + 'px';
+}
+function endPhotoDrag() { _photoDrag = null; }
 
 function updatePhotoTransform() {
     var img = document.getElementById('photo-preview');
@@ -1231,8 +1260,11 @@ function handleSaveStudent(e) {
     var rotateSlider = document.getElementById('rotate-slider');
     var frameVisible = frame && !frame.classList.contains('hidden');
     var hasNewFile = fileInput.files && fileInput.files[0];
+    var photoPreview = document.getElementById('photo-preview');
+    var imgLeft = photoPreview ? (parseFloat(photoPreview.style.left) || 0) : 0;
+    var imgTop = photoPreview ? (parseFloat(photoPreview.style.top) || 0) : 0;
     var hasTransformation = zoomSlider && rotateSlider &&
-        (parseFloat(zoomSlider.value) !== 1 || parseInt(rotateSlider.value) !== 0);
+        (parseFloat(zoomSlider.value) !== 1 || parseInt(rotateSlider.value) !== 0 || imgLeft !== 0 || imgTop !== 0);
     if (!frameVisible || (!hasNewFile && !hasTransformation)) { form.submit(); return; }
 
     window._studentSaveProcessing = true;
@@ -1253,6 +1285,8 @@ function processImageTransformation() {
     }
     var zoom = parseFloat(zoomSlider.value) || 1;
     var rotation = parseInt(rotateSlider.value) || 0;
+    var imgLeft = parseFloat(image.style.left) || 0;
+    var imgTop = parseFloat(image.style.top) || 0;
     var containerWidth = 176;
     var containerHeight = 192;
     var outputScale = 2;
@@ -1279,7 +1313,7 @@ function processImageTransformation() {
     }
     var drawWidth = baseWidth * zoom;
     var drawHeight = baseHeight * zoom;
-    ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+    ctx.drawImage(image, -drawWidth / 2 + imgLeft, -drawHeight / 2 + imgTop, drawWidth, drawHeight);
     ctx.restore();
     canvas.toBlob(function (blob) {
         if (!blob) { showToast('Failed to process image', 'error'); window._studentSaveProcessing = false; return; }
@@ -1297,12 +1331,20 @@ function processImageTransformation() {
     }, 'image/jpeg', 0.98);
 }
 
-function previewStudentDoc(input) {
+function previewStudentDoc(input, idx) {
     var file = input.files && input.files[0];
-    if (!file) return;
-    var card = input.closest('.border-dashed');
-    var label = card.querySelector('.fieldset-label') || card.querySelector('label');
-    if (label) showToast('File selected: ' + file.name, 'info');
+    var status = document.getElementById('docStatus_' + idx);
+    var nameEl = document.getElementById('docFileName_' + idx);
+    if (!file) {
+        if (status) { status.textContent = 'Not Uploaded'; status.className = 'doc-card-status inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 mb-2'; }
+        if (nameEl) nameEl.textContent = '';
+        return;
+    }
+    if (status) {
+        status.textContent = 'Uploaded';
+        status.className = 'doc-card-status inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-600 mb-2';
+    }
+    if (nameEl) { nameEl.textContent = file.name; nameEl.className = 'doc-card-filename text-[10px] text-slate-400 truncate mt-1'; }
 }
 
 /* ---------------- Sections / Family / City ---------------- */
@@ -1421,26 +1463,35 @@ function removeMultiRow(rowId) {
     if (el) { el.remove(); showToast('Row removed', 'info'); }
 }
 function saveMultiStudents() {
-    var rows = document.querySelectorAll('#multi-student-tbody tr');
-    var count = 0;
-    rows.forEach(function (tr) {
+    var rows = [];
+    document.querySelectorAll('#multi-student-tbody tr').forEach(function (tr) {
         var name = (tr.querySelector('input[id^="multi-name-"]') || {}).value || '';
-        if (name) count++;
+        var father = (tr.querySelector('input[id^="multi-father-"]') || {}).value || '';
+        var cell = (tr.querySelector('input[id^="multi-cell-"]') || {}).value || '';
+        var cls = (tr.querySelector('select[id^="multi-class-"]') || { value: '' }).value || '';
+        if (name) rows.push({ name: name, father: father, cell: cell, class_id: cls });
     });
-    if (count === 0) { showToast('No students added yet', 'warning'); return; }
-    showToast(count + ' students ready to save. Use Add Multi Students for bulk save.', 'success');
+    if (rows.length === 0) { showToast('No students added yet', 'warning'); return; }
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', HIIFI_BASE + 'add_student.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.onload = function () {
+        var resp;
+        try { resp = JSON.parse(xhr.responseText); } catch (err) { resp = null; }
+        if (resp && resp.ok) {
+            showToast(resp.inserted + ' student(s) saved successfully', 'success');
+            document.querySelectorAll('#multi-student-tbody tr').forEach(function (tr) { tr.remove(); });
+            multiIndex = 0;
+            for (var i = 0; i < 3; i++) addMultiRow();
+        } else {
+            showToast('Failed to save students', 'error');
+        }
+    };
+    xhr.send('action=SaveMultiStudents&rows=' + encodeURIComponent(JSON.stringify(rows)));
 }
 
 /* ---------------- CSV Import ---------------- */
-var initialCSVData = [
-    { SNo: 1, StudentName: 'Ahmed Raza', FatherName: 'Muhammad Raza', CellNo: '0300-1234567', Class: '10th' },
-    { SNo: 2, StudentName: 'Fatima Bibi', FatherName: 'Abdul Ghafoor', CellNo: '0345-9876543', Class: '8th' },
-    { SNo: 3, StudentName: 'Hassan Ali', FatherName: 'Ali Akbar', CellNo: '0333-1122334', Class: '9th' },
-    { SNo: 4, StudentName: 'Ayesha Khan', FatherName: 'Naveed Khan', CellNo: '0312-4455667', Class: '7th' },
-    { SNo: 5, StudentName: 'Bilal Ahmed', FatherName: 'Tariq Ahmed', CellNo: '0301-9988776', Class: '6th' },
-    { SNo: 6, StudentName: 'Zainab Noor', FatherName: 'Imran Noor', CellNo: '0322-5566778', Class: '5th' },
-    { SNo: 7, StudentName: 'Usman Malik', FatherName: 'Shahid Malik', CellNo: '0307-3344556', Class: '10th' }
-];
 var csvRecords = [];
 var multiClassOptions = '<?php foreach ($classes as $cl): ?><option value="<?php echo $cl['class_id']; ?>"><?php echo e($cl['class_name']); ?></option><?php endforeach; ?>';
 
@@ -1480,10 +1531,82 @@ function deleteCSVRecord(sno) {
 function triggerCSVImport(input) {
     var file = input.files && input.files[0];
     if (!file) return;
-    showToast('CSV imported: ' + file.name, 'success');
-    csvRecords = initialCSVData.map(function (r) { return Object.assign({}, r); });
-    renderCSVTable();
-    switchMainView('import');
+    var ext = file.name.split('.').pop().toLowerCase();
+    if (ext !== 'csv') { showToast('Please select a CSV file', 'warning'); input.value = ''; return; }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+        var text = ev.target.result;
+        csvRecords = parseCSV(text);
+        if (csvRecords.length === 0) {
+            showToast('No valid rows found in CSV', 'warning');
+            input.value = '';
+            return;
+        }
+        renderCSVTable();
+        showToast(csvRecords.length + ' records loaded from ' + file.name, 'success');
+    };
+    reader.onerror = function () { showToast('Failed to read file', 'error'); };
+    reader.readAsText(file);
+}
+
+function parseCSV(text) {
+    var lines = (text || '').split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    if (lines.length === 0) return [];
+    var header = splitCSVLine(lines[0]);
+    var hIdx = {};
+    header.forEach(function (h, i) { hIdx[h.trim().toLowerCase()] = i; });
+    var nameCol = findCol(hIdx, ['student name', 'name', 'student']);
+    var fatherCol = findCol(hIdx, ['father name', 'father', 'fathers name']);
+    var cellCol = findCol(hIdx, ['cell', 'mobile', 'cell no', 'cellno', 'phone', 'contact']);
+    var classCol = findCol(hIdx, ['class', 'class name', 'cls']);
+    if (nameCol === -1 || classCol === -1) return [];
+    var rows = [];
+    var sno = 1;
+    for (var i = 1; i < lines.length; i++) {
+        var c = splitCSVLine(lines[i]);
+        var name = (c[nameCol] || '').trim();
+        if (!name) continue;
+        rows.push({
+            SNo: sno++,
+            StudentName: name,
+            FatherName: fatherCol !== -1 ? (c[fatherCol] || '').trim() : '',
+            CellNo: cellCol !== -1 ? (c[cellCol] || '').trim() : '',
+            Class: (c[classCol] || '').trim(),
+            Section: '',
+            Gender: '',
+            Religion: '',
+            DOB: ''
+        });
+    }
+    return rows;
+}
+
+function findCol(hIdx, names) {
+    for (var i = 0; i < names.length; i++) {
+        if (hIdx[names[i]] !== undefined) return hIdx[names[i]];
+    }
+    return -1;
+}
+
+function splitCSVLine(line) {
+    var out = [];
+    var cur = '';
+    var inQ = false;
+    for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (inQ) {
+            if (ch === '"') {
+                if (line[i + 1] === '"') { cur += '"'; i++; }
+                else inQ = false;
+            } else cur += ch;
+        } else {
+            if (ch === '"') inQ = true;
+            else if (ch === ',') { out.push(cur); cur = ''; }
+            else cur += ch;
+        }
+    }
+    out.push(cur);
+    return out;
 }
 function downloadSampleCSV() {
     var csv = 'S.No,Student Name,Father Name,Cell / Mobile,Class\n1,Ahmed Raza,Muhammad Raza,0300-1234567,10th\n2,Fatima Bibi,Abdul Ghafoor,0345-9876543,8th\n';
@@ -1496,12 +1619,27 @@ function downloadSampleCSV() {
     showToast('Sample CSV downloaded', 'success');
 }
 function saveImportedData() {
-    var rows = document.querySelectorAll('#csv-table-body tr');
-    if (rows.length === 0) { showToast('No records to import', 'warning'); return; }
-    var count = rows.length;
-    showToast(count + ' student(s) imported successfully', 'success');
-    csvRecords = [];
-    renderCSVTable();
+    if (csvRecords.length === 0) { showToast('No records to import', 'warning'); return; }
+    var rows = csvRecords.map(function (r) {
+        return { name: r.StudentName, father: r.FatherName, cell: r.CellNo, class: r.Class };
+    });
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', HIIFI_BASE + 'add_student.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.onload = function () {
+        var resp;
+        try { resp = JSON.parse(xhr.responseText); } catch (err) { resp = null; }
+        if (resp && resp.ok) {
+            showToast(resp.inserted + ' student(s) imported, ' + resp.skipped + ' skipped', resp.skipped > 0 ? 'warning' : 'success');
+            csvRecords = [];
+            renderCSVTable();
+            document.getElementById('import-csv-input').value = '';
+        } else {
+            showToast('Import failed', 'error');
+        }
+    };
+    xhr.send('action=ImportCSV&rows=' + encodeURIComponent(JSON.stringify(rows)));
 }
 function clearImportedData() {
     csvRecords = [];
@@ -1511,10 +1649,21 @@ function clearImportedData() {
 
 window.onload = function () {
     multiIndex = 0;
-    for (var i = 0; i < 5; i++) addMultiRow();
-    csvRecords = initialCSVData.map(function (r) { return Object.assign({}, r); });
+    for (var i = 0; i < 3; i++) addMultiRow();
+    csvRecords = [];
     renderCSVTable();
+
+    document.addEventListener('mousemove', onPosPhotoMove);
+    document.addEventListener('mouseup', endPhotoDrag);
+
+    if (window.flatpickr) {
+        flatpickr('#dob', { dateFormat: 'd/m/Y' });
+        flatpickr('#date_of_adms', { dateFormat: 'd/m/Y' });
+    }
+    if (window.jQuery && jQuery.fn.select2) {
+        jQuery('#family_search').select2({ width: '100%', placeholder: 'Select Family', allowClear: true });
+    }
 };
 </script>
-</body>
-</html>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>

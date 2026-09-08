@@ -278,6 +278,9 @@
           <li><a href="<?php echo BASE_URL; ?>parents_portal_dashboard.php">Parents Overview</a></li>
         </ul>
       </li>
+      <li>
+        <a href="<?php echo BASE_URL; ?>student_portal.php"><i class="fa fa-graduation-cap"></i><span class="label" style="font-weight: normal !important;">Student Portal</span></a>
+      </li>
       <li class="has-children">
         <a href="javascript:void(0)"><i class="fa fa-money"></i><span class="label" style="font-weight: normal !important;">Expenses</span><span class="fa fa-chevron-right chev"></span></a>
         <ul class="child_menu" style="display: none;">
