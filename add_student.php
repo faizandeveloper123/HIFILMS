@@ -466,6 +466,12 @@ $stateMapDef = [
     .fieldset-box .btn-add-new { display: inline-flex; align-items: center; gap: 3px; font-size: clamp(10px, 0.9vw, 12px); font-weight: 600; color: var(--primary); padding: 2px clamp(6px, 0.6vw, 10px); border-radius: 4px; text-decoration: none; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; background: transparent; border: none; cursor: pointer; }
     .fieldset-box .btn-add-new:hover { background: var(--primary-light); }
     .fieldset-box .btn-add-new i { font-size: clamp(9px, 0.8vw, 11px); }
+    .fieldset-box .family-add-box { margin-top: 10px; padding: clamp(8px, 1vw, 12px); border: 1px dashed var(--primary); border-radius: 8px; background: var(--primary-light); display: flex; flex-direction: column; gap: 8px; }
+    .fieldset-box .family-add-box .family-add-head { font-size: clamp(10px, 0.9vw, 12px); font-weight: 600; color: var(--primary); }
+    .fieldset-box .family-add-box .family-add-head i { margin-right: 4px; }
+    .fieldset-box .family-add-box input { width: 100%; border: 1px solid var(--gray-200); border-radius: 6px; background: white; font-size: clamp(11px, 1vw, 13px); color: var(--gray-800); padding: 6px 8px; font-family: inherit; }
+    .fieldset-box .family-add-box .family-add-actions { display: flex; align-items: center; gap: 8px; }
+    .fieldset-box .family-add-box .family-add-actions .btn-primary, .fieldset-box .family-add-box .family-add-actions .btn-secondary { font-size: clamp(10px, 0.9vw, 12px); padding: 4px 12px; }
 
     /* Main Layout */
     .main-layout { display: grid; grid-template-columns: 1fr minmax(200px, 280px); gap: clamp(16px, 2vw, 24px); }
@@ -746,7 +752,17 @@ $stateMapDef = [
                                             <?php foreach ($families as $fam): ?>
                                             <option value="<?php echo e($fam['family_code']); ?>"><?php echo e($fam['family_code'] . ' - ' . $fam['last_name']); ?></option>
                                             <?php endforeach; ?>
+                                            <option value="__add__">+ Add New Family</option>
                                         </select>
+                                        <div class="family-add-box" id="family_add_box" style="display:none;">
+                                            <div class="family-add-head"><i class="fas fa-user-friends"></i> Add New Family</div>
+                                            <input type="text" id="new_family_name" placeholder="Family / Guardian Name" maxlength="100">
+                                            <input type="text" id="new_family_cell" placeholder="Family Cell / Phone No" inputmode="tel" maxlength="20">
+                                            <div class="family-add-actions">
+                                                <button type="button" class="btn-primary" onclick="addNewFamily()"><i class="fas fa-plus"></i> Add Family</button>
+                                                <button type="button" class="btn-secondary" onclick="closeFamilyAdd()"><i class="fas fa-times"></i> Cancel</button>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label required">Session</label>
@@ -1457,6 +1473,13 @@ function getSection(cid) {
 }
 
 function getFamilyInfo(code) {
+    var addBox = document.getElementById('family_add_box');
+    if (code === '__add__') {
+        document.getElementById('family_code_value').value = '';
+        if (addBox) addBox.style.display = 'flex';
+        return;
+    }
+    if (addBox) addBox.style.display = 'none';
     document.getElementById('family_code_value').value = code || '';
     if (!code) return;
     var xhr = new XMLHttpRequest();
@@ -1506,6 +1529,47 @@ function getFamilyInfo(code) {
         showToast('Family details loaded', 'success');
     };
     xhr.send();
+}
+
+function addNewFamily() {
+    var name = document.getElementById('new_family_name').value.trim();
+    if (!name) { showToast('Enter family / guardian name', 'error'); return; }
+    var cell = document.getElementById('new_family_cell').value.trim();
+    var sel = document.getElementById('family_search');
+    var code = null;
+    for (var i = 0; i < 50; i++) {
+        var cand = 'F-' + (1000 + Math.floor(Math.random() * 9000));
+        if (!sel.querySelector('option[value="' + cand + '"]')) { code = cand; break; }
+    }
+    if (!code) { showToast('Could not create family code, try again', 'error'); return; }
+    var opt = document.createElement('option');
+    opt.value = code;
+    opt.text = code + ' - ' + name;
+    sel.appendChild(opt);
+    sel.value = code;
+    document.getElementById('family_code_value').value = code;
+    var father = document.getElementById('last_name');
+    if (father && !father.value) father.value = name;
+    var gname = document.getElementById('gardian_name');
+    if (gname && !gname.value) gname.value = name;
+    if (cell) {
+        var fc = document.getElementById('father_cellno');
+        if (fc && !fc.value) fc.value = cell;
+        var gc = document.getElementById('gardian_no');
+        if (gc && !gc.value) gc.value = cell;
+    }
+    closeFamilyAdd();
+    showToast('New family ' + code + ' added', 'success');
+}
+
+function closeFamilyAdd() {
+    var box = document.getElementById('family_add_box');
+    if (box) box.style.display = 'none';
+    var sel = document.getElementById('family_search');
+    if (sel && sel.value === '__add__') {
+        sel.value = '';
+        document.getElementById('family_code_value').value = '';
+    }
 }
 
 var stateMap = <?php echo json_encode($stateMapDef); ?>;
