@@ -3,6 +3,7 @@ define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 require_login();
 
+// Create necessary tables
 try { db_query("CREATE TABLE IF NOT EXISTS student_documents (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT,
@@ -10,9 +11,6 @@ try { db_query("CREATE TABLE IF NOT EXISTS student_documents (
     file_path VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB"); } catch (Throwable $ex) {}
-try { db_query("ALTER TABLE student_documents ADD COLUMN IF NOT EXISTS file_path VARCHAR(255) DEFAULT NULL"); } catch (Throwable $ex) {}
-try { db_query("ALTER TABLE student_documents ADD COLUMN IF NOT EXISTS doc_type VARCHAR(100) DEFAULT NULL"); } catch (Throwable $ex) {}
-try { db_query("ALTER TABLE student_documents ADD COLUMN IF NOT EXISTS student_id INT DEFAULT NULL"); } catch (Throwable $ex) {}
 
 try { db_query("CREATE TABLE IF NOT EXISTS boards (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,6 +37,17 @@ try { db_query("CREATE TABLE IF NOT EXISTS document_titles (
 ) ENGINE=InnoDB"); } catch (Throwable $ex) {}
 
 try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS family_code VARCHAR(50) DEFAULT NULL"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS monthly_fee DECIMAL(12,2) NOT NULL DEFAULT 0"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS old_balance DECIMAL(12,2) NOT NULL DEFAULT 0"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS admission_no VARCHAR(50) DEFAULT NULL"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS sibling_code VARCHAR(50) DEFAULT NULL"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS course_package VARCHAR(191) DEFAULT NULL"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS discount_package_id INT DEFAULT NULL"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS course_package_id INT DEFAULT NULL"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS transport_fee DECIMAL(12,2) NOT NULL DEFAULT 0"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS discount_reason VARCHAR(191) DEFAULT NULL"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS miscellaneous_fee DECIMAL(12,2) NOT NULL DEFAULT 0"); } catch (Throwable $ex) {}
+try { db_query("ALTER TABLE students ADD COLUMN IF NOT EXISTS payment_mode VARCHAR(30) DEFAULT 'monthly'"); } catch (Throwable $ex) {}
 
 try { db_query("CREATE TABLE IF NOT EXISTS student_fee_plan (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -164,19 +173,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'AddAd
         $ext = strtolower(pathinfo($_FILES['img_file']['name'], PATHINFO_EXTENSION));
         $photo = 's_' . time() . '_' . rand(1000, 9999) . '.' . $ext;
         if (!move_uploaded_file($_FILES['img_file']['tmp_name'], $dir . '/' . $photo)) { $photo = null; }
-    } elseif (!empty($_POST['captured_image'])) {
-        $dir = __DIR__ . '/uploads/students';
-        if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
-        $data = $_POST['captured_image'];
-        $prefix = 'data:image/jpeg;base64,';
-        if (stripos($data, $prefix) === 0) {
-            $base64 = substr($data, strlen($prefix));
-            $bin = base64_decode($base64, true);
-            if ($bin !== false) {
-                $photo = 's_' . time() . '_' . rand(1000, 9999) . '.jpg';
-                if (file_put_contents($dir . '/' . $photo, $bin) === false) { $photo = null; }
-            }
-        }
     }
 
     if ($first_name === '' || $class_id === 0) {
@@ -256,12 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'AddAd
                     $docInsert->close();
                 }
 
-                $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
-                if ($isAjax) {
-                    header('Content-Type: application/json');
-                    echo json_encode(['ok' => true, 'student_id' => $studentId, 'gr_no' => $gr]);
-                    exit;
-                }
+                // Redirect to fee plan
                 header('Location: ' . BASE_URL . 'fee_plan.php?student_id=' . $studentId);
                 exit;
             }
@@ -271,36 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'AddAd
     }
 }
 
-/* ---------------- AJAX / JSON handlers (lookup, multi-save, CSV import) ---------------- */
-if (($_POST['action'] ?? '') === 'AddLookup') {
-    header('Content-Type: application/json');
-    $tableMap = ['boards', 'groups', 'admission_sources', 'document_titles', 'localities'];
-    $table = $_POST['table'] ?? '';
-    $name  = trim($_POST['name'] ?? '');
-    $id    = 0;
-    if (!in_array($table, $tableMap, true) || $name === '') {
-        echo json_encode(['ok' => false, 'msg' => 'Invalid request']);
-        exit;
-    }
-    try {
-        if ($table === 'localities') {
-            $st = db_prepare('INSERT INTO localities (locality_name, status) VALUES (?, 1)');
-            $st->bind_param('s', $name);
-            $st->execute();
-            $id = $st->insert_id;
-        } else {
-            $st = db_prepare("INSERT INTO `$table` (name) VALUES (?)");
-            $st->bind_param('s', $name);
-            $st->execute();
-            $id = $st->insert_id;
-        }
-        echo json_encode(['ok' => true, 'id' => $id, 'name' => $name]);
-    } catch (Exception $ex) {
-        echo json_encode(['ok' => false, 'msg' => $ex->getMessage()]);
-    }
-    exit;
-}
-
+// AJAX handlers for multi-student and CSV import
 if (($_POST['action'] ?? '') === 'SaveMultiStudents') {
     header('Content-Type: application/json');
     $rows      = json_decode($_POST['rows'] ?? '[]', true);
@@ -314,22 +276,16 @@ if (($_POST['action'] ?? '') === 'SaveMultiStudents') {
             $name   = trim($r['name'] ?? '');
             $father = trim($r['father'] ?? '');
             $cell   = trim($r['cell'] ?? '');
+            $fee    = (float)($r['fee'] ?? 0);
+            $balance = (float)($r['balance'] ?? 0);
             $rc = $class_id > 0 ? $class_id : (int)($r['class_id'] ?? 0);
             $rs = $section_id > 0 ? $section_id : 0;
             if ($name === '' || $rc === 0) continue;
-            $gender = ($r['gender'] ?? '') === 'Female' ? 'female' : 'male';
             $sid = 0;
-            if ($rs > 0) {
-                $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, section_id, session, gender, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)');
-                $stmt->bind_param('sssiissd', $name, $father, $cell, $rc, $rs, $session, $gender, $adm);
-                $stmt->execute();
-                $sid = $stmt->insert_id;
-            } else {
-                $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, session, gender, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, 1)');
-                $stmt->bind_param('sssissd', $name, $father, $cell, $rc, $session, $gender, $adm);
-                $stmt->execute();
-                $sid = $stmt->insert_id;
-            }
+            $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, section_id, session, monthly_fee, old_balance, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
+            $stmt->bind_param('sssiissds', $name, $father, $cell, $rc, $rs, $session, $fee, $balance, $adm);
+            $stmt->execute();
+            $sid = $stmt->insert_id;
             if ($sid > 0) {
                 $gr = substr(date('Y'), 2) . '-' . str_pad($sid, 4, '0', STR_PAD_LEFT);
                 $u = db_prepare('UPDATE students SET gr_no = ? WHERE student_id = ?');
@@ -347,18 +303,34 @@ if (($_POST['action'] ?? '') === 'ImportCSV') {
     header('Content-Type: application/json');
     $rows     = json_decode($_POST['rows'] ?? '[]', true);
     $session  = trim($_POST['session'] ?? '');
+    if ($session === '') { $session = get_setting('session_year', '2026-2027'); }
     $inserted = 0;
     $skipped  = 0;
     if (is_array($rows)) {
         $classCache = [];
         $sectionCache = [];
-        $adm = date('Y-m-d');
         foreach ($rows as $r) {
             $name    = trim($r['name'] ?? '');
             $father  = trim($r['father'] ?? '');
             $cell    = trim($r['cell'] ?? '');
             $cn      = trim($r['class'] ?? '');
             $sn      = trim($r['section'] ?? '');
+            $gender  = strtolower(trim($r['gender'] ?? '')) === 'female' ? 'female' : 'male';
+            $religion = trim($r['religion'] ?? '') !== '' ? $r['religion'] : 'Islam';
+            $dob     = null;
+            if (!empty($r['dob'])) {
+                $ts = strtotime(str_replace('/', '-', $r['dob']));
+                $dob = $ts ? date('Y-m-d', $ts) : null;
+            }
+            $admDate = null;
+            if (!empty($r['admission_date'])) {
+                $ats = strtotime(str_replace('/', '-', $r['admission_date']));
+                $admDate = $ats ? date('Y-m-d', $ats) : null;
+            }
+            $admNo     = trim($r['admission_no'] ?? '') !== '' ? $r['admission_no'] : null;
+            $sibCode   = trim($r['sibling_code'] ?? '') !== '' ? $r['sibling_code'] : null;
+            $famCode   = trim($r['family_code'] ?? '') !== '' ? $r['family_code'] : null;
+            $coursePkg = trim($r['course_package'] ?? '') !== '' ? $r['course_package'] : null;
             if ($name === '' || $cn === '') { $skipped++; continue; }
             if (!isset($classCache[$cn])) {
                 $st = db_prepare('SELECT class_id FROM classes WHERE class_name = ?');
@@ -381,25 +353,11 @@ if (($_POST['action'] ?? '') === 'ImportCSV') {
                 }
                 $sid = $sectionCache[$key];
             }
-            $gender  = strtolower(trim($r['gender'] ?? '')) === 'female' ? 'female' : 'male';
-            $religion = trim($r['religion'] ?? '') !== '' ? $r['religion'] : 'Islam';
-            $dob = null;
-            if (!empty($r['dob'])) {
-                $dt = DateTime::createFromFormat('Y-m-d', trim($r['dob']));
-                $dob = $dt ? $dt->format('Y-m-d') : null;
-            }
             $newId = 0;
-            if ($sid > 0) {
-                $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, section_id, session, gender, religion, dob, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
-                $stmt->bind_param('sssiisssss', $name, $father, $cell, $cid, $sid, $session, $gender, $religion, $dob, $adm);
-                $stmt->execute();
-                $newId = $stmt->insert_id;
-            } else {
-                $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, session, gender, religion, dob, admission_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
-                $stmt->bind_param('sssissdss', $name, $father, $cell, $cid, $session, $gender, $religion, $dob, $adm);
-                $stmt->execute();
-                $newId = $stmt->insert_id;
-            }
+            $stmt = db_prepare('INSERT INTO students (first_name, father_name, phone, class_id, section_id, session, gender, religion, dob, admission_date, admission_no, sibling_code, family_code, course_package, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
+            $stmt->bind_param('sssiisssssssss', $name, $father, $cell, $cid, $sid, $session, $gender, $religion, $dob, $admDate, $admNo, $sibCode, $famCode, $coursePkg);
+            $stmt->execute();
+            $newId = $stmt->insert_id;
             if ($newId > 0) {
                 $gr = substr(date('Y'), 2) . '-' . str_pad($newId, 4, '0', STR_PAD_LEFT);
                 $u = db_prepare('UPDATE students SET gr_no = ? WHERE student_id = ?');
@@ -414,7 +372,6 @@ if (($_POST['action'] ?? '') === 'ImportCSV') {
 }
 
 ?>
-
 <?php
 $stateMapDef = [
     'Punjab' => ['Lahore','Rawalpindi','Faisalabad','Multan','Gujranwala','Sialkot','Bahawalpur','Sargodha','Sheikhupura','Rahim Yar Khan','Jhang','Kasur','Gujrat','Okara','Sahiwal','Mianwali','Dera Ghazi Khan','Attock','Chakwal','Mandi Bahauddin','Vehari','Muzaffargarh','Khanewal','Wazirabad','Hafizabad','Narowal','Burewala','Toba Tek Singh'],
@@ -430,178 +387,342 @@ $stateMapDef = [
 
 <?php include __DIR__ . '/includes/header.php'; ?>
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <style>
-.right_col { padding: 0; }
+    :root {
+        --primary: #FF6B2C;
+        --primary-light: #FFF3EC;
+        --primary-hover: #E55A1E;
+        --gray-50: #F8FAFC;
+        --gray-100: #F1F5F9;
+        --gray-200: #E2E8F0;
+        --gray-300: #CBD5E1;
+        --gray-400: #94A3B8;
+        --gray-500: #64748B;
+        --gray-600: #475569;
+        --gray-700: #334155;
+        --gray-800: #1E293B;
+        --gray-900: #0F172A;
+        --border-radius: 12px;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+        --shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--gray-50); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: var(--gray-800); line-height: 1.5; overflow-x: hidden; }
+
+    .page-wrapper { max-width: 1440px; margin: 0 auto; padding: 16px 20px 40px; width: 100%; }
+
+    /* Top Bar */
+    .top-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--gray-200); }
+    .top-bar-left { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .top-bar-left .brand { font-size: clamp(16px, 2.2vw, 22px); font-weight: 700; color: var(--gray-900); letter-spacing: -0.3px; }
+    .top-bar-left .brand span { color: var(--primary); }
+    .top-bar-left .session-badge { font-size: clamp(10px, 1.2vw, 13px); font-weight: 600; color: var(--gray-500); background: var(--gray-100); padding: 3px 12px; border-radius: 20px; border: 1px solid var(--gray-200); white-space: nowrap; }
+    .top-bar-right { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .top-bar-right .search-box { display: flex; align-items: center; gap: 6px; background: white; border: 1px solid var(--gray-200); border-radius: 8px; padding: 5px 12px; font-size: clamp(11px, 1.1vw, 13px); color: var(--gray-500); min-width: 140px; flex: 1; max-width: 320px; }
+    .top-bar-right .search-box i { color: var(--gray-400); font-size: clamp(12px, 1vw, 14px); }
+    .top-bar-right .search-box input { border: none; outline: none; background: transparent; font-size: clamp(11px, 1.1vw, 13px); color: var(--gray-700); width: 100%; min-width: 80px; }
+    .top-bar-right .search-box input::placeholder { color: var(--gray-400); font-size: clamp(10px, 1vw, 12px); }
+    .top-bar-right .user-badge { display: flex; align-items: center; gap: 6px; font-size: clamp(11px, 1.1vw, 13px); font-weight: 500; color: var(--gray-700); white-space: nowrap; }
+    .top-bar-right .user-badge .avatar { width: clamp(28px, 3vw, 36px); height: clamp(28px, 3vw, 36px); border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: clamp(12px, 1.2vw, 15px); font-weight: 600; flex-shrink: 0; }
+
+    /* Quick Links */
+    .quick-links { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; font-size: clamp(11px, 1.1vw, 13px); color: var(--gray-500); }
+    .quick-links a { color: var(--gray-600); text-decoration: none; padding: 3px 8px; border-radius: 6px; transition: all 0.2s; font-size: clamp(11px, 1.1vw, 13px); white-space: nowrap; }
+    .quick-links a:hover { background: var(--gray-100); color: var(--gray-800); }
+    .quick-links .separator { color: var(--gray-300); font-size: clamp(9px, 0.8vw, 11px); }
+
+    /* Main Tabs */
+    .main-tabs { display: flex; align-items: center; gap: 4px; background: white; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: 4px; margin-bottom: 20px; overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+    .main-tabs::-webkit-scrollbar { display: none; }
+    .main-tabs .tab-btn { display: flex; align-items: center; gap: clamp(4px, 0.6vw, 8px); padding: clamp(6px, 0.8vw, 10px) clamp(12px, 1.5vw, 20px); border-radius: 8px; font-size: clamp(11px, 1.1vw, 14px); font-weight: 500; color: var(--gray-600); background: transparent; border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap; text-decoration: none; flex-shrink: 0; }
+    .main-tabs .tab-btn:hover { background: var(--gray-100); color: var(--gray-800); }
+    .main-tabs .tab-btn.active { background: var(--primary-light); color: var(--primary); font-weight: 600; }
+    .main-tabs .tab-btn i { font-size: clamp(13px, 1.2vw, 16px); }
+
+    /* Section Card */
+    .section-card { background: white; border: 1px solid var(--gray-200); border-radius: var(--border-radius); overflow: hidden; margin-bottom: clamp(14px, 1.8vw, 24px); }
+    .section-card .section-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: clamp(10px, 1.2vw, 16px) clamp(14px, 1.8vw, 24px); border-bottom: 1px solid var(--gray-100); background: var(--gray-50); }
+    .section-card .section-header h3 { font-size: clamp(13px, 1.2vw, 16px); font-weight: 600; color: var(--gray-700); display: flex; align-items: center; gap: 8px; }
+    .section-card .section-header h3 i { color: var(--primary); font-size: clamp(14px, 1.2vw, 17px); }
+    .section-card .section-body { padding: clamp(14px, 1.8vw, 24px); }
+
+    /* Form Grids */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); gap: clamp(12px, 1.5vw, 20px); }
+    .form-grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: clamp(12px, 1.5vw, 20px); }
+
+    /* Fieldset Box */
+    .fieldset-box { position: relative; border: 1px solid var(--gray-200); border-radius: 8px; padding: clamp(12px, 1.2vw, 16px) clamp(10px, 1vw, 14px) clamp(4px, 0.5vw, 8px) clamp(10px, 1vw, 14px); background: white; transition: border-color 0.2s, box-shadow 0.2s; min-height: clamp(44px, 5vw, 56px); width: 100%; }
+    .fieldset-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 107, 44, 0.08); }
+    .fieldset-box .fieldset-label { position: absolute; left: clamp(10px, 1vw, 14px); top: -8px; background: white; padding: 0 clamp(4px, 0.5vw, 8px); font-size: clamp(9px, 0.8vw, 11px); font-weight: 600; color: var(--gray-500); letter-spacing: 0.3px; pointer-events: none; text-transform: uppercase; white-space: nowrap; }
+    .fieldset-box .fieldset-label.required::after { content: ' *'; color: #EF4444; }
+    .fieldset-box .fieldset-input, .fieldset-box .fieldset-select, .fieldset-box .fieldset-textarea { width: 100%; border: none; outline: none; background: transparent; font-size: clamp(12px, 1.1vw, 14px); color: var(--gray-800); padding: 2px 0 4px; font-family: inherit; min-height: clamp(24px, 2.5vw, 32px); }
+    .fieldset-box .fieldset-input::placeholder, .fieldset-box .fieldset-textarea::placeholder { color: var(--gray-400); font-weight: 400; font-size: clamp(11px, 1vw, 13px); }
+    .fieldset-box .fieldset-textarea { resize: vertical; min-height: 28px; max-height: 80px; }
+    .fieldset-box .fieldset-select { cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 4px center; padding-right: 20px; }
+    .fieldset-box .inline-actions { display: flex; align-items: center; gap: clamp(4px, 0.5vw, 8px); width: 100%; }
+    .fieldset-box .inline-actions .fieldset-input, .fieldset-box .inline-actions .fieldset-select { flex: 1; min-width: 0; }
+    .fieldset-box .btn-add-new { display: inline-flex; align-items: center; gap: 3px; font-size: clamp(10px, 0.9vw, 12px); font-weight: 600; color: var(--primary); padding: 2px clamp(6px, 0.6vw, 10px); border-radius: 4px; text-decoration: none; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; background: transparent; border: none; cursor: pointer; }
+    .fieldset-box .btn-add-new:hover { background: var(--primary-light); }
+    .fieldset-box .btn-add-new i { font-size: clamp(9px, 0.8vw, 11px); }
+
+    /* Main Layout */
+    .main-layout { display: grid; grid-template-columns: 1fr minmax(200px, 280px); gap: clamp(16px, 2vw, 24px); }
+
+    /* Photo Widget */
+    .photo-widget { background: white; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: clamp(14px, 1.8vw, 24px); text-align: center; height: fit-content; position: sticky; top: 20px; }
+    .photo-widget .photo-title { font-size: clamp(12px, 1.2vw, 15px); font-weight: 600; color: var(--gray-700); margin-bottom: clamp(12px, 1.5vw, 18px); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .photo-widget .photo-title i { color: var(--primary); font-size: clamp(14px, 1.2vw, 17px); }
+    .photo-widget .photo-frame { width: 100%; max-width: 180px; aspect-ratio: 4/5; margin: 0 auto clamp(10px, 1.2vw, 16px); border-radius: 10px; border: 2px dashed var(--gray-300); background: var(--gray-50); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.2s; overflow: hidden; position: relative; min-height: 140px; }
+    .photo-widget .photo-frame:hover { border-color: var(--primary); }
+    .photo-widget .photo-frame.has-image { border-style: solid; border-color: var(--gray-200); }
+    .photo-widget .photo-frame img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+    .photo-widget .photo-frame .placeholder-icon { font-size: clamp(28px, 3vw, 40px); color: var(--gray-400); margin-bottom: 6px; }
+    .photo-widget .photo-frame .placeholder-text { font-size: clamp(11px, 1vw, 14px); font-weight: 500; color: var(--gray-500); }
+    .photo-widget .photo-frame .placeholder-sub { font-size: clamp(9px, 0.8vw, 11px); color: var(--gray-400); margin-top: 2px; }
+    .photo-widget .photo-frame .delete-btn { position: absolute; top: 6px; right: 6px; width: clamp(22px, 2.2vw, 28px); height: clamp(22px, 2.2vw, 28px); border-radius: 50%; background: #EF4444; color: white; border: none; font-size: clamp(10px, 1vw, 13px); cursor: pointer; display: none; align-items: center; justify-content: center; transition: background 0.2s; z-index: 5; }
+    .photo-widget .photo-frame .delete-btn:hover { background: #DC2626; }
+    .photo-widget .photo-frame.has-image .delete-btn { display: flex; }
+    .photo-widget .photo-controls { margin-top: clamp(10px, 1.2vw, 16px); display: none; }
+    .photo-widget .photo-controls.active { display: block; }
+    .photo-widget .photo-controls .control-row { display: flex; align-items: center; gap: clamp(6px, 0.8vw, 12px); margin-bottom: 6px; }
+    .photo-widget .photo-controls .control-row i { color: var(--gray-400); font-size: clamp(11px, 1vw, 14px); width: clamp(14px, 1.2vw, 18px); flex-shrink: 0; }
+    .photo-widget .photo-controls .control-row input[type="range"] { flex: 1; accent-color: var(--primary); height: 4px; cursor: pointer; min-width: 40px; }
+    .photo-widget .photo-controls .control-row .value-label { font-size: clamp(10px, 0.9vw, 12px); color: var(--gray-400); width: clamp(32px, 3vw, 40px); text-align: right; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn-primary { display: inline-flex; align-items: center; gap: clamp(6px, 0.6vw, 10px); padding: clamp(8px, 0.9vw, 12px) clamp(16px, 1.8vw, 28px); border-radius: 8px; background: var(--primary); color: white; font-size: clamp(12px, 1.1vw, 15px); font-weight: 600; border: none; cursor: pointer; transition: background 0.2s, transform 0.1s; white-space: nowrap; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-secondary { display: inline-flex; align-items: center; gap: clamp(6px, 0.6vw, 10px); padding: clamp(8px, 0.9vw, 12px) clamp(14px, 1.5vw, 22px); border-radius: 8px; background: var(--gray-100); color: var(--gray-600); font-size: clamp(12px, 1.1vw, 15px); font-weight: 500; border: none; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+    .btn-secondary:hover { background: var(--gray-200); }
+    .btn-success { display: inline-flex; align-items: center; gap: clamp(6px, 0.6vw, 10px); padding: clamp(8px, 0.9vw, 12px) clamp(16px, 1.8vw, 28px); border-radius: 8px; background: #22C55E; color: white; font-size: clamp(12px, 1.1vw, 15px); font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+    .btn-success:hover { background: #16A34A; }
+
+    /* Form Actions */
+    .form-actions { display: flex; align-items: center; flex-wrap: wrap; gap: clamp(10px, 1.2vw, 16px); padding-top: clamp(16px, 2vw, 24px); border-top: 1px solid var(--gray-200); margin-top: 4px; }
+    .form-actions .note { font-size: clamp(11px, 1vw, 13px); color: var(--gray-400); margin-left: auto; }
+
+    /* Sub Tabs */
+    .sub-tabs { display: flex; align-items: center; gap: 4px; margin-bottom: clamp(14px, 1.8vw, 20px); overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 2px 0; }
+    .sub-tabs::-webkit-scrollbar { display: none; }
+    .sub-tabs .subtab-btn { display: inline-flex; align-items: center; gap: clamp(4px, 0.5vw, 8px); padding: clamp(5px, 0.6vw, 8px) clamp(10px, 1.2vw, 18px); border-radius: 8px; font-size: clamp(11px, 1vw, 13px); font-weight: 500; color: var(--gray-500); background: white; border: 1px solid var(--gray-200); cursor: pointer; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+    .sub-tabs .subtab-btn:hover { background: var(--gray-50); }
+    .sub-tabs .subtab-btn.active { background: var(--primary-light); color: var(--primary); border-color: var(--primary); font-weight: 600; }
+    .sub-tabs .subtab-btn i { font-size: clamp(12px, 1vw, 14px); }
+
+    /* Progress Steps */
+    .progress-steps { display: flex; align-items: center; gap: clamp(10px, 1.5vw, 20px); background: white; border: 1px solid var(--gray-200); border-radius: var(--border-radius); padding: clamp(10px, 1.2vw, 16px) clamp(14px, 1.8vw, 24px); margin-bottom: clamp(16px, 2vw, 24px); flex-wrap: wrap; }
+    .progress-steps .step { display: flex; align-items: center; gap: clamp(8px, 1vw, 14px); }
+    .progress-steps .step .num { width: clamp(28px, 2.8vw, 36px); height: clamp(28px, 2.8vw, 36px); border-radius: 50%; background: var(--gray-200); color: var(--gray-500); display: flex; align-items: center; justify-content: center; font-size: clamp(12px, 1.2vw, 15px); font-weight: 700; flex-shrink: 0; }
+    .progress-steps .step .num.active { background: var(--primary); color: white; }
+    .progress-steps .step .info { flex: 1; min-width: 0; }
+    .progress-steps .step .info .title { font-size: clamp(12px, 1.1vw, 14px); font-weight: 600; color: var(--gray-700); }
+    .progress-steps .step .info .sub { font-size: clamp(10px, 0.9vw, 12px); color: var(--gray-400); }
+    .progress-steps .divider { flex: 1; min-width: 20px; max-width: 100px; border-top: 2px dashed var(--gray-200); }
+
+    /* Document Cards */
+    .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: clamp(12px, 1.5vw, 18px); }
+    .doc-card { border: 1px dashed var(--gray-300); border-radius: 10px; padding: clamp(12px, 1.2vw, 18px) clamp(10px, 1vw, 14px); text-align: center; transition: border-color 0.2s, background 0.2s; cursor: pointer; }
+    .doc-card:hover { border-color: var(--primary); background: var(--primary-light); }
+    .doc-card .doc-icon { width: clamp(36px, 3.5vw, 48px); height: clamp(36px, 3.5vw, 48px); margin: 0 auto clamp(6px, 0.6vw, 10px); border-radius: 8px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: clamp(16px, 1.5vw, 22px); }
+    .doc-card .doc-name { font-size: clamp(11px, 1vw, 13px); font-weight: 600; color: var(--gray-700); display: block; margin-bottom: 4px; line-height: 1.3; }
+    .doc-card .doc-status { display: inline-block; padding: 2px clamp(8px, 0.8vw, 12px); border-radius: 12px; font-size: clamp(9px, 0.8vw, 11px); font-weight: 600; background: var(--gray-100); color: var(--gray-400); margin-bottom: clamp(6px, 0.6vw, 10px); }
+    .doc-card .doc-status.uploaded { background: #DCFCE7; color: #16A34A; }
+    .doc-card .doc-upload-btn { display: inline-flex; align-items: center; gap: clamp(4px, 0.4vw, 8px); padding: clamp(4px, 0.4vw, 8px) clamp(10px, 1vw, 16px); border-radius: 6px; background: #2563EB; color: white; font-size: clamp(10px, 0.9vw, 12px); font-weight: 600; border: none; cursor: pointer; transition: background 0.2s; }
+    .doc-card .doc-upload-btn:hover { background: #1D4ED8; }
+    .doc-card .doc-filename { font-size: clamp(9px, 0.8vw, 11px); color: var(--gray-400); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Table Wrapper */
+    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0; padding: 0; }
+    .table-wrapper table { width: 100%; border-collapse: collapse; font-size: clamp(12px, 1.1vw, 14px); min-width: 600px; }
+    .table-wrapper table th { padding: clamp(8px, 0.9vw, 12px) clamp(10px, 1vw, 16px); text-align: left; font-size: clamp(10px, 0.9vw, 12px); text-transform: uppercase; color: var(--gray-500); font-weight: 600; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+    .table-wrapper table td { padding: clamp(6px, 0.8vw, 10px) clamp(10px, 1vw, 16px); border-bottom: 1px solid var(--gray-100); }
+
+    /* Toast */
+    #toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; max-width: min(360px, 90vw); width: 100%; pointer-events: none; }
+    .toast-item { padding: clamp(12px, 1.2vw, 16px) clamp(14px, 1.5vw, 20px); border-radius: 10px; color: white; font-size: clamp(12px, 1.1vw, 14px); font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow-lg); animation: slideIn 0.3s ease; pointer-events: auto; width: 100%; }
+    .toast-item i { font-size: clamp(14px, 1.2vw, 18px); flex-shrink: 0; }
+    .toast-item.success { background: #22C55E; }
+    .toast-item.error { background: #EF4444; }
+    .toast-item.warning { background: #F59E0B; }
+    .toast-item.info { background: #3B82F6; }
+
+    @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
+
+    /* Error Message */
+    .error-message { display: flex; align-items: center; gap: 10px; background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: 8px; padding: clamp(10px, 1.2vw, 14px) clamp(14px, 1.5vw, 20px); margin-bottom: clamp(14px, 1.8vw, 20px); color: #DC2626; font-size: clamp(12px, 1.1vw, 14px); }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 991px) { .main-layout { grid-template-columns: 1fr; gap: 16px; } .photo-widget { position: static; max-width: 320px; margin: 0 auto; } .form-grid { grid-template-columns: repeat(2, 1fr); } .form-grid-2 { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 767px) { .page-wrapper { padding: 12px 16px 28px; } .form-grid { grid-template-columns: 1fr; } .form-grid-2 { grid-template-columns: 1fr; } .main-layout { grid-template-columns: 1fr; } .top-bar { flex-direction: column; align-items: stretch; gap: 8px; } .top-bar-right { flex-wrap: wrap; } .top-bar-right .search-box { max-width: 100%; } .main-tabs .tab-btn span { display: none; } .main-tabs .tab-btn i { font-size: 16px; } .sub-tabs .subtab-btn span { display: none; } .sub-tabs .subtab-btn i { font-size: 14px; } .progress-steps .divider { display: none; } .progress-steps .step .info .sub { display: none; } .form-actions .note { margin-left: 0; width: 100%; } .form-actions { flex-wrap: wrap; } .photo-widget { position: static; } .table-wrapper table { min-width: 480px; } }
+    @media (max-width: 479px) { .page-wrapper { padding: 10px 12px 24px; } .form-grid { grid-template-columns: 1fr; } .form-grid-2 { grid-template-columns: 1fr; } .main-layout { grid-template-columns: 1fr; } .doc-grid { grid-template-columns: 1fr 1fr; } .main-tabs .tab-btn { padding: 4px 10px; font-size: 10px; } .main-tabs .tab-btn span { display: none; } .main-tabs .tab-btn i { font-size: 14px; } .top-bar { flex-direction: column; align-items: stretch; gap: 6px; } .top-bar-right .search-box { max-width: 100%; } .sub-tabs .subtab-btn { padding: 4px 8px; font-size: 10px; } .sub-tabs .subtab-btn span { display: none; } .sub-tabs .subtab-btn i { font-size: 14px; } .progress-steps { flex-direction: column; align-items: flex-start; gap: 8px; } .progress-steps .divider { display: none; } .progress-steps .step .info .sub { display: none; } .form-actions { flex-direction: column; align-items: stretch; } .form-actions .note { margin-left: 0; } .btn-primary, .btn-secondary, .btn-success { justify-content: center; width: 100%; } .photo-widget { max-width: 280px; margin: 0 auto; } .table-wrapper table { min-width: 380px; } }
+
+    /* Landscape */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .page-wrapper { padding: 8px 16px 16px; }
+        .top-bar { margin-bottom: 8px; padding-bottom: 8px; }
+        .top-bar-left .brand { font-size: 16px; }
+        .main-tabs .tab-btn { padding: 4px 10px; font-size: 10px; }
+        .main-tabs .tab-btn span { display: none; }
+        .main-tabs .tab-btn i { font-size: 12px; }
+        .sub-tabs .subtab-btn { padding: 3px 8px; font-size: 9px; }
+        .sub-tabs .subtab-btn span { display: none; }
+        .sub-tabs .subtab-btn i { font-size: 12px; }
+        .progress-steps { padding: 6px 12px; margin-bottom: 10px; gap: 6px; }
+        .progress-steps .step .num { width: 22px; height: 22px; font-size: 10px; }
+        .progress-steps .step .info .title { font-size: 10px; }
+        .progress-steps .step .info .sub { display: none; }
+        .progress-steps .divider { display: none; }
+        .section-card .section-header { padding: 6px 12px; }
+        .section-card .section-header h3 { font-size: 11px; }
+        .section-card .section-body { padding: 8px 12px; }
+        .form-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+        .form-grid-2 { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+        .fieldset-box { min-height: 34px; padding: 8px 6px 2px 6px; }
+        .fieldset-box .fieldset-label { font-size: 7px; top: -5px; }
+        .fieldset-box .fieldset-input, .fieldset-box .fieldset-select { font-size: 11px; min-height: 18px; }
+        .main-layout { grid-template-columns: 1fr 160px; gap: 10px; }
+        .photo-widget { padding: 10px; }
+        .photo-widget .photo-frame { max-width: 100px; min-height: 80px; }
+        .btn-primary, .btn-secondary, .btn-success { font-size: 10px; padding: 4px 12px; }
+        .form-actions { padding-top: 10px; gap: 6px; }
+        .table-wrapper table { min-width: 320px; font-size: 10px; }
+    }
 </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-.fieldset-box {
-    position: relative;
-    border: 1px solid #e7e7e7;
-    border-radius: 10px;
-    padding: 14px 12px 8px 12px;
-    background: #fefefe;
-    height: 100%;
-    transition: border-color .15s ease, box-shadow .15s ease;
-    min-height: 46px;
-}
-.fieldset-box:focus-within {
-    border-color: #FF6B2C;
-    box-shadow: 0 0 0 3px rgba(255,107,44,.12);
-}
-.fieldset-label {
-    position: absolute;
-    left: 14px;
-    top: -9px;
-    background: #fff;
-    padding: 0 6px;
-    font-size: 11px;
-    font-weight: 600;
-    color: #6b7280;
-    letter-spacing: .02em;
-    pointer-events: none;
-}
-.fieldset-label.required::after { content: ' *'; color: #ef4444; }
-.fieldset-input,
-.fieldset-select {
-    width: 100%;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-size: 13px;
-    color: #1f2430;
-    padding: 0 0 1px;
-}
-.fieldset-input::placeholder { color: #9ca3af; font-weight: 400; }
-.fieldset-area {
-    resize: vertical;
-    min-height: 32px;
-}
 
-*::-webkit-scrollbar { width: 7px; height: 7px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 20px; }
-*::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+<div class="page-wrapper">
 
-.toast-item { animation: slideIn .25s ease; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
-@keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: none; } }
-.toast-item.remove { animation: slideOut .25s ease forwards; }
-@keyframes slideOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(30px); } }
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div class="brand">Test <span>Portal</span></div>
+            <div class="session-badge"><?php echo e($cur_session); ?></div>
+        </div>
+        <div class="top-bar-right">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search Student with | Name | GR No | Family Code">
+            </div>
+            <div class="user-badge">
+                <span>Super Admin</span>
+                <div class="avatar">SA</div>
+            </div>
+        </div>
+    </div>
 
-input[type=range] { accent-color: #FF6B2C; }
+    <!-- Quick Links -->
+    <div class="quick-links">
+        <a href="<?php echo BASE_URL; ?>dashboard.php"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <span class="separator">/</span>
+        <a href="<?php echo BASE_URL; ?>manage_students.php">Students</a>
+        <span class="separator">/</span>
+        <span style="color: var(--gray-700); font-weight: 500;">Add New Student</span>
+    </div>
 
-.tab-btn { transition: all .15s ease; }
-.tab-btn.active {
-    background: #fff7ed;
-    color: #FF6B2C;
-    border-color: #FF6B2C;
-    font-weight: 600;
-}
-.subtab-btn { transition: all .15s ease; }
-.subtab-btn.active {
-    background: #fff7ed;
-    color: #FF6B2C;
-    border-color: #FF6B2C;
-    font-weight: 600;
-}
-.photo-controls:disabled { opacity: .4; pointer-events: none; }
-</style>
-<main id="main-content" class="p-4 sm:p-5">
-
-        <?php if ($error !== ''): ?>
-        <div class="mb-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-[13px]">
-            <i class="fa-solid fa-circle-exclamation mt-0.5"></i>
+    <?php if ($error !== ''): ?>
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i>
             <span><?php echo htmlspecialchars($error); ?></span>
         </div>
-        <?php endif; ?>
+    <?php endif; ?>
 
-        <!-- Breadcrumb -->
-        <div class="flex items-center gap-1.5 text-[12px] text-slate-500 mb-4">
-            <a href="<?php echo BASE_URL; ?>dashboard.php" class="hover:text-brand-orange transition">Dashboard</a>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
-            <a href="<?php echo BASE_URL; ?>manage_students.php" class="hover:text-brand-orange transition">Students</a>
-            <i class="fa-solid fa-chevron-right text-[9px] text-slate-300"></i>
-            <span class="text-slate-700 font-medium">Add New Student</span>
-        </div>
+    <!-- Main Tabs -->
+    <div class="main-tabs">
+        <button id="tab-btn-single" onclick="switchMainView('single')" class="tab-btn active">
+            <i class="fas fa-user-plus"></i>
+            <span>Add New Student</span>
+        </button>
+        <button id="tab-btn-multi" onclick="switchMainView('multi')" class="tab-btn">
+            <i class="fas fa-users"></i>
+            <span>Add Multi Students</span>
+        </button>
+        <button id="tab-btn-import" onclick="switchMainView('import')" class="tab-btn">
+            <i class="fas fa-upload"></i>
+            <span>Import Students with CSV</span>
+        </button>
+        <a id="tab-btn-form" href="<?php echo BASE_URL; ?>adm_form.php" target="_blank" class="tab-btn">
+            <i class="fas fa-file-alt"></i>
+            <span>Admission Form</span>
+        </a>
+    </div>
 
-        <!-- Top Sub Tabs -->
-        <div class="flex items-center gap-1 bg-white border border-brand-border rounded-xl p-1.5 mb-5 overflow-x-auto">
-            <button id="tab-btn-single" onclick="switchMainView('single')" class="tab-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0">
-                <i class="fa fa-user-plus"></i> Add New Student
-            </button>
-            <a id="tab-btn-multi" href="<?php echo BASE_URL; ?>bulk_stdns.php" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0 no-underline">
-                <i class="fa fa-users"></i> Add Multi Students
-            </a>
-            <a id="tab-btn-import" href="<?php echo BASE_URL; ?>import_data.php" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0 no-underline">
-                <i class="fa fa-upload"></i> Import Students with CSV
-            </a>
-            <a id="tab-btn-form" href="<?php echo BASE_URL; ?>adm_form.php" target="_blank" class="tab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-transparent whitespace-nowrap shrink-0 no-underline">
-                <i class="fa fa-file-alt"></i> Admission Form
-            </a>
-        </div>
+    <!-- ===================== VIEW: SINGLE STUDENT ===================== -->
+    <div id="view-single-student">
 
-        <!-- ===================== VIEW: SINGLE STUDENT ===================== -->
-        <div id="view-single-student">
-
-            <!-- Step Tracker -->
-            <div class="bg-white border border-brand-border rounded-xl p-4 mb-5">
-                <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-brand-orange text-white text-[13px] font-bold flex items-center justify-center shadow">1</div>
-                        <div>
-                            <p class="text-[13px] font-semibold text-slate-700">Student Info</p>
-                            <p class="text-[11px] text-slate-400">Name, class &amp; contact details</p>
-                        </div>
-                    </div>
-                    <div class="hidden md:block flex-1 max-w-[120px] border-t-2 border-dashed border-slate-200"></div>
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-full bg-slate-200 text-slate-500 text-[13px] font-bold flex items-center justify-center">2</div>
-                        <div>
-                            <p class="text-[13px] font-semibold text-slate-700">Fee &amp; Parent Info</p>
-                            <p class="text-[11px] text-slate-400">Guardians &amp; fee plan setup</p>
-                        </div>
-                    </div>
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step">
+                <div class="num active">1</div>
+                <div class="info">
+                    <div class="title">Student Information</div>
+                    <div class="sub">Name, class &amp; contact details</div>
                 </div>
             </div>
-
-            <!-- Inner Tabs -->
-            <div class="flex items-center gap-1 mb-4 overflow-x-auto">
-                <button id="subtab-basic" onclick="switchFormTab('basic')" class="subtab-btn active flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-id-card"></i> Basic Information
-                </button>
-                <button id="subtab-parent" onclick="switchFormTab('parent')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-people-roof"></i> Parent Details
-                </button>
-                <button id="subtab-academic" onclick="switchFormTab('academic')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-graduation-cap"></i> Academic Information
-                </button>
-                <button id="subtab-contact" onclick="switchFormTab('contact')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-address-book"></i> Contact Information
-                </button>
-                <button id="subtab-documents" onclick="switchFormTab('documents')" class="subtab-btn flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] text-slate-500 border border-brand-border bg-white whitespace-nowrap shrink-0">
-                    <i class="fa-solid fa-paperclip"></i> Documents
-                </button>
+            <div class="divider"></div>
+            <div class="step">
+                <div class="num">2</div>
+                <div class="info">
+                    <div class="title">Fee Plan</div>
+                    <div class="sub">Guardians &amp; fee plan setup</div>
+                </div>
             </div>
+            <div class="divider"></div>
+            <div class="step">
+                <div class="num">3</div>
+                <div class="info">
+                    <div class="title">Finish</div>
+                    <div class="sub">Complete admission process</div>
+                </div>
+            </div>
+        </div>
 
-            <!-- Form -->
-            <form id="single-student-form" action="<?php echo BASE_URL; ?>add_student.php" method="post" enctype="multipart/form-data" onsubmit="handleSaveStudent(event)" autocomplete="off">
-                <input type="hidden" name="action" value="AddAdmission">
-                <input type="hidden" name="family_code" id="family_code_value" value="">
-                <input type="hidden" name="captured_image" id="captured_image" value="">
-                <input type="hidden" name="redirect_mode" id="redirect_mode" value="">
-                <input type="hidden" name="old_file" id="old_file" value="">
+        <!-- Sub Tabs -->
+        <div class="sub-tabs">
+            <button id="subtab-basic" onclick="switchFormTab('basic')" class="subtab-btn active">
+                <i class="fas fa-id-card"></i>
+                <span>Basic Information</span>
+            </button>
+            <button id="subtab-parent" onclick="switchFormTab('parent')" class="subtab-btn">
+                <i class="fas fa-user-friends"></i>
+                <span>Parent Details</span>
+            </button>
+            <button id="subtab-academic" onclick="switchFormTab('academic')" class="subtab-btn">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Academic Information</span>
+            </button>
+            <button id="subtab-contact" onclick="switchFormTab('contact')" class="subtab-btn">
+                <i class="fas fa-address-book"></i>
+                <span>Contact Information</span>
+            </button>
+            <button id="subtab-documents" onclick="switchFormTab('documents')" class="subtab-btn">
+                <i class="fas fa-paperclip"></i>
+                <span>Documents</span>
+            </button>
+        </div>
 
-                <div class="grid grid-cols-12 gap-5">
+        <!-- Form -->
+        <form id="single-student-form" action="<?php echo BASE_URL; ?>add_student.php" method="post" enctype="multipart/form-data" onsubmit="handleSaveStudent(event)" autocomplete="off">
+            <input type="hidden" name="action" value="AddAdmission">
+            <input type="hidden" name="family_code" id="family_code_value" value="">
+            <input type="hidden" name="captured_image" id="captured_image" value="">
+            <input type="hidden" name="redirect_mode" id="redirect_mode" value="">
+            <input type="hidden" name="old_file" id="old_file" value="">
 
-                    <div class="col-span-12 lg:col-span-9 space-y-6">
+            <div class="main-layout">
 
-                        <!-- BASIC TAB -->
-                        <div id="form-basic">
-                            <div class="bg-white border border-brand-border rounded-xl p-5 space-y-4">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                <!-- Left Column -->
+                <div>
+
+                    <!-- BASIC TAB -->
+                    <div id="form-basic">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-user"></i> Basic Information</h3>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-grid">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label required">Student Name</label>
                                         <input type="text" class="fieldset-input" name="first_name" id="first_name" placeholder="Enter Full Name" required>
@@ -611,7 +732,11 @@ input[type=range] { accent-color: #FF6B2C; }
                                         <input type="text" class="fieldset-input" name="lname" id="last_name" placeholder="Enter Father Name" required>
                                     </div>
                                     <div class="fieldset-box">
-                                        <label class="fieldset-label">Cell / Mobile Number</label>
+                                        <label class="fieldset-label">Mother Name</label>
+                                        <input type="text" class="fieldset-input" name="mother_name" id="mother_name" placeholder="Enter Mother Name">
+                                    </div>
+                                    <div class="fieldset-box">
+                                        <label class="fieldset-label required">Cell / Mobile Number</label>
                                         <input type="text" class="fieldset-input" name="cellno" id="cell_no" placeholder="03XX-XXXXXXX" inputmode="tel" required>
                                     </div>
                                     <div class="fieldset-box">
@@ -652,50 +777,6 @@ input[type=range] { accent-color: #FF6B2C; }
                                         </select>
                                     </div>
                                     <div class="fieldset-box">
-                                        <label class="fieldset-label">Board / Council</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <select name="board_council" id="board_council" class="fieldset-select flex-1">
-                                                <option value="">Select Board</option>
-                                                <?php foreach ($boards as $b): ?>
-                                                <option value="<?php echo $b['id']; ?>"><?php echo e($b['name']); ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <a href="<?php echo BASE_URL; ?>manage_board.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Board"><i class="fa fa-plus text-[10px]"></i> Add New</a>
-                                        </div>
-                                    </div>
-                                    <div class="fieldset-box">
-                                        <label class="fieldset-label">Group / Shift</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <select name="group_shift" id="group_shift" class="fieldset-select flex-1">
-                                                <option value="">Select Group</option>
-                                                <?php foreach ($groups as $g): ?>
-                                                <option value="<?php echo $g['id']; ?>"><?php echo e($g['name']); ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <a href="<?php echo BASE_URL; ?>manage_group.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Group"><i class="fa fa-plus text-[10px]"></i> Add New</a>
-                                        </div>
-                                    </div>
-                                    <div class="fieldset-box">
-                                        <label class="fieldset-label">Admission Source</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <select name="adm_source" id="adm_source" class="fieldset-select flex-1">
-                                                <option value="">Select Source</option>
-                                                <?php foreach ($admSrcs as $a): ?>
-                                                <option value="<?php echo $a['id']; ?>"><?php echo e($a['name']); ?></option>
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <a href="<?php echo BASE_URL; ?>manage_admission_sources.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Source"><i class="fa fa-plus text-[10px]"></i> Add New</a>
-                                        </div>
-                                    </div>
-                                    <div class="fieldset-box">
-                                        <label class="fieldset-label">Date of Birth</label>
-                                        <input type="text" class="fieldset-input" name="dob" id="dob" placeholder="dd/mm/yyyy" value="<?php echo date('d/m/Y'); ?>" autocomplete="off">
-                                    </div>
-                                    <div class="fieldset-box">
-                                        <label class="fieldset-label">Date of Admission</label>
-                                        <input type="text" class="fieldset-input" name="date_of_adms" id="date_of_adms" placeholder="dd/mm/yyyy" value="<?php echo date('d/m/Y'); ?>" autocomplete="off">
-                                    </div>
-                                    <div class="fieldset-box">
                                         <label class="fieldset-label required">Gender</label>
                                         <select name="gender" id="gender" class="fieldset-select" required>
                                             <option value="male" selected>Male</option>
@@ -711,32 +792,77 @@ input[type=range] { accent-color: #FF6B2C; }
                                         </select>
                                     </div>
                                     <div class="fieldset-box">
+                                        <label class="fieldset-label">Board / Council</label>
+                                        <div class="inline-actions">
+                                            <select name="board_council" id="board_council" class="fieldset-select">
+                                                <option value="">Select Board</option>
+                                                <?php foreach ($boards as $b): ?>
+                                                <option value="<?php echo $b['id']; ?>"><?php echo e($b['name']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <a href="<?php echo BASE_URL; ?>manage_board.php" target="_blank" class="btn-add-new"><i class="fas fa-plus"></i> Add New</a>
+                                        </div>
+                                    </div>
+                                    <div class="fieldset-box">
+                                        <label class="fieldset-label">Group / Shift</label>
+                                        <div class="inline-actions">
+                                            <select name="group_shift" id="group_shift" class="fieldset-select">
+                                                <option value="">Select Group</option>
+                                                <?php foreach ($groups as $g): ?>
+                                                <option value="<?php echo $g['id']; ?>"><?php echo e($g['name']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <a href="<?php echo BASE_URL; ?>manage_group.php" target="_blank" class="btn-add-new"><i class="fas fa-plus"></i> Add New</a>
+                                        </div>
+                                    </div>
+                                    <div class="fieldset-box">
+                                        <label class="fieldset-label">Admission Source</label>
+                                        <div class="inline-actions">
+                                            <select name="adm_source" id="adm_source" class="fieldset-select">
+                                                <option value="">Select Source</option>
+                                                <?php foreach ($admSrcs as $a): ?>
+                                                <option value="<?php echo $a['id']; ?>"><?php echo e($a['name']); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <a href="<?php echo BASE_URL; ?>manage_admission_sources.php" target="_blank" class="btn-add-new"><i class="fas fa-plus"></i> Add New</a>
+                                        </div>
+                                    </div>
+                                    <div class="fieldset-box">
+                                        <label class="fieldset-label">Date of Birth</label>
+                                        <input type="text" class="fieldset-input" name="dob" id="dob" placeholder="dd/mm/yyyy" value="<?php echo date('d/m/Y'); ?>" autocomplete="off">
+                                    </div>
+                                    <div class="fieldset-box">
+                                        <label class="fieldset-label">Date of Admission</label>
+                                        <input type="text" class="fieldset-input" name="date_of_adms" id="date_of_adms" placeholder="dd/mm/yyyy" value="<?php echo date('d/m/Y'); ?>" autocomplete="off">
+                                    </div>
+                                    <div class="fieldset-box">
                                         <label class="fieldset-label">Locality</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <select name="Locality" id="locality" class="fieldset-select flex-1">
+                                        <div class="inline-actions">
+                                            <select name="Locality" id="locality" class="fieldset-select">
                                                 <option value="">Select Locality</option>
                                                 <?php foreach ($localities as $loc): ?>
                                                 <option value="<?php echo $loc['locality_id']; ?>"><?php echo e($loc['locality_name']); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <a href="<?php echo BASE_URL; ?>manage_localities.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Locality"><i class="fa fa-plus text-[10px]"></i> Add New</a>
+                                            <a href="<?php echo BASE_URL; ?>manage_localities.php" target="_blank" class="btn-add-new"><i class="fas fa-plus"></i> Add New</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- PARENT TAB -->
-                        <div id="form-parent" class="hidden space-y-5">
-                            <div class="bg-white border border-brand-border rounded-xl p-5">
-                                <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                    <i class="fa-solid fa-user-tie text-brand-orange"></i> Father &amp; Mother Information
-                                </h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- PARENT TAB -->
+                    <div id="form-parent" class="hidden">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-user-tie"></i> Father &amp; Mother Information</h3>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-grid-2">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Father CNIC</label>
-                                        <input type="text" class="fieldset-input" name="cnic" id="cnic" placeholder="00000-0000000-0" maxlength="13" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,13); document.getElementById('fcnic-limit-msg').style.display=(this.value.length>0 && this.value.length<13)?'block':'none';">
-                                        <small id="fcnic-limit-msg" class="text-red-500 text-[10px] hidden">Must be exactly 13 digits.</small>
+                                        <input type="text" class="fieldset-input" name="cnic" id="cnic" placeholder="00000-0000000-0" maxlength="13" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,13);">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Father Qualification</label>
@@ -744,32 +870,31 @@ input[type=range] { accent-color: #FF6B2C; }
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Father Occupation</label>
-                                        <div class="flex items-center gap-1.5">
-                                            <select name="father_occupation" id="father_occupation" class="fieldset-select flex-1">
+                                        <div class="inline-actions">
+                                            <select name="father_occupation" id="father_occupation" class="fieldset-select">
                                                 <option value="">Select Occupation</option>
                                                 <?php foreach ($occupations as $o): ?>
                                                 <option value="<?php echo $o['id']; ?>"><?php echo e($o['name']); ?></option>
                                                 <?php endforeach; ?>
                                             </select>
-                                            <a href="<?php echo BASE_URL; ?>manage_occupations.php" target="_blank" class="btn-add-new shrink-0 inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold text-brand-orange hover:bg-orange-50 no-underline" title="Add New Occupation"><i class="fa fa-plus text-[10px]"></i> Add New</a>
+                                            <a href="<?php echo BASE_URL; ?>manage_occupations.php" target="_blank" class="btn-add-new"><i class="fas fa-plus"></i> Add New</a>
                                         </div>
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Father Business Address</label>
-                                        <textarea class="fieldset-input fieldset-area" name="Fbusiness_address" id="Fbusiness_address" placeholder="Business address"></textarea>
+                                        <textarea class="fieldset-input fieldset-textarea" name="Fbusiness_address" id="Fbusiness_address" placeholder="Business address"></textarea>
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Father Income</label>
                                         <input type="text" class="fieldset-input" name="Fincome" id="father_income" placeholder="e.g. 60000" inputmode="numeric">
                                     </div>
                                     <div class="fieldset-box">
-                                        <label class="fieldset-label">Mother Name</label>
-                                        <input type="text" class="fieldset-input" name="mother_name" id="mother_name" placeholder="Enter Mother Name">
+                                        <label class="fieldset-label">Father Cell No</label>
+                                        <input type="text" class="fieldset-input" name="father_cellno" id="father_cellno" placeholder="03XX-XXXXXXX" inputmode="tel">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Mother CNIC</label>
-                                        <input type="text" class="fieldset-input" name="mother_cnic" id="mother_cnic" placeholder="00000-0000000-0" maxlength="13" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,13); document.getElementById('mcnic-limit-msg').style.display=(this.value.length>0 && this.value.length<13)?'block':'none';">
-                                        <small id="mcnic-limit-msg" class="text-red-500 text-[10px] hidden">Must be exactly 13 digits.</small>
+                                        <input type="text" class="fieldset-input" name="mother_cnic" id="mother_cnic" placeholder="00000-0000000-0" maxlength="13" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'').slice(0,13);">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Mother Qualification</label>
@@ -788,6 +913,10 @@ input[type=range] { accent-color: #FF6B2C; }
                                         <input type="text" class="fieldset-input" name="mother_designation" id="mother_designation" placeholder="Designation">
                                     </div>
                                     <div class="fieldset-box">
+                                        <label class="fieldset-label">Mother Cell No</label>
+                                        <input type="text" class="fieldset-input" name="mother_cell" id="mother_cell" placeholder="03XX-XXXXXXX" inputmode="tel">
+                                    </div>
+                                    <div class="fieldset-box">
                                         <label class="fieldset-label">B-Form No</label>
                                         <input type="text" class="fieldset-input" name="formBNo" id="formBNo" placeholder="B-Form number">
                                     </div>
@@ -795,18 +924,20 @@ input[type=range] { accent-color: #FF6B2C; }
                                         <label class="fieldset-label">Cast</label>
                                         <input type="text" class="fieldset-input" name="cast" id="cast" placeholder="Caste">
                                     </div>
-                                    <div class="fieldset-box col-span-2">
+                                    <div class="fieldset-box" style="grid-column: span 2;">
                                         <label class="fieldset-label">Home Address</label>
-                                        <textarea class="fieldset-input fieldset-area" name="address" id="address" placeholder="Complete residential address"></textarea>
+                                        <textarea class="fieldset-input fieldset-textarea" name="address" id="address" placeholder="Complete residential address"></textarea>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="bg-white border border-brand-border rounded-xl p-5">
-                                <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                    <i class="fa-solid fa-user-shield text-brand-orange"></i> Guardian Information
-                                </h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-user-shield"></i> Guardian Information</h3>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-grid-2">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Guardian Name</label>
                                         <input type="text" class="fieldset-input" name="gname" id="gardian_name" placeholder="Full name">
@@ -837,19 +968,21 @@ input[type=range] { accent-color: #FF6B2C; }
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Guardian Address</label>
-                                        <textarea class="fieldset-input fieldset-area" name="Gaddress" id="gardian_address" placeholder="Guardian address"></textarea>
+                                        <textarea class="fieldset-input fieldset-textarea" name="Gaddress" id="gardian_address" placeholder="Guardian address"></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- ACADEMIC TAB -->
-                        <div id="form-academic" class="hidden">
-                            <div class="bg-white border border-brand-border rounded-xl p-5">
-                                <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                    <i class="fa-solid fa-school-circle-check text-brand-orange"></i> Previous Education
-                                </h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <!-- ACADEMIC TAB -->
+                    <div id="form-academic" class="hidden">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-graduation-cap"></i> Academic Information</h3>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-grid">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Previous Class</label>
                                         <input type="text" class="fieldset-input" name="old_class" id="old_class" placeholder="Last attended class">
@@ -877,25 +1010,19 @@ input[type=range] { accent-color: #FF6B2C; }
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- CONTACT TAB -->
-                        <div id="form-contact" class="hidden">
-                            <div class="bg-white border border-brand-border rounded-xl p-5">
-                                <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                    <i class="fa-solid fa-location-dot text-brand-orange"></i> Address &amp; Contact Information
-                                </h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- CONTACT TAB -->
+                    <div id="form-contact" class="hidden">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-map-marker-alt"></i> Contact Information</h3>
+                            </div>
+                            <div class="section-body">
+                                <div class="form-grid-2">
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Whatsapp No</label>
                                         <input type="text" class="fieldset-input" name="whatsapp_number" id="whatsapp_number" placeholder="03XX-XXXXXXX" inputmode="tel">
-                                    </div>
-                                    <div class="fieldset-box">
-                                        <label class="fieldset-label">Father Cell No</label>
-                                        <input type="text" class="fieldset-input" name="father_cellno" id="father_cellno" placeholder="03XX-XXXXXXX" inputmode="tel">
-                                    </div>
-                                    <div class="fieldset-box">
-                                        <label class="fieldset-label">Mother Cell No</label>
-                                        <input type="text" class="fieldset-input" name="mother_cell" id="mother_cell" placeholder="03XX-XXXXXXX" inputmode="tel">
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label">Home Cell No</label>
@@ -927,253 +1054,233 @@ input[type=range] { accent-color: #FF6B2C; }
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- DOCUMENTS TAB -->
-                        <div id="form-documents" class="hidden">
-                            <div class="bg-white border border-brand-border rounded-xl p-5">
-                                <div class="flex items-start justify-between flex-wrap gap-3 mb-4">
-                                    <div>
-                                        <h3 class="text-[13px] font-bold text-slate-700 mb-1 flex items-center gap-2">
-                                            <i class="fa-solid fa-paperclip text-brand-orange"></i> Student Documents
-                                        </h3>
-                                        <p class="text-[11px] text-slate-400"><i class="fa fa-info-circle mr-1"></i>Upload the student's documents below. Accepted formats: JPG, JPEG, PNG, PDF.</p>
-                                    </div>
-                                    <a href="<?php echo BASE_URL; ?>add_student_documents.php" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-brand-border bg-orange-50 hover:bg-orange-100 text-brand-orange text-[11px] font-semibold transition no-underline">
-                                        <i class="fa fa-plus-circle"></i> Manage Document Titles
-                                    </a>
-                                </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- DOCUMENTS TAB -->
+                    <div id="form-documents" class="hidden">
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3><i class="fas fa-paperclip"></i> Documents</h3>
+                                <a href="<?php echo BASE_URL; ?>add_student_documents.php" target="_blank" style="font-size: clamp(11px, 1vw, 13px); font-weight: 600; color: var(--primary); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                    <i class="fas fa-plus-circle"></i> Manage Document Titles
+                                </a>
+                            </div>
+                            <div class="section-body">
+                                <div class="doc-grid">
                                     <?php foreach ($docTitles as $di => $doc): ?>
-                                    <div id="doc-card-<?php echo $doc['id']; ?>" class="border border-dashed border-brand-border rounded-xl p-3 text-center">
-                                        <div class="w-10 h-10 mx-auto rounded-lg bg-orange-50 text-brand-orange flex items-center justify-center mb-2">
-                                            <i class="fa-regular fa-file-lines text-[16px]"></i>
+                                    <div id="doc-card-<?php echo $doc['id']; ?>" class="doc-card">
+                                        <div class="doc-icon">
+                                            <i class="far fa-file-alt"></i>
                                         </div>
-                                        <label class="text-[12px] font-semibold text-slate-600 block mb-1.5 leading-tight"><?php echo e($doc['name']); ?></label>
-                                        <span id="docStatus_<?php echo $di; ?>" class="doc-card-status inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 mb-2">Not Uploaded</span>
-                                        <div class="mb-2">
-                                            <label for="docFile_<?php echo $di; ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-blueBtn hover:bg-blue-600 text-white text-[11px] font-semibold transition cursor-pointer">
-                                                <i class="fa fa-upload"></i> Choose File
+                                        <span class="doc-name"><?php echo e($doc['name']); ?></span>
+                                        <span id="docStatus_<?php echo $di; ?>" class="doc-status">Not Uploaded</span>
+                                        <div>
+                                            <label for="docFile_<?php echo $di; ?>" class="doc-upload-btn">
+                                                <i class="fas fa-upload"></i> Choose File
                                             </label>
                                         </div>
                                         <input type="hidden" name="doc_types[]" value="<?php echo e($doc['name']); ?>">
                                         <input type="file" id="docFile_<?php echo $di; ?>" name="doc_files[]" accept=".jpg,.jpeg,.png,.pdf" class="hidden" onchange="previewStudentDoc(this, <?php echo $di; ?>)">
-                                        <div class="doc-card-filename" id="docFileName_<?php echo $di; ?>"></div>
+                                        <div class="doc-filename" id="docFileName_<?php echo $di; ?>"></div>
                                     </div>
                                     <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Form Actions -->
-                        <div class="flex items-center gap-3">
-                            <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-brand-orange hover:bg-brand-orangeHover text-white text-[13px] font-semibold shadow-sm transition">
-                                <i class="fa-solid fa-floppy-disk"></i> Save Student
-                            </button>
-                            <button type="button" onclick="resetSingleForm()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[13px] font-medium transition">
-                                <i class="fa-solid fa-rotate-left"></i> Cancel
-                            </button>
-                        </div>
-
-                    </div>
-
-                    <!-- Photo Widget -->
-                    <div class="col-span-12 lg:col-span-3">
-                        <div class="bg-white border border-brand-border rounded-xl p-5">
-                            <h3 class="text-[13px] font-bold text-slate-700 mb-4 flex items-center gap-2">
-                                <i class="fa-solid fa-camera text-brand-orange"></i> Student Photo
-                            </h3>
-
-                            <div id="photo-placeholder" onclick="document.getElementById('photo-input').click()" class="w-44 h-48 mx-auto rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-col items-center justify-center text-center cursor-pointer hover:border-brand-orange transition">
-                                <i class="fa-solid fa-camera text-3xl text-slate-400 mb-2"></i>
-                                <p class="text-xs text-slate-500 font-medium">Add Photo</p>
-                                <p class="text-[10px] text-slate-400 mt-0.5">JPG / PNG</p>
-                            </div>
-
-                            <div id="photo-frame" class="hidden relative w-44 h-48 mx-auto rounded-xl overflow-hidden border border-slate-200 bg-white">
-                                <img id="photo-preview" class="w-full h-full object-cover absolute inset-0 select-none" style="transform-origin:center; cursor:grab;" onmousedown="posPhotoDrag(event)">
-                                <button type="button" id="photo-delete-btn" onclick="deletePhotoFrame(event)" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-500 text-white text-[11px] flex items-center justify-center shadow hover:bg-red-600 transition z-10"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-
-                            <input type="file" id="photo-input" name="img_file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
-                            <canvas id="photo-canvas" class="hidden"></canvas>
-
-                            <div id="photo-controls" class="mt-4 space-y-4 photo-controls" disabled>
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-solid fa-magnifying-glass-plus text-slate-400 text-[13px] w-4"></i>
-                                    <input type="range" id="zoom-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updatePhotoTransform()" class="flex-1">
-                                    <span id="zoom-label" class="text-[10px] text-slate-400 w-9 text-right">1.0x</span>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-solid fa-rotate-right text-slate-400 text-[13px] w-4"></i>
-                                    <input type="range" id="rotate-slider" min="-180" max="180" step="5" value="0" oninput="updatePhotoTransform()" class="flex-1">
-                                    <span id="rotate-label" class="text-[10px] text-slate-400 w-9 text-right">0&deg;</span>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                 </div>
-            </form>
-        </div>
 
-        <!-- ===================== VIEW: MULTI STUDENT ===================== -->
-        <div id="view-multi-student" class="hidden">
-            <div class="bg-white border border-brand-border rounded-xl overflow-hidden">
-                <div class="flex items-center justify-between flex-wrap gap-3 px-4 py-3 border-b border-brand-border">
-                    <div>
-                        <h3 class="text-[14px] font-bold text-slate-700"><i class="fa-solid fa-users text-brand-orange mr-2"></i>Add Multi Students</h3>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Quickly add several students in one go</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="addMultiRow()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-blueBtn hover:bg-blue-600 text-white text-[12px] font-semibold transition"><i class="fa-solid fa-plus"></i> Add Row</button>
-                        <button onclick="saveMultiStudents()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-greenBtn hover:bg-green-600 text-white text-[12px] font-semibold transition"><i class="fa-solid fa-database"></i> Save All</button>
+                <!-- Right Column - Photo Widget -->
+                <div>
+                    <div class="photo-widget">
+                        <div class="photo-title">
+                            <i class="fas fa-camera"></i> Student Photo
+                        </div>
+
+                        <div id="photo-placeholder" onclick="document.getElementById('photo-input').click()" class="photo-frame" style="cursor: pointer;">
+                            <div class="placeholder-icon"><i class="fas fa-camera"></i></div>
+                            <div class="placeholder-text">Add Photo</div>
+                            <div class="placeholder-sub">JPG / PNG</div>
+                        </div>
+
+                        <div id="photo-frame" class="photo-frame has-image" style="display: none; cursor: grab;">
+                            <img id="photo-preview" style="width: 100%; height: 100%; object-fit: cover; transform-origin: center;" onmousedown="posPhotoDrag(event)">
+                            <button type="button" id="photo-delete-btn" onclick="deletePhotoFrame(event)" class="delete-btn" style="display: flex;"><i class="fas fa-times"></i></button>
+                        </div>
+
+                        <input type="file" id="photo-input" name="img_file" accept="image/*" class="hidden" onchange="handlePhotoUpload(event)">
+                        <canvas id="photo-canvas" class="hidden"></canvas>
+
+                        <div id="photo-controls" class="photo-controls active">
+                            <div class="control-row">
+                                <i class="fas fa-search-plus"></i>
+                                <input type="range" id="zoom-slider" min="0.5" max="2.5" step="0.05" value="1" oninput="updatePhotoTransform()">
+                                <span id="zoom-label" class="value-label">1.0x</span>
+                            </div>
+                            <div class="control-row">
+                                <i class="fas fa-redo"></i>
+                                <input type="range" id="rotate-slider" min="-180" max="180" step="5" value="0" oninput="updatePhotoTransform()">
+                                <span id="rotate-label" class="value-label">0°</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-[13px]">
-                        <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wide">
+
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Save Student
+                </button>
+                <button type="button" onclick="resetSingleForm()" class="btn-secondary">
+                    <i class="fas fa-undo"></i> Cancel
+                </button>
+                <span class="note"><i class="fas fa-asterisk" style="color: #EF4444; font-size: 8px;"></i> Marked fields are mandatory</span>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- ===================== VIEW: MULTI STUDENT ===================== -->
+    <div id="view-multi-student" class="hidden">
+        <div class="section-card">
+            <div class="section-header">
+                <h3><i class="fas fa-users"></i> Add Multi Student</h3>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <button onclick="addMultiRow()" class="btn-primary" style="padding: clamp(4px, 0.6vw, 8px) clamp(10px, 1.2vw, 18px); font-size: clamp(10px, 0.9vw, 13px);">
+                        <i class="fas fa-plus"></i> Add Row
+                    </button>
+                    <button onclick="saveMultiStudents()" class="btn-success" style="padding: clamp(4px, 0.6vw, 8px) clamp(10px, 1.2vw, 18px); font-size: clamp(10px, 0.9vw, 13px);">
+                        <i class="fas fa-database"></i> Submit
+                    </button>
+                    <button onclick="addLocality()" class="btn-secondary" style="padding: clamp(4px, 0.6vw, 8px) clamp(10px, 1.2vw, 18px); font-size: clamp(10px, 0.9vw, 13px);">
+                        <i class="fas fa-map-marker-alt"></i> Add Locality
+                    </button>
+                    <a href="<?php echo BASE_URL; ?>manage_students.php" class="btn-secondary" style="padding: clamp(4px, 0.6vw, 8px) clamp(10px, 1.2vw, 18px); font-size: clamp(10px, 0.9vw, 13px); text-decoration: none;">
+                        <i class="fas fa-eye"></i> View Student
+                    </a>
+                </div>
+            </div>
+            <div class="section-body">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                    <div class="fieldset-box">
+                        <label class="fieldset-label">Session</label>
+                        <select id="multi-session" class="fieldset-select">
+                            <?php foreach ($sessions as $s): ?>
+                            <option value="<?php echo e($s); ?>" <?php echo ($s === $cur_session) ? 'selected' : ''; ?>><?php echo e($s); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="fieldset-box">
+                        <label class="fieldset-label">Class</label>
+                        <select id="multi-class-select" class="fieldset-select">
+                            <option value="">Select Class</option>
+                            <?php foreach ($classes as $cl): ?>
+                            <option value="<?php echo $cl['class_id']; ?>"><?php echo e($cl['class_name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
                             <tr>
-                                <th class="px-4 py-2.5 font-semibold w-14">#</th>
-                                <th class="px-4 py-2.5 font-semibold min-w-[180px]">Student Name</th>
-                                <th class="px-4 py-2.5 font-semibold min-w-[180px]">Father Name</th>
-                                <th class="px-4 py-2.5 font-semibold min-w-[150px]">Cell / Mobile</th>
-                                <th class="px-4 py-2.5 font-semibold min-w-[140px]">Class</th>
-                                <th class="px-4 py-2.5 font-semibold w-16"></th>
+                                <th style="width: 40px;">#</th>
+                                <th style="min-width: 150px;">Student Name</th>
+                                <th style="min-width: 150px;">Father Name</th>
+                                <th style="min-width: 130px;">Cell</th>
+                                <th style="min-width: 100px;">Fee</th>
+                                <th style="min-width: 120px;">Initial Balance</th>
+                                <th style="width: 50px;"></th>
                             </tr>
                         </thead>
-                        <tbody id="multi-student-tbody" class="divide-y divide-brand-border">
+                        <tbody id="multi-student-tbody">
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- ===================== VIEW: IMPORT CSV ===================== -->
-        <div id="view-import-student" class="hidden">
-            <div class="bg-white border border-brand-border rounded-xl overflow-hidden">
-                <div class="flex items-center justify-between flex-wrap gap-3 px-4 py-3 border-b border-brand-border">
-                    <div>
-                        <h3 class="text-[14px] font-bold text-slate-700"><i class="fa-solid fa-file-csv text-brand-orange mr-2"></i>Import Students / CSV</h3>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Upload a CSV file to bulk import students</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="downloadSampleCSV()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-[12px] font-semibold transition"><i class="fa-solid fa-download"></i> Sample CSV File</button>
-                        <button onclick="document.getElementById('import-csv-input').click()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-blueBtn hover:bg-blue-600 text-white text-[12px] font-semibold transition"><i class="fa-solid fa-upload"></i> Choose File</button>
-                        <input type="file" id="import-csv-input" accept=".csv" class="hidden" onchange="triggerCSVImport(this)">
-                    </div>
+    <!-- ===================== VIEW: IMPORT CSV ===================== -->
+    <div id="view-import-student" class="hidden">
+        <div class="section-card">
+            <div class="section-header">
+                <h3><i class="fas fa-file-csv"></i> Import Student Data</h3>
+            </div>
+            <div class="section-body">
+                <p style="font-size: 13px; color: var(--gray-500); margin-bottom: 16px;">
+                    Upload the CSV template to stage student data, review it below, then save it into the software.
+                </p>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 8px;">
+                    <button onclick="document.getElementById('import-csv-input').click()" class="btn-primary" style="padding: clamp(6px, 0.8vw, 10px) clamp(14px, 1.5vw, 22px); font-size: clamp(11px, 1vw, 14px);">
+                        <i class="fas fa-upload"></i> Choose File
+                    </button>
+                    <input type="file" id="import-csv-input" accept=".csv" class="hidden" onchange="triggerCSVImport(this)">
+                    <span id="csv-file-name" style="font-size: 13px; color: var(--gray-500);">No file chosen</span>
+                    <button onclick="saveImportedData()" class="btn-success" style="padding: clamp(6px, 0.8vw, 10px) clamp(14px, 1.5vw, 22px); font-size: clamp(11px, 1vw, 14px);">
+                        <i class="fas fa-database"></i> Import
+                    </button>
                 </div>
-
-                <div class="flex items-center gap-3 px-4 py-2.5 border-b border-brand-border bg-slate-50/50">
-                    <input type="text" id="csv-search" placeholder="Search imported records..." oninput="filterCSVTable()" class="flex-1 h-9 px-3 rounded-lg bg-white border border-brand-border text-[12px] text-slate-600 outline-none focus:ring-2 focus:ring-brand-orange/40 placeholder:text-slate-400">
-                    <span id="csv-count" class="text-[11px] text-slate-400 whitespace-nowrap">0 records</span>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-[13px]">
-                        <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase tracking-wide">
-                            <tr>
-                                <th class="px-4 py-2.5 font-semibold w-10"><i class="fa-solid fa-check text-slate-300"></i></th>
-                                <th class="px-4 py-2.5 font-semibold w-14">S.No</th>
-                                <th class="px-4 py-2.5 font-semibold min-w-[170px]">Student Name</th>
-                                <th class="px-4 py-2.5 font-semibold min-w-[170px]">Father Name</th>
-                                <th class="px-4 py-2.5 font-semibold min-w-[130px]">Cell / Mobile</th>
-                                <th class="px-4 py-2.5 font-semibold min-w-[110px]">Class</th>
-                                <th class="px-4 py-2.5 font-semibold w-16"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="csv-table-body" class="divide-y divide-brand-border">
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="flex items-center justify-between flex-wrap gap-3 px-4 py-3 border-t border-brand-border bg-slate-50/50">
-                    <p class="text-[11px] text-slate-400"><i class="fa-solid fa-circle-info text-brand-blueBtn mr-1"></i> Columns: Student Name, Father Name, Cell / Mobile, Class</p>
-                    <div class="flex items-center gap-2">
-                        <button onclick="clearImportedData()" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-[12px] font-semibold transition"><i class="fa-solid fa-trash-can"></i> Clear All</button>
-                        <button onclick="saveImportedData()" class="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-brand-greenBtn hover:bg-green-600 text-white text-[12px] font-semibold transition"><i class="fa-solid fa-database"></i> Import Selected</button>
-                    </div>
-                </div>
+                <p style="font-size: 12px; color: var(--gray-400);">
+                    <i class="fas fa-info-circle"></i> Only CSV files are accepted — match the class/section names from the downloaded template for best accuracy.
+                </p>
             </div>
         </div>
 
-    </main>
+        <div class="section-card">
+            <div class="section-header">
+                <h3><i class="fas fa-list"></i> Import Data List</h3>
+                <span id="csv-count" style="font-size: 12px; color: var(--gray-400);">0 records</span>
+            </div>
+            <div class="section-body" style="padding: 0;">
+                <div style="display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--gray-200); background: var(--gray-50);">
+                    <input type="text" id="csv-search" placeholder="Search imported records..." oninput="filterCSVTable()" style="flex: 1; min-width: 120px; height: clamp(30px, 3vw, 38px); padding: 0 clamp(10px, 1vw, 14px); border-radius: 6px; border: 1px solid var(--gray-200); font-size: clamp(11px, 1vw, 13px); outline: none; transition: border-color 0.2s;">
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><i class="fas fa-check" style="color: var(--gray-300);"></i></th>
+                                <th style="width: 50px;">S.No</th>
+                                <th style="min-width: 140px;">Student Name</th>
+                                <th style="min-width: 140px;">Father Name</th>
+                                <th style="min-width: 120px;">Class Name</th>
+                                <th style="min-width: 120px;">Section Name</th>
+                                <th style="min-width: 110px;">Cell Number</th>
+                                <th style="min-width: 90px;">Gender</th>
+                                <th style="min-width: 90px;">Religion</th>
+                                <th style="min-width: 100px;">Date of Birth</th>
+                                <th style="min-width: 110px;">Admission Date</th>
+                                <th style="min-width: 100px;">Admission No</th>
+                                <th style="min-width: 90px;">Sibling Code</th>
+                                <th style="min-width: 90px;">Family Code</th>
+                                <th style="min-width: 120px;">Course Package</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="csv-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- ===================== TOAST ===================== -->
-<div id="toast-container" class="fixed top-4 right-4 z-[100] space-y-2 w-[320px] max-w-[90vw]"></div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
 
 <script>
 var HIIFI_BASE = '<?php echo BASE_URL; ?>';
 
-
-function switchMainView(view) {
-    if (view === 'form') { window.location = HIIFI_BASE + 'adm_form.php'; return; }
-    var views = { 'single': 'view-single-student', 'multi': 'view-multi-student', 'import': 'view-import-student' };
-    Object.keys(views).forEach(function (k) {
-        document.getElementById(views[k]).classList.toggle('hidden', k !== view);
-    });
-    document.querySelectorAll('#tab-btn-single, #tab-btn-multi, #tab-btn-import').forEach(function (b) { b.classList.remove('active'); });
-    var btn = document.getElementById('tab-btn-' + view);
-    if (btn) btn.classList.add('active');
-    if (view === 'multi' && multiIndex <= 1) addMultiRow();
-}
-
-function switchFormTab(tab) {
-    var tabs = { 'basic': 'form-basic', 'parent': 'form-parent', 'academic': 'form-academic', 'contact': 'form-contact', 'documents': 'form-documents' };
-    Object.keys(tabs).forEach(function (k) {
-        document.getElementById(tabs[k]).classList.toggle('hidden', k !== tab);
-    });
-    document.querySelectorAll('#subtab-basic, #subtab-parent, #subtab-academic, #subtab-contact, #subtab-documents').forEach(function (b) { b.classList.remove('active'); });
-    var btn = document.getElementById('subtab-' + tab);
-    if (btn) btn.classList.add('active');
-}
-
-function resetSingleForm() {
-    document.getElementById('single-student-form').reset();
-    document.getElementById('family_code_value').value = '';
-    document.getElementById('com_no').value = '<?php echo e($nextGr); ?>';
-    document.getElementById('txt_section').innerHTML = '<option value="" disabled selected>Select Section</option>';
-    resetPhotoFrame();
-    switchFormTab('basic');
-    showToast('Form cleared', 'info');
-}
-
-function showToast(msg, type) {
-    var types = { success: 'bg-emerald-600', warning: 'bg-amber-500', info: 'bg-sky-600', error: 'bg-red-600' };
-    var icons = { success: 'fa-circle-check', warning: 'fa-triangle-exclamation', info: 'fa-circle-info', error: 'fa-circle-exclamation' };
-    var el = document.createElement('div');
-    el.className = 'toast-item ' + (types[type] || types.info) + ' text-white text-sm px-4 py-3 rounded-xl flex items-start gap-2';
-    el.innerHTML = '<i class="fa-solid ' + (icons[type] || icons.info) + ' mt-0.5"></i><span class="flex-1"></span>';
-    el.querySelector('span').textContent = msg;
-    document.getElementById('toast-container').appendChild(el);
-    setTimeout(function () { el.classList.add('remove'); setTimeout(function () { el.remove(); }, 260); }, 3200);
-}
-
-/* ---------------- Photo ---------------- */
-function handlePhotoUpload(e) {
-    var input = e.target;
-    var file = input.files && input.files[0];
-    if (!file) return;
-    if (!/^image\//.test(file.type)) { showToast('Please select an image file', 'warning'); input.value = ''; return; }
-    var reader = new FileReader();
-    reader.onload = function (ev) {
-        var img = document.getElementById('photo-preview');
-        img.src = ev.target.result;
-        img.style.transform = 'scale(1) rotate(0deg)';
-        img.style.left = '0px';
-        img.style.top = '0px';
-        document.getElementById('zoom-slider').value = 1;
-        document.getElementById('rotate-slider').value = 0;
-        document.getElementById('zoom-label').textContent = '1.0x';
-        document.getElementById('rotate-label').textContent = '0\u00B0';
-        document.getElementById('photo-placeholder').classList.add('hidden');
-        document.getElementById('photo-frame').classList.remove('hidden');
-        document.getElementById('photo-controls').removeAttribute('disabled');
-    };
-    reader.readAsDataURL(file);
-}
-
-/* drag-to-position the photo inside the frame */
+// ==================== SINGLE STUDENT ====================
 var _photoDrag = null;
+
 function posPhotoDrag(e) {
     e.preventDefault();
     var img = document.getElementById('photo-preview');
@@ -1184,8 +1291,10 @@ function posPhotoDrag(e) {
         orgTop: parseInt(img.style.top) || 0,
         img: img
     };
-    onPosPhotoMove(e);
+    document.addEventListener('mousemove', onPosPhotoMove);
+    document.addEventListener('mouseup', endPhotoDrag);
 }
+
 function onPosPhotoMove(e) {
     if (!_photoDrag) return;
     var dx = e.clientX - _photoDrag.startX;
@@ -1207,7 +1316,77 @@ function onPosPhotoMove(e) {
     img.style.left = nx + 'px';
     img.style.top = ny + 'px';
 }
-function endPhotoDrag() { _photoDrag = null; }
+
+function endPhotoDrag() {
+    _photoDrag = null;
+    document.removeEventListener('mousemove', onPosPhotoMove);
+    document.removeEventListener('mouseup', endPhotoDrag);
+}
+
+function switchMainView(view) {
+    if (view === 'form') { window.location = HIIFI_BASE + 'adm_form.php'; return; }
+    var views = { 'single': 'view-single-student', 'multi': 'view-multi-student', 'import': 'view-import-student' };
+    Object.keys(views).forEach(function (k) {
+        document.getElementById(views[k]).classList.toggle('hidden', k !== view);
+    });
+    document.querySelectorAll('.main-tabs .tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    var btn = document.getElementById('tab-btn-' + view);
+    if (btn) btn.classList.add('active');
+    if (view === 'multi' && multiIndex <= 1) addMultiRow();
+}
+
+function switchFormTab(tab) {
+    var tabs = { 'basic': 'form-basic', 'parent': 'form-parent', 'academic': 'form-academic', 'contact': 'form-contact', 'documents': 'form-documents' };
+    Object.keys(tabs).forEach(function (k) {
+        document.getElementById(tabs[k]).classList.toggle('hidden', k !== tab);
+    });
+    document.querySelectorAll('.subtab-btn').forEach(function (b) { b.classList.remove('active'); });
+    var btn = document.getElementById('subtab-' + tab);
+    if (btn) btn.classList.add('active');
+}
+
+function resetSingleForm() {
+    document.getElementById('single-student-form').reset();
+    document.getElementById('family_code_value').value = '';
+    document.getElementById('com_no').value = '<?php echo e($nextGr); ?>';
+    document.getElementById('txt_section').innerHTML = '<option value="" disabled selected>Select Section</option>';
+    resetPhotoFrame();
+    switchFormTab('basic');
+    showToast('Form cleared', 'info');
+}
+
+function showToast(msg, type) {
+    var types = { success: 'success', warning: 'warning', info: 'info', error: 'error' };
+    var icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle', error: 'fa-exclamation-circle' };
+    var el = document.createElement('div');
+    el.className = 'toast-item ' + (types[type] || types.info);
+    el.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i><span>' + msg + '</span>';
+    document.getElementById('toast-container').appendChild(el);
+    setTimeout(function () { el.style.opacity = '0'; el.style.transform = 'translateX(30px)'; setTimeout(function () { el.remove(); }, 300); }, 3200);
+}
+
+function handlePhotoUpload(e) {
+    var input = e.target;
+    var file = input.files && input.files[0];
+    if (!file) return;
+    if (!/^image\//.test(file.type)) { showToast('Please select an image file', 'warning'); input.value = ''; return; }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+        var img = document.getElementById('photo-preview');
+        img.src = ev.target.result;
+        img.style.transform = 'scale(1) rotate(0deg)';
+        img.style.left = '0px';
+        img.style.top = '0px';
+        document.getElementById('zoom-slider').value = 1;
+        document.getElementById('rotate-slider').value = 0;
+        document.getElementById('zoom-label').textContent = '1.0x';
+        document.getElementById('rotate-label').textContent = '0\u00B0';
+        document.getElementById('photo-placeholder').style.display = 'none';
+        document.getElementById('photo-frame').style.display = 'flex';
+        document.getElementById('photo-controls').classList.add('active');
+    };
+    reader.readAsDataURL(file);
+}
 
 function updatePhotoTransform() {
     var img = document.getElementById('photo-preview');
@@ -1227,108 +1406,16 @@ function resetPhotoFrame() {
     var input = document.getElementById('photo-input');
     input.value = '';
     document.getElementById('captured_image').value = '';
-    document.getElementById('photo-placeholder').classList.remove('hidden');
-    document.getElementById('photo-frame').classList.add('hidden');
-    document.getElementById('photo-controls').setAttribute('disabled', 'disabled');
+    document.getElementById('photo-placeholder').style.display = 'flex';
+    document.getElementById('photo-frame').style.display = 'none';
+    document.getElementById('photo-controls').classList.remove('active');
 }
 
 function handleSaveStudent(e) {
     e.preventDefault();
     var form = document.getElementById('single-student-form');
-    var fcnic = document.getElementById('cnic');
-    var mcnic = document.getElementById('mother_cnic');
-    if (fcnic && fcnic.value && fcnic.value.length < 13) {
-        switchFormTab('parent');
-        document.getElementById('fcnic-limit-msg').classList.remove('hidden');
-        fcnic.focus();
-        showToast('Father CNIC must be exactly 13 digits', 'warning');
-        return;
-    }
-    if (mcnic && mcnic.value && mcnic.value.length < 13) {
-        switchFormTab('parent');
-        document.getElementById('mcnic-limit-msg').classList.remove('hidden');
-        mcnic.focus();
-        showToast('Mother CNIC must be exactly 13 digits', 'warning');
-        return;
-    }
     if (!form.checkValidity()) { form.reportValidity(); return; }
-    if (window._studentSaveProcessing) return;
-
-    var frame = document.getElementById('photo-frame');
-    var fileInput = document.getElementById('photo-input');
-    var zoomSlider = document.getElementById('zoom-slider');
-    var rotateSlider = document.getElementById('rotate-slider');
-    var frameVisible = frame && !frame.classList.contains('hidden');
-    var hasNewFile = fileInput.files && fileInput.files[0];
-    var photoPreview = document.getElementById('photo-preview');
-    var imgLeft = photoPreview ? (parseFloat(photoPreview.style.left) || 0) : 0;
-    var imgTop = photoPreview ? (parseFloat(photoPreview.style.top) || 0) : 0;
-    var hasTransformation = zoomSlider && rotateSlider &&
-        (parseFloat(zoomSlider.value) !== 1 || parseInt(rotateSlider.value) !== 0 || imgLeft !== 0 || imgTop !== 0);
-    if (!frameVisible || (!hasNewFile && !hasTransformation)) { form.submit(); return; }
-
-    window._studentSaveProcessing = true;
-    processImageTransformation();
-}
-
-function processImageTransformation() {
-    var canvas = document.getElementById('photo-canvas');
-    var form = document.getElementById('single-student-form');
-    var image = document.getElementById('photo-preview');
-    var fileInput = document.getElementById('photo-input');
-    var zoomSlider = document.getElementById('zoom-slider');
-    var rotateSlider = document.getElementById('rotate-slider');
-    if (!image.complete || !image.naturalWidth) {
-        showToast('Image not loaded properly. Please try again.', 'warning');
-        window._studentSaveProcessing = false;
-        return;
-    }
-    var zoom = parseFloat(zoomSlider.value) || 1;
-    var rotation = parseInt(rotateSlider.value) || 0;
-    var imgLeft = parseFloat(image.style.left) || 0;
-    var imgTop = parseFloat(image.style.top) || 0;
-    var containerWidth = 176;
-    var containerHeight = 192;
-    var outputScale = 2;
-    canvas.width = containerWidth * outputScale;
-    canvas.height = containerHeight * outputScale;
-    var ctx = canvas.getContext('2d');
-    ctx.scale(outputScale, outputScale);
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, containerWidth, containerHeight);
-    ctx.save();
-    ctx.translate(containerWidth / 2, containerHeight / 2);
-    if (rotation !== 0) ctx.rotate((rotation * Math.PI) / 180);
-    var imageAspectRatio = image.naturalWidth / image.naturalHeight;
-    var containerAspectRatio = containerWidth / containerHeight;
-    var baseWidth, baseHeight;
-    if (imageAspectRatio > containerAspectRatio) {
-        baseWidth = containerWidth;
-        baseHeight = containerWidth / imageAspectRatio;
-    } else {
-        baseHeight = containerHeight;
-        baseWidth = containerHeight * imageAspectRatio;
-    }
-    var drawWidth = baseWidth * zoom;
-    var drawHeight = baseHeight * zoom;
-    ctx.drawImage(image, -drawWidth / 2 + imgLeft, -drawHeight / 2 + imgTop, drawWidth, drawHeight);
-    ctx.restore();
-    canvas.toBlob(function (blob) {
-        if (!blob) { showToast('Failed to process image', 'error'); window._studentSaveProcessing = false; return; }
-        var transformedFile = new File([blob], 'transformed_student_image.jpg', { type: 'image/jpeg', lastModified: Date.now() });
-        try {
-            var dataTransfer = new DataTransfer();
-            dataTransfer.items.add(transformedFile);
-            fileInput.files = dataTransfer.files;
-            form.submit();
-        } catch (err) {
-            console.error(err);
-            showToast('Failed to process image. Please try again.', 'error');
-            window._studentSaveProcessing = false;
-        }
-    }, 'image/jpeg', 0.98);
+    form.submit();
 }
 
 function previewStudentDoc(input, idx) {
@@ -1336,18 +1423,17 @@ function previewStudentDoc(input, idx) {
     var status = document.getElementById('docStatus_' + idx);
     var nameEl = document.getElementById('docFileName_' + idx);
     if (!file) {
-        if (status) { status.textContent = 'Not Uploaded'; status.className = 'doc-card-status inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-400 mb-2'; }
+        if (status) { status.textContent = 'Not Uploaded'; status.className = 'doc-status'; }
         if (nameEl) nameEl.textContent = '';
         return;
     }
     if (status) {
         status.textContent = 'Uploaded';
-        status.className = 'doc-card-status inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-100 text-green-600 mb-2';
+        status.className = 'doc-status uploaded';
     }
-    if (nameEl) { nameEl.textContent = file.name; nameEl.className = 'doc-card-filename text-[10px] text-slate-400 truncate mt-1'; }
+    if (nameEl) { nameEl.textContent = file.name; }
 }
 
-/* ---------------- Sections / Family / City ---------------- */
 function getSection(cid) {
     var sel = document.getElementById('txt_section');
     if (!cid) { sel.innerHTML = '<option value="" disabled selected>Select Section</option>'; return; }
@@ -1420,16 +1506,8 @@ function getFamilyInfo(code) {
     xhr.send();
 }
 
-var stateMap = {
-    'Punjab': ['Lahore','Rawalpindi','Faisalabad','Multan','Gujranwala','Sialkot','Bahawalpur','Sargodha','Sheikhupura','Rahim Yar Khan','Jhang','Kasur','Gujrat','Okara','Sahiwal','Mianwali','Dera Ghazi Khan','Attock','Chakwal','Mandi Bahauddin','Vehari','Muzaffargarh','Khanewal','Wazirabad','Hafizabad','Narowal','Burewala','Toba Tek Singh'],
-    'Sindh': ['Karachi','Hyderabad','Sukkur','Larkana','Nawabshah','Mirpur Khas','Badin','Shikarpur','Dadu','Thatta','Jacobabad','Ghorki'],
-    'Balochistan': ['Quetta','Khuzdar','Turbat','Gwadar','Chaman','Sibi','Zhob','Noshki'],
-    'KPK': ['Peshawar','Mardan','Swat','Abbottabad','Kohat','Bannu','Charsadda','Dera Ismail Khan','Nowshera','Mansehra','Haripur','Swabi'],
-    'Gilgit-Baltistan': ['Gilgit','Skardu','Hunza','Nagar','Ghizer','Astore'],
-    'Kashmir (territory)': ['Muzaffarabad','Mirpur','Rawalakot','Kotli','Bhimber'],
-    'FATA (territory)': ['Parachinar','Miranshah','Wana','Kurram'],
-    'Federal': ['Islamabad']
-};
+var stateMap = <?php echo json_encode($stateMapDef); ?>;
+
 function getCity(stateVal) {
     var cityEl = document.getElementById('city');
     cityEl.innerHTML = '<option value="" disabled selected>Select City</option>';
@@ -1443,33 +1521,46 @@ function getCity(stateVal) {
     });
 }
 
-/* ---------------- Multi Students ---------------- */
+// ==================== MULTI STUDENT ====================
 var multiIndex = 0;
+var multiClassOptions = '<?php foreach ($classes as $cl): ?><option value="<?php echo $cl['class_id']; ?>"><?php echo e($cl['class_name']); ?></option><?php endforeach; ?>';
+
 function addMultiRow() {
     multiIndex++;
     var tr = document.createElement('tr');
     tr.id = 'multi-row-' + multiIndex;
     tr.innerHTML =
-        '<td class="px-4 py-2 text-slate-400 text-[12px]">' + multiIndex + '</td>' +
-        '<td class="px-4 py-2"><div class="fieldset-box"><label class="fieldset-label">Student Name</label><input id="multi-name-' + multiIndex + '" class="fieldset-input" placeholder="Full name"></div></td>' +
-        '<td class="px-4 py-2"><div class="fieldset-box"><label class="fieldset-label">Father Name</label><input id="multi-father-' + multiIndex + '" class="fieldset-input" placeholder="Father name"></div></td>' +
-        '<td class="px-4 py-2"><div class="fieldset-box"><label class="fieldset-label">Cell / Mobile</label><input id="multi-cell-' + multiIndex + '" class="fieldset-input" placeholder="03XX-XXXXXXX"></div></td>' +
-        '<td class="px-4 py-2"><div class="fieldset-box"><label class="fieldset-label">Class</label><select id="multi-class-' + multiIndex + '" class="fieldset-select"><option value="">Select Class</option>' + multiClassOptions + '</select></div></td>' +
-        '<td class="px-4 py-2 text-center"><button onclick="removeMultiRow(' + multiIndex + ')" class="w-7 h-7 rounded-md text-red-500 hover:bg-red-50 flex items-center justify-center"><i class="fa-solid fa-trash-can text-[12px]"></i></button></td>';
+        '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-400); font-size: clamp(11px, 1vw, 13px); text-align:center;">' + multiIndex + '</td>' +
+        '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px);"><div class="fieldset-box" style="min-height: clamp(32px, 3.5vw, 44px); padding: clamp(8px, 0.8vw, 12px) clamp(8px, 0.8vw, 12px) clamp(2px, 0.3vw, 6px) clamp(8px, 0.8vw, 12px);"><label class="fieldset-label" style="font-size: clamp(8px, 0.7vw, 10px); top: -6px;">Student Name</label><input id="multi-name-' + multiIndex + '" class="fieldset-input" placeholder="Student Name" style="font-size: clamp(11px, 1vw, 13px);"></div></td>' +
+        '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px);"><div class="fieldset-box" style="min-height: clamp(32px, 3.5vw, 44px); padding: clamp(8px, 0.8vw, 12px) clamp(8px, 0.8vw, 12px) clamp(2px, 0.3vw, 6px) clamp(8px, 0.8vw, 12px);"><label class="fieldset-label" style="font-size: clamp(8px, 0.7vw, 10px); top: -6px;">Father Name</label><input id="multi-father-' + multiIndex + '" class="fieldset-input" placeholder="Father Name" style="font-size: clamp(11px, 1vw, 13px);"></div></td>' +
+        '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px);"><div class="fieldset-box" style="min-height: clamp(32px, 3.5vw, 44px); padding: clamp(8px, 0.8vw, 12px) clamp(8px, 0.8vw, 12px) clamp(2px, 0.3vw, 6px) clamp(8px, 0.8vw, 12px);"><label class="fieldset-label" style="font-size: clamp(8px, 0.7vw, 10px); top: -6px;">Cell</label><input id="multi-cell-' + multiIndex + '" class="fieldset-input" placeholder="03XX-XXXXXXX" style="font-size: clamp(11px, 1vw, 13px);"></div></td>' +
+        '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px);"><div class="fieldset-box" style="min-height: clamp(32px, 3.5vw, 44px); padding: clamp(8px, 0.8vw, 12px) clamp(8px, 0.8vw, 12px) clamp(2px, 0.3vw, 6px) clamp(8px, 0.8vw, 12px);"><label class="fieldset-label" style="font-size: clamp(8px, 0.7vw, 10px); top: -6px;">Fee</label><input id="multi-fee-' + multiIndex + '" class="fieldset-input" placeholder="0.00" style="font-size: clamp(11px, 1vw, 13px);"></div></td>' +
+        '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px);"><div class="fieldset-box" style="min-height: clamp(32px, 3.5vw, 44px); padding: clamp(8px, 0.8vw, 12px) clamp(8px, 0.8vw, 12px) clamp(2px, 0.3vw, 6px) clamp(8px, 0.8vw, 12px);"><label class="fieldset-label" style="font-size: clamp(8px, 0.7vw, 10px); top: -6px;">Initial Balance</label><input id="multi-balance-' + multiIndex + '" class="fieldset-input" placeholder="0.00" style="font-size: clamp(11px, 1vw, 13px);"></div></td>' +
+        '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); text-align: center;"><button onclick="removeMultiRow(' + multiIndex + ')" style="width: clamp(24px, 2.5vw, 32px); height: clamp(24px, 2.5vw, 32px); border-radius: 6px; border: none; background: transparent; color: #EF4444; cursor: pointer; font-size: clamp(11px, 1vw, 13px);"><i class="fas fa-trash-alt"></i></button></td>';
     document.getElementById('multi-student-tbody').appendChild(tr);
 }
+
 function removeMultiRow(rowId) {
     var el = document.getElementById('multi-row-' + rowId);
     if (el) { el.remove(); showToast('Row removed', 'info'); }
 }
+
+function addLocality() {
+    window.location = HIIFI_BASE + 'manage_localities.php';
+}
+
 function saveMultiStudents() {
     var rows = [];
+    var session = document.getElementById('multi-session').value;
+    var classId = document.getElementById('multi-class-select').value;
+    if (!classId) { showToast('Please select a class first', 'warning'); return; }
     document.querySelectorAll('#multi-student-tbody tr').forEach(function (tr) {
         var name = (tr.querySelector('input[id^="multi-name-"]') || {}).value || '';
         var father = (tr.querySelector('input[id^="multi-father-"]') || {}).value || '';
         var cell = (tr.querySelector('input[id^="multi-cell-"]') || {}).value || '';
-        var cls = (tr.querySelector('select[id^="multi-class-"]') || { value: '' }).value || '';
-        if (name) rows.push({ name: name, father: father, cell: cell, class_id: cls });
+        var fee = (tr.querySelector('input[id^="multi-fee-"]') || {}).value || '0';
+        var balance = (tr.querySelector('input[id^="multi-balance-"]') || {}).value || '0';
+        if (name) rows.push({ name: name, father: father, cell: cell, class_id: classId, fee: fee, balance: balance });
     });
     if (rows.length === 0) { showToast('No students added yet', 'warning'); return; }
     var xhr = new XMLHttpRequest();
@@ -1488,12 +1579,11 @@ function saveMultiStudents() {
             showToast('Failed to save students', 'error');
         }
     };
-    xhr.send('action=SaveMultiStudents&rows=' + encodeURIComponent(JSON.stringify(rows)));
+    xhr.send('action=SaveMultiStudents&rows=' + encodeURIComponent(JSON.stringify(rows)) + '&session=' + encodeURIComponent(session) + '&class_id=' + encodeURIComponent(classId));
 }
 
-/* ---------------- CSV Import ---------------- */
+// ==================== CSV IMPORT ====================
 var csvRecords = [];
-var multiClassOptions = '<?php foreach ($classes as $cl): ?><option value="<?php echo $cl['class_id']; ?>"><?php echo e($cl['class_name']); ?></option><?php endforeach; ?>';
 
 function renderCSVTable(data) {
     var tbody = document.getElementById('csv-table-body');
@@ -1502,37 +1592,50 @@ function renderCSVTable(data) {
     rows.forEach(function (r) {
         var tr = document.createElement('tr');
         tr.innerHTML =
-            '<td class="px-4 py-2 text-center"><input type="checkbox" checked class="w-3.5 h-3.5 accent-brand-orange"></td>' +
-            '<td class="px-4 py-2 text-slate-400 text-[12px]">' + r.SNo + '</td>' +
-            '<td class="px-4 py-2 font-medium text-slate-700">' + r.StudentName + '</td>' +
-            '<td class="px-4 py-2 text-slate-500">' + r.FatherName + '</td>' +
-            '<td class="px-4 py-2 text-slate-500">' + r.CellNo + '</td>' +
-            '<td class="px-4 py-2 text-slate-500">' + r.Class + '</td>' +
-            '<td class="px-4 py-2 text-center"><button onclick="deleteCSVRecord(' + r.SNo + ')" class="w-7 h-7 rounded-md text-red-500 hover:bg-red-50 flex items-center justify-center"><i class="fa-solid fa-trash-can text-[12px]"></i></button></td>';
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); text-align: center;"><input type="checkbox" checked style="width: clamp(12px, 1.2vw, 16px); height: clamp(12px, 1.2vw, 16px); accent-color: var(--primary);"></td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-400); font-size: clamp(11px, 1vw, 13px);">' + r.SNo + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); font-weight: 500; color: var(--gray-700);">' + (r.StudentName || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.FatherName || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.Class || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.Section || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.CellNo || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.Gender || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.Religion || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.DOB || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.AdmissionDate || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.AdmissionNo || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.SiblingCode || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.FamilyCode || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); color: var(--gray-500);">' + (r.CoursePackage || '') + '</td>' +
+            '<td style="padding: clamp(4px, 0.6vw, 10px) clamp(8px, 0.8vw, 14px); text-align: center;"><button onclick="deleteCSVRecord(' + r.SNo + ')" style="width: clamp(24px, 2.5vw, 32px); height: clamp(24px, 2.5vw, 32px); border-radius: 6px; border: none; background: transparent; color: #EF4444; cursor: pointer; font-size: clamp(11px, 1vw, 13px);"><i class="fas fa-trash-alt"></i></button></td>';
         tbody.appendChild(tr);
     });
     document.getElementById('csv-count').textContent = rows.length + ' records';
 }
+
 function filterCSVTable() {
     var q = (document.getElementById('csv-search').value || '').toLowerCase();
     var filtered = csvRecords.filter(function (r) {
-        return r.StudentName.toLowerCase().indexOf(q) !== -1 ||
-               r.FatherName.toLowerCase().indexOf(q) !== -1 ||
-               r.CellNo.toLowerCase().indexOf(q) !== -1 ||
-               r.Class.toLowerCase().indexOf(q) !== -1;
+        return (r.StudentName || '').toLowerCase().indexOf(q) !== -1 ||
+               (r.FatherName || '').toLowerCase().indexOf(q) !== -1 ||
+               (r.Class || '').toLowerCase().indexOf(q) !== -1 ||
+               (r.CellNo || '').toLowerCase().indexOf(q) !== -1;
     });
     renderCSVTable(filtered);
 }
+
 function deleteCSVRecord(sno) {
     csvRecords = csvRecords.filter(function (r) { return r.SNo !== sno; });
     renderCSVTable();
     showToast('Record deleted', 'info');
 }
+
 function triggerCSVImport(input) {
     var file = input.files && input.files[0];
     if (!file) return;
     var ext = file.name.split('.').pop().toLowerCase();
     if (ext !== 'csv') { showToast('Please select a CSV file', 'warning'); input.value = ''; return; }
+    document.getElementById('csv-file-name').textContent = file.name;
     var reader = new FileReader();
     reader.onload = function (ev) {
         var text = ev.target.result;
@@ -1540,6 +1643,7 @@ function triggerCSVImport(input) {
         if (csvRecords.length === 0) {
             showToast('No valid rows found in CSV', 'warning');
             input.value = '';
+            document.getElementById('csv-file-name').textContent = 'No file chosen';
             return;
         }
         renderCSVTable();
@@ -1558,8 +1662,18 @@ function parseCSV(text) {
     var nameCol = findCol(hIdx, ['student name', 'name', 'student']);
     var fatherCol = findCol(hIdx, ['father name', 'father', 'fathers name']);
     var cellCol = findCol(hIdx, ['cell', 'mobile', 'cell no', 'cellno', 'phone', 'contact']);
-    var classCol = findCol(hIdx, ['class', 'class name', 'cls']);
-    if (nameCol === -1 || classCol === -1) return [];
+    var classCol = findCol(hIdx, ['class', 'class name', 'cls', 'class name']);
+    var sectionCol = findCol(hIdx, ['section', 'section name', 'sec']);
+    var genderCol = findCol(hIdx, ['gender', 'sex']);
+    var religionCol = findCol(hIdx, ['religion', 'faith']);
+    var dobCol = findCol(hIdx, ['dob', 'date of birth', 'birthdate']);
+    var admDateCol = findCol(hIdx, ['admission date', 'admission', 'adm date']);
+    var admNoCol = findCol(hIdx, ['admission no', 'adm no', 'admission number']);
+    var siblingCol = findCol(hIdx, ['sibling code', 'sibling']);
+    var familyCol = findCol(hIdx, ['family code', 'family']);
+    var courseCol = findCol(hIdx, ['course package', 'course', 'package']);
+    
+    if (nameCol === -1) return [];
     var rows = [];
     var sno = 1;
     for (var i = 1; i < lines.length; i++) {
@@ -1571,11 +1685,16 @@ function parseCSV(text) {
             StudentName: name,
             FatherName: fatherCol !== -1 ? (c[fatherCol] || '').trim() : '',
             CellNo: cellCol !== -1 ? (c[cellCol] || '').trim() : '',
-            Class: (c[classCol] || '').trim(),
-            Section: '',
-            Gender: '',
-            Religion: '',
-            DOB: ''
+            Class: classCol !== -1 ? (c[classCol] || '').trim() : '',
+            Section: sectionCol !== -1 ? (c[sectionCol] || '').trim() : '',
+            Gender: genderCol !== -1 ? (c[genderCol] || '').trim() : '',
+            Religion: religionCol !== -1 ? (c[religionCol] || '').trim() : '',
+            DOB: dobCol !== -1 ? (c[dobCol] || '').trim() : '',
+            AdmissionDate: admDateCol !== -1 ? (c[admDateCol] || '').trim() : '',
+            AdmissionNo: admNoCol !== -1 ? (c[admNoCol] || '').trim() : '',
+            SiblingCode: siblingCol !== -1 ? (c[siblingCol] || '').trim() : '',
+            FamilyCode: familyCol !== -1 ? (c[familyCol] || '').trim() : '',
+            CoursePackage: courseCol !== -1 ? (c[courseCol] || '').trim() : ''
         });
     }
     return rows;
@@ -1608,20 +1727,25 @@ function splitCSVLine(line) {
     out.push(cur);
     return out;
 }
-function downloadSampleCSV() {
-    var csv = 'S.No,Student Name,Father Name,Cell / Mobile,Class\n1,Ahmed Raza,Muhammad Raza,0300-1234567,10th\n2,Fatima Bibi,Abdul Ghafoor,0345-9876543,8th\n';
-    var blob = new Blob([csv], { type: 'text/csv' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'sample_students.csv';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    showToast('Sample CSV downloaded', 'success');
-}
+
 function saveImportedData() {
     if (csvRecords.length === 0) { showToast('No records to import', 'warning'); return; }
     var rows = csvRecords.map(function (r) {
-        return { name: r.StudentName, father: r.FatherName, cell: r.CellNo, class: r.Class };
+        return { 
+            name: r.StudentName, 
+            father: r.FatherName, 
+            cell: r.CellNo, 
+            class: r.Class,
+            section: r.Section,
+            gender: r.Gender,
+            religion: r.Religion,
+            dob: r.DOB,
+            admission_date: r.AdmissionDate,
+            admission_no: r.AdmissionNo,
+            sibling_code: r.SiblingCode,
+            family_code: r.FamilyCode,
+            course_package: r.CoursePackage
+        };
     });
     var xhr = new XMLHttpRequest();
     xhr.open('POST', HIIFI_BASE + 'add_student.php', true);
@@ -1635,33 +1759,24 @@ function saveImportedData() {
             csvRecords = [];
             renderCSVTable();
             document.getElementById('import-csv-input').value = '';
+            document.getElementById('csv-file-name').textContent = 'No file chosen';
         } else {
             showToast('Import failed', 'error');
         }
     };
-    xhr.send('action=ImportCSV&rows=' + encodeURIComponent(JSON.stringify(rows)));
-}
-function clearImportedData() {
-    csvRecords = [];
-    renderCSVTable();
-    showToast('All records cleared', 'info');
+    xhr.send('action=ImportCSV&rows=' + encodeURIComponent(JSON.stringify(rows)) + '&session=' + encodeURIComponent('<?php echo e($cur_session); ?>'));
 }
 
+// ==================== INITIALIZE ====================
 window.onload = function () {
     multiIndex = 0;
     for (var i = 0; i < 3; i++) addMultiRow();
     csvRecords = [];
     renderCSVTable();
 
-    document.addEventListener('mousemove', onPosPhotoMove);
-    document.addEventListener('mouseup', endPhotoDrag);
-
     if (window.flatpickr) {
         flatpickr('#dob', { dateFormat: 'd/m/Y' });
         flatpickr('#date_of_adms', { dateFormat: 'd/m/Y' });
-    }
-    if (window.jQuery && jQuery.fn.select2) {
-        jQuery('#family_search').select2({ width: '100%', placeholder: 'Select Family', allowClear: true });
     }
 };
 </script>
