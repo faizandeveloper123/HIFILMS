@@ -170,7 +170,7 @@
         </ul>
       </li>
       <li class="has-children">
-        <a href="javascript:void(0)"><i class="fa fa-dashboard"></i><span class="label" style="font-weight: normal !important;">Dashboard</span><span class="fa fa-chevron-right chev"></span></a>
+        <a href="javascript:void(0)"><i class="fas fa-tachometer-alt"></i><span class="label" style="font-weight: normal !important;">Dashboard</span><span class="fa fa-chevron-right chev"></span></a>
         <ul class="child_menu" style="display: none;">
           <li><a href="<?php echo BASE_URL; ?>dashboard.php">Executive Dashboard</a></li>
           <li><a href="<?php echo BASE_URL; ?>basic_dashboard.php">Staff Dashboard</a></li>
@@ -349,7 +349,7 @@
         <a href="<?php echo BASE_URL; ?>manage_complaint.php" class="submenu-item">Complaint Hub</a>
       </div>
       <a href="#" class="nav-item has-submenu">
-        <div class="nav-icon"><i class="fa fa-dashboard"></i></div>
+        <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div>
         <div class="nav-text">Dashboard</div>
       </a>
       <div class="submenu">
