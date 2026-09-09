@@ -9,17 +9,62 @@ jobs:
   deploy:
     name: Deploy HIFILMS to lms.biztrack.uk
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Deploy via rsync over SSH
-        uses: easingthemes/ssh-deploy@v5.1.0
+      - name: Install rsync
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rsync
+
+      - name: Setup SSH key
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.DEPLOY_HOST }}
-          REMOTE_USER: ${{ secrets.DEPLOY_USER }}
-          REMOTE_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
-          TARGET: ${{ secrets.DEPLOY_PATH || '/var/www/lms-biztrack' }}
-          EXCLUDE: "/.git/, /.github/, deploy*.tar, deploy_list.txt, deploy_logo.tar, config.php"
-          ARGS: "-rlgoDzvc --delete --omit-dir-times"
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          if echo "$DEPLOY_SSH_KEY" | base64 -d > ~/.ssh/deploy_key 2>/dev/null && ssh-keygen -l -f ~/.ssh/deploy_key >/dev/null 2>&1; then
+            echo "Imported base64-encoded SSH key"
+          else
+            printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          fi
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keygen -l -f ~/.ssh/deploy_key
+
+      - name: Trust server host key
+        run: ssh-keyscan -H "${{ secrets.DEPLOY_HOST || 'lms.biztrack.uk' }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy via rsync over SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST || 'lms.biztrack.uk' }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER || 'root' }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/var/www/lms-biztrack' }}
+        run: |
+          set -euo pipefail
+          rsync -rlgoDzvc \
+            -e "ssh -i /home/runner/.ssh/deploy_key -p '$DEPLOY_PORT' -o StrictHostKeyChecking=yes" \
+            --delete \
+            --omit-dir-times \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'config.php' \
+            --exclude 'deploy*.tar' \
+            --exclude 'deploy_list.txt' \
+            --exclude 'deploy_logo.tar' \
+            --exclude 'XAMPP/' \
+            --exclude 'uploads/' \
+            --exclude 'assets/uploads/' \
+            --exclude 'node_modules/' \
+            --exclude 'crawled/' \
+            --exclude '__pycache__/' \
+            --exclude '*.log' \
+            --exclude '*.py' \
+            --exclude '*.sql' \
+            ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+          ssh -i /home/runner/.ssh/deploy_key -p "$DEPLOY_PORT" -o StrictHostKeyChecking=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "chown -R www-data:www-data '$DEPLOY_PATH' && echo DEPLOY_OK"

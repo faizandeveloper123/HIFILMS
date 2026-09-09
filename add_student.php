@@ -1091,8 +1091,8 @@ $stateMapDef = [
 
                 </div>
 
-                <!-- Right Column - Photo Widget -->
-                <div>
+                <!-- Right Column - Photo Widget (visible only on Basic Info tab) -->
+                <div id="photo-widget-col">
                     <div class="photo-widget">
                         <div class="photo-title">
                             <i class="fas fa-camera"></i> Student Photo
@@ -1340,6 +1340,8 @@ function switchFormTab(tab) {
     Object.keys(tabs).forEach(function (k) {
         document.getElementById(tabs[k]).classList.toggle('hidden', k !== tab);
     });
+    var photoCol = document.getElementById('photo-widget-col');
+    if (photoCol) photoCol.classList.toggle('hidden', tab !== 'basic');
     document.querySelectorAll('.subtab-btn').forEach(function (b) { b.classList.remove('active'); });
     var btn = document.getElementById('subtab-' + tab);
     if (btn) btn.classList.add('active');
