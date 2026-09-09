@@ -289,18 +289,18 @@ include __DIR__ . '/includes/header.php';
         .top-bar-right .search-box { max-width: 100%; }
         .wizard-steps .divider { display: none; }
         .wizard-steps .step .info .sub { display: none; }
-        .fee-grid { grid-template-columns: 1fr; gap: 12px; }
-        .form-actions { flex-direction: column; align-items: stretch; }
+        .fee-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-actions { flex-direction: row; flex-wrap: wrap; align-items: center; }
         .form-actions .note { margin-left: 0; }
-        .btn-primary, .btn-secondary { justify-content: center; width: 100%; }
+        .btn-primary, .btn-secondary { justify-content: center; }
         .fee-table { min-width: 500px; }
         .fee-table-wrapper { overflow-x: auto; }
-        .student-info-box { flex-direction: column; text-align: center; }
+        .student-info-box { flex-direction: row; flex-wrap: wrap; justify-content: center; }
     }
     @media (max-width: 479px) {
         .page-wrapper { padding: 10px 12px 24px; }
         .top-bar-left .brand { font-size: 16px; }
-        .wizard-steps { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .wizard-steps { flex-direction: row; align-items: center; gap: 8px; }
         .wizard-steps .divider { display: none; }
         .wizard-steps .step .info .sub { display: none; }
         .fee-table { min-width: 400px; }
