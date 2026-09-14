@@ -312,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
 
-        <div class="powered-by">Powered by LAPS</div>
+        <div class="powered-by">Powered by Parker Technologies LLC</div>
     </div>
 </div>
 
