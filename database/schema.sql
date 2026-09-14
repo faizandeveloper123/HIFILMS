@@ -404,7 +404,7 @@ CREATE TABLE IF NOT EXISTS `settings` (
 -- ------------------------------------------------------------
 INSERT INTO `users` (`email`, `password`, `full_name`, `role`) VALUES
 ('kashif123@gmail.com', SHA2('kash7395515', 256), 'System Administrator', 'admin'),
-('admin@laps.pk', SHA2('admin123', 256), 'LAPS Admin', 'admin');
+('laps@gmail.com', SHA2('Laps@2026', 256), 'LAPS Admin', 'admin');
 
 INSERT INTO `classes` (`class_name`) VALUES
 ('Play Group'),('KG-2'),('1ST'),('2ND'),('3RD'),('4TH'),('5TH'),('6TH'),('7TH'),('8TH'),('9TH'),('10TH'),

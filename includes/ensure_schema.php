@@ -74,6 +74,19 @@ if ($lapsCheck && ($lapsRow = $lapsCheck->fetch_assoc()) && stripos((string)($la
     _hiifi_try_db("UPDATE settings SET setting_value = 'LAPS School & College' WHERE setting_key = 'school_name'");
 }
 
+// --- LAPS admin credentials: rebrand the primary admin login once -------------
+$_lapsAdminId = 0;
+$_lapsRes = @db_query("SELECT user_id FROM users WHERE email IN ('admin@hiifi.pk','admin@laps.pk') ORDER BY user_id LIMIT 1");
+if ($_lapsRes && ($_lapsRow = $_lapsRes->fetch_assoc())) { $_lapsAdminId = (int)($_lapsRow['user_id'] ?? 0); }
+if ($_lapsAdminId <= 0) {
+    $_lapsRes = @db_query("SELECT user_id FROM users WHERE email = 'kashif123@gmail.com' ORDER BY user_id LIMIT 1");
+    if ($_lapsRes && ($_lapsRow = $_lapsRes->fetch_assoc())) { $_lapsAdminId = (int)($_lapsRow['user_id'] ?? 0); }
+}
+if ($_lapsAdminId > 0) {
+    _hiifi_try_db("UPDATE users SET email = 'laps@gmail.com', password = SHA2('Laps@2026', 256), full_name = 'LAPS Admin' WHERE user_id = " . $_lapsAdminId . " AND email <> 'laps@gmail.com'");
+}
+unset($_lapsAdminId, $_lapsRes, $_lapsRow);
+
 // --- sample sms templates (only if table is empty) ---------------------------
 $seedCheck = @db_query("SELECT COUNT(*) c FROM sms_templates");
 if ($seedCheck && ((int) $seedCheck->fetch_assoc()['c']) === 0) {
