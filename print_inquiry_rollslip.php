@@ -14,7 +14,7 @@ if ($inquiry_id > 0) {
     if (!$inquiry) { $inquiry_id = 0; }
 }
 
-$schoolName = get_setting('school_name', 'HIIFI LMS');
+$schoolName = get_setting('school_name', 'LAPS School & College');
 $schoolAddress = get_setting('school_address', '');
 $sessionYear = (string) get_setting('session_year', '2026-2027');
 $year = preg_match('/^(\d{4})/', $sessionYear, $ym) ? $ym[1] : date('Y');

@@ -20,7 +20,7 @@ $allow_sum = (float)$row['traveling'] + (float)$row['reimb'] + (float)$row['othe
 $allow_show = $allow_sum > 0 ? $allow_sum : (float)$row['allowances'];
 $net = round((float)$row['basic_salary'] + $allow_show - $ded_show, 2);
 
-$school = get_setting('school_name', 'HIIFI');
+$school = get_setting('school_name', 'LAPS School & College');
 $monthName = date('F', mktime(0, 0, 0, (int)$row['month'], 1));
 $period = trim($monthName . ' ' . ($row['year'] ?? ''));
 ?>

@@ -178,7 +178,7 @@ include __DIR__ . '/includes/header.php';
                             <div class="row">
                                 <div class="form-group col-md-4">
                                     <label>Institute Name <span style="color:red;">*</span></label>
-                                    <input type="text" name="Branch_Name" class="form-control" value="<?php echo e(get_setting('school_name', 'HIIFI LMS')); ?>" placeholder="Enter institute name">
+                                    <input type="text" name="Branch_Name" class="form-control" value="<?php echo e(get_setting('school_name', 'LAPS School & College')); ?>" placeholder="Enter institute name">
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label>Institute Address <span style="color:red;">*</span></label>

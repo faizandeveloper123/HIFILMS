@@ -1,5 +1,5 @@
 -- ============================================================
--- HIIFI LMS Database Schema (EduPortal clone)
+-- HIIFI LMS Database Schema (EduPortal clone) — rebranded for LAPS School & College
 -- MariaDB / MySQL 10.4+  (XAMPP)
 -- ============================================================
 CREATE DATABASE IF NOT EXISTS `hiifi_lms` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -404,14 +404,14 @@ CREATE TABLE IF NOT EXISTS `settings` (
 -- ------------------------------------------------------------
 INSERT INTO `users` (`email`, `password`, `full_name`, `role`) VALUES
 ('kashif123@gmail.com', SHA2('kash7395515', 256), 'System Administrator', 'admin'),
-('admin@hiifi.pk', SHA2('admin123', 256), 'HIIFI Admin', 'admin');
+('admin@laps.pk', SHA2('admin123', 256), 'LAPS Admin', 'admin');
 
 INSERT INTO `classes` (`class_name`) VALUES
 ('Play Group'),('KG-2'),('1ST'),('2ND'),('3RD'),('4TH'),('5TH'),('6TH'),('7TH'),('8TH'),('9TH'),('10TH'),
 ('BS Computer Science'),('BSIT'),('MIT');
 
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
-('school_name', 'HIIFI LMS'),
+('school_name', 'LAPS School & College'),
 ('school_tagline', 'Test Portal'),
 ('session_year', '2026-2027'),
 ('currency_symbol', 'Rs.');

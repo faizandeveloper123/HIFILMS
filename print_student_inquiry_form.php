@@ -31,7 +31,7 @@ if ($inquiry) {
     }
 }
 
-$schoolName = get_setting('school_name', 'HIIFI LMS');
+$schoolName = get_setting('school_name', 'LAPS School & College');
 $schoolAddress = get_setting('school_address', '');
 $schoolPhone = get_setting('school_phone', '');
 $cellLine = trim($schoolAddress . ($schoolAddress !== '' && $schoolPhone !== '' ? ' | ' : '') . $schoolPhone);

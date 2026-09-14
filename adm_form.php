@@ -5,7 +5,7 @@ require_login();
 
 $page_title = 'Admission Form';
 
-$school_name = get_setting('school_name') ?: 'HIIFI';
+$school_name = get_setting('school_name') ?: 'LAPS School & College';
 
 $classes = [];
 $res = db_query("Select class_id, class_name FROM classes WHERE status=1 ORDER BY class_name");

@@ -1,4 +1,4 @@
-/* ============ HIIFI LMS shared helpers ============ */
+/* ============ LAPS School & College LMS shared helpers ============ */
 var HIIFI_BASE = null;
 
 (function () {

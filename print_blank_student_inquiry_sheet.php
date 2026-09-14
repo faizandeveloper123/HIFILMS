@@ -3,7 +3,7 @@ define('HIIFI', true);
 require_once __DIR__ . '/config.php';
 require_login();
 
-$schoolName = get_setting('school_name', 'HIIFI LMS');
+$schoolName = get_setting('school_name', 'LAPS School & College');
 ?>
 <!DOCTYPE HTML>
 <html>

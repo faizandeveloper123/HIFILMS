@@ -72,7 +72,7 @@ $activeLogins = (int) (db_query("SELECT COUNT(*) c FROM parent_access WHERE stat
 $inactiveLogins = (int) (db_query("SELECT COUNT(*) c FROM parent_access WHERE status = 0")->fetch_assoc()['c'] ?? 0);
 $monthLogins = (int) (db_query("SELECT COUNT(*) c FROM parent_access WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')")->fetch_assoc()['c'] ?? 0);
 
-$schoolName = get_setting('school_name', 'HIIFI LMS');
+$schoolName = get_setting('school_name', 'LAPS School & College');
 
 function hifi_barcode($text) {
     $map = [

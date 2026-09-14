@@ -68,6 +68,12 @@ _hiifi_try_db("UPDATE complaints SET complaint_code = CONCAT('CMP-', DATE_FORMAT
 _hiifi_try_db("UPDATE complaints SET complainant_type = NULLIF(complaint_type, '') WHERE (complainant_type IS NULL OR complainant_type = '') AND complaint_type IS NOT NULL");
 _hiifi_try_db("UPDATE complaints SET complainant_name = CONCAT('Complainant #', complaint_id) WHERE complainant_name IS NULL OR complainant_name = ''");
 
+// --- LAPS rebrand: switch legacy default school name once -------------------
+$lapsCheck = @db_query("SELECT setting_value FROM settings WHERE setting_key = 'school_name'");
+if ($lapsCheck && ($lapsRow = $lapsCheck->fetch_assoc()) && stripos((string)($lapsRow['setting_value'] ?? ''), 'HIIFI') !== false) {
+    _hiifi_try_db("UPDATE settings SET setting_value = 'LAPS School & College' WHERE setting_key = 'school_name'");
+}
+
 // --- sample sms templates (only if table is empty) ---------------------------
 $seedCheck = @db_query("SELECT COUNT(*) c FROM sms_templates");
 if ($seedCheck && ((int) $seedCheck->fetch_assoc()['c']) === 0) {

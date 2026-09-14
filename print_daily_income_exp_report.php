@@ -58,7 +58,7 @@ $symbol = get_setting('currency_symbol', 'Rs.');
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Daily Income & Expense Report | HIIFI LMS</title>
+    <title>Daily Income & Expense Report | LAPS School & College</title>
     <style type="text/css">
         * {
             margin: 0;

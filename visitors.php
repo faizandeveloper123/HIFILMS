@@ -427,7 +427,7 @@ function printBadge(id) {
     var d = new Date(v.check_in);
     var dateStr = d.toLocaleDateString('en-GB', {day:'2-digit', month:'short', year:'numeric'});
     var html = '<div class="badge-preview">';
-    html += '<div class="bp-logo"><?php echo e(get_setting("school_name", "HIIFI LMS")); ?></div>';
+    html += '<div class="bp-logo"><?php echo e(get_setting("school_name", "LAPS School & College")); ?></div>';
     html += '<div style="font-size:8px; color:#9CA3AF; text-transform:uppercase; letter-spacing:2px;">VISITOR PASS</div>';
     html += '<div class="bp-badge"># ' + v.badge_number + '</div>';
     html += '<div class="bp-name">' + v.visitor_name + '</div>';

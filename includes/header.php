@@ -1,6 +1,7 @@
-<?php if (!defined('HIIFI')) exit('Direct access not allowed.'); ?>
+<?php if (!defined('HIIFI')) exit('Direct access not allowed.');
+require_once __DIR__ . '/ensure_schema.php'; ?>
 <!DOCTYPE html><html lang="en"><head>
-    <title><?php echo isset($page_title) ? e($page_title) . ' | HIIFI LMS' : 'HIIFI LMS'; ?></title>
+    <title><?php echo isset($page_title) ? e($page_title) . ' | LAPS School & College' : 'LAPS School & College'; ?></title>
     <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>assets/img/favicon.png">
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
@@ -152,10 +153,10 @@
 <button id="ios_toggle_btn" aria-label="Toggle sidebar"><i class="fa fa-bars"></i></button>
 <div class="left_col scroll-view" id="dsLeftCol">
   <div class="sidebar-logo">
-    <img src="<?php echo BASE_URL; ?>assets/img/favicon.png" alt="HIFI Logo" style="border-radius:50%">
+    <img src="<?php echo BASE_URL; ?>assets/img/favicon.png" alt="LAPS Logo" style="border-radius:50%">
   </div>
   <div class="ds-branch">
-    <div style="font-weight:700; font-size:12px;"><?php echo e(get_setting('school_name', 'HIIFI LMS')); ?></div>
+    <div style="font-weight:700; font-size:12px;"><?php echo e(get_setting('school_name', 'LAPS School & College')); ?></div>
     <div style="font-size:12px;">(<?php echo e(get_setting('session_year', '2026-2027')); ?>)</div>
   </div>
   <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
@@ -576,7 +577,7 @@
 <script src="<?php echo BASE_URL; ?>assets/plugins/select2/select2.min.js"></script>
 <script src="<?php echo BASE_URL; ?>assets/js/app_shared.js"></script>
 <?php
-$topSchoolName = get_setting('school_name', 'HIIFI LMS');
+$topSchoolName = get_setting('school_name', 'LAPS School & College');
 $topSession    = get_setting('session_year', '2026-2027');
 $topSmsUsed    = (int) get_setting('whatsapp_sms_used', 0);
 $topSmsLimit   = (int) get_setting('whatsapp_sms_limit', 10000);

@@ -95,7 +95,7 @@ $res = db_query("SELECT v.*, c.class_name FROM inquiry_fee_vouchers v LEFT JOIN 
 while ($row = $res->fetch_assoc()) { $vouchers[] = $row; }
 
 $cs = get_setting('currency_symbol', 'Rs.');
-$schoolName = get_setting('school_name', 'HIIFI LMS');
+$schoolName = get_setting('school_name', 'LAPS School & College');
 
 include __DIR__ . '/includes/header.php';
 ?>

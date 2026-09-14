@@ -67,7 +67,7 @@ function require_role($roles) {
         <!DOCTYPE html>
         <html lang="en"><head>
             <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Access Denied | HIIFI LMS</title>
+            <title>Access Denied | LAPS School & College</title>
             <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>assets/img/favicon.png">
             <link href="<?php echo BASE_URL; ?>assets/css/bootstrap.min.css" rel="stylesheet">
             <link href="<?php echo BASE_URL; ?>assets/css/font-awesome.min.css" rel="stylesheet">

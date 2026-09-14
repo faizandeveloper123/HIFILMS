@@ -263,7 +263,7 @@ include __DIR__ . '/includes/header.php';
             <div class="ai-chat-header">
                 <div class="ai-avatar"><i class="fa fa-robot"></i></div>
                 <div class="ai-info">
-                    <h4>HIIFI AI Assistant</h4>
+                    <h4>LAPS AI Assistant</h4>
                     <p>School Data Assistant - Ask me anything about your school</p>
                 </div>
             </div>
@@ -281,7 +281,7 @@ include __DIR__ . '/includes/header.php';
 
             <div class="ai-chat-body" id="chatBody">
                 <div class="ai-msg bot">
-                    Assalam-o-Alaikum! Mein HIIFI AI Assistant hoon. Aap mujh se school data ke baray mein kuch bhi pooch sakte hain. English ya Roman Urdu mein poochain.
+                    Assalam-o-Alaikum! Mein LAPS AI Assistant hoon. Aap mujh se school data ke baray mein kuch bhi pooch sakte hain. English ya Roman Urdu mein poochain.
                     <span class="msg-time"><?php echo date('h:i A'); ?></span>
                 </div>
                 <?php foreach ($chat_history as $ch): ?>

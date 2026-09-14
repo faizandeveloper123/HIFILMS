@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html><html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | HIIFI LMS</title>
+    <title>Login | LAPS School & College</title>
     <link rel="icon" type="image/png" href="assets/img/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -272,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="login-container">
     <div class="left-image">
         <div class="image-text">
-            <h3>HIFI LMS 2.0</h3>
+            <h3>LAPS School &amp; College</h3>
             <p>Modern SaaS experience for schools with smarter insights and a more reliable system.</p>
             <ul class="feature-list">
                 <li><i class="fas fa-chart-line"></i> Modern analytics &amp; activity monitoring</li>
@@ -285,9 +285,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <div class="right-content">
         <div class="login-card" text-align="center">
-            <img src="assets/img/logo_new.png" alt="HIFI LMS logo" class="logo">
+            <img src="assets/img/logo_new.png" alt="LAPS School & College logo" class="logo">
             <h2>Welcome Back</h2>
-            <p>Sign in to continue to HIFI LMS</p>
+            <p>Sign in to continue to LAPS School &amp; College</p>
             <div class="underline-orange"></div>
 
             <?php if ($error !== ''): ?>
@@ -312,7 +312,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </form>
         </div>
 
-        <div class="powered-by">Powered by HIFI MARKETING ACADEMY</div>
+        <div class="powered-by">Powered by LAPS</div>
     </div>
 </div>
 

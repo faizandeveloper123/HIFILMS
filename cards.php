@@ -9,7 +9,7 @@ $employees = [];
 $res = db_query("SELECT * FROM employees WHERE status=1 ORDER BY emp_id");
 while ($row = $res->fetch_assoc()) { $employees[] = $row; }
 
-$school_name = get_setting('school_name') ?: 'HIIFI';
+$school_name = get_setting('school_name') ?: 'LAPS School & College';
 
 include __DIR__ . '/includes/header.php';
 ?>

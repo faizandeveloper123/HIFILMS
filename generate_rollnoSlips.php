@@ -239,7 +239,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="stripe"></div>
                     <div class="top">
                         <div>
-                            <div style="font-weight:800; color:#111827;"><?php echo e($schoolName = get_setting('school_name', 'HIIFI LMS')); ?></div>
+                            <div style="font-weight:800; color:#111827;"><?php echo e($schoolName = get_setting('school_name', 'LAPS School & College')); ?></div>
                             <div style="font-size:12px; color:#6B7280;"><?php echo e($sel_term !== '' ? $sel_term : 'Roll No Slip'); ?></div>
                         </div>
                         <div style="text-align:right;">
@@ -281,7 +281,7 @@ document.querySelectorAll('#listofstudents tbody tr[data-sid]').forEach(function
         var out  = document.getElementById('slipPreview');
         out.innerHTML = '<div class="slip-card">' +
             '<div class="stripe"></div>' +
-            '<div class="top"><div><div style="font-weight:800;color:#111827;"><?php echo e(get_setting('school_name', 'HIIFI LMS')); ?></div>' +
+            '<div class="top"><div><div style="font-weight:800;color:#111827;"><?php echo e(get_setting('school_name', 'LAPS School & College')); ?></div>' +
             '<div style="font-size:12px;color:#6B7280;"><?php echo e($sel_term !== '' ? $sel_term : 'Roll No Slip'); ?></div></div>' +
             '<div style="text-align:right;"><div style="font-weight:800;color:#FF7A1B;font-size:20px;">' + this.querySelectorAll('td')[0].textContent + '</div>' +
             '<div style="font-size:11px;color:#6B7280;">Roll #</div></div></div>' +

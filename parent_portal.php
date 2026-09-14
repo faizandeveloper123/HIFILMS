@@ -429,7 +429,7 @@ function printFeeVoucher() {
     w.document.write('<tr><td><strong>Pending</strong></td><td><strong><?php echo number_format($fee_pending, 0); ?></strong></td></tr>');
     w.document.write('</table>');
     w.document.write('<p>Due Date: Please check with accounts office.</p>');
-    w.document.write('<div class="footer">HIIFI LMS &bull; <?php echo e(get_setting("school_name", "HIIFI LMS")); ?></div>');
+    w.document.write('<div class="footer">LAPS School &amp; College &bull; <?php echo e(get_setting("school_name", "LAPS School & College")); ?></div>');
     w.document.write('</body></html>');
     w.document.close();
     w.print();
@@ -440,7 +440,7 @@ function shareResult() {
     <?php foreach ($results as $r): ?>
     text += '<?php echo e($r["exam_name"]); ?> | <?php echo e($r["subject_name"] ?? "-"); ?> | <?php echo e($r["obtained_marks"]); ?>/<?php echo e($r["total_marks"]); ?> (<?php echo $r["pct"]; ?>%)\n';
     <?php endforeach; ?>
-    text += '\nPowered by <?php echo e(get_setting("school_name", "HIIFI LMS")); ?>';
+    text += '\nPowered by <?php echo e(get_setting("school_name", "LAPS School & College")); ?>';
     if (navigator.share) {
         navigator.share({ title: 'Result Card - <?php echo e($full_name); ?>', text: text });
     } else {
