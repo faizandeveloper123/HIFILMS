@@ -1,6 +1,7 @@
 <?php
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/ensure_schema.php';
 
 if (is_logged_in()) {
     $role = $_SESSION['user_role'] ?? 'admin';
