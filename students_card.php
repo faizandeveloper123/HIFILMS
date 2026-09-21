@@ -62,6 +62,39 @@ if ($sel_class > 0) {
     }
 }
 
+function card_photo_upload($file, $dir, $prefix) {
+    if (empty($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) { return null; }
+    if ((int)($file['size'] ?? 0) > 5242880) { return null; }
+    $info = @getimagesize($file['tmp_name']);
+    if ($info === false) { return null; }
+    $map = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif', IMAGETYPE_WEBP => 'webp'];
+    $ext = $map[$info[2]] ?? strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) { $ext = 'jpg'; }
+    if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
+    $name = $prefix . time() . '_' . rand(1000, 9999) . '.' . $ext;
+    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) { return null; }
+    return $name;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_card_photo') {
+    $sid = (int)($_POST['card_student_id'] ?? 0);
+    if ($sid > 0) {
+        $pn = card_photo_upload($_FILES['card_photo'] ?? null, __DIR__ . '/uploads/students', 's_');
+        if ($pn !== null) {
+            $up = db_prepare("UPDATE students SET photo=? WHERE student_id=?");
+            $up->bind_param('si', $pn, $sid);
+            $up->execute();
+        }
+    }
+    $ccq = ['class_id', 'section_id', 'valid', 'color', 'school_name_font_size', 'name_font_size', 'DOB', 'cell_number'];
+    $qs = [];
+    foreach ($ccq as $k) { if (isset($_POST[$k]) && trim((string)$_POST[$k]) !== '') { $qs[$k] = (string)$_POST[$k]; } }
+    $qs['class_id'] = (int)($_POST['class_id'] ?? 0);
+    $qs['section_id'] = (int)($_POST['section_id'] ?? 0);
+    header('Location: ' . BASE_URL . 'students_card.php?' . http_build_query($qs));
+    exit;
+}
+
 include __DIR__ . '/includes/header.php';
 ?>
 <style>
@@ -159,11 +192,17 @@ include __DIR__ . '/includes/header.php';
     .cc-ui { position:fixed; top:12px; right:12px; z-index:9999; }
     .cc-btn { background:<?php echo $color; ?>; color:#fff; border:none; border-radius:6px; padding:8px 12px; font-size:13px; cursor:pointer; margin-left:6px; }
     .cc-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:10000; }
-    .cc-panel { width:430px; max-width:94%; margin:70px auto; background:#fff; border-radius:10px; padding:14px; box-shadow:0 10px 28px rgba(0,0,0,.25); }
+    .cc-panel { width:430px; max-width:94%; max-height:calc(100vh - 32px); overflow-y:auto; margin:16px auto; background:#fff; border-radius:10px; padding:16px; box-shadow:0 10px 28px rgba(0,0,0,.25); scrollbar-width:thin; }
+    .cc-panel::-webkit-scrollbar { width:6px; }
+    .cc-panel::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:3px; }
     .cc-panel h4 { margin:0 0 10px; font-size:16px; }
     .cc-row { margin-bottom:10px; }
     .cc-row label { display:block; font-size:12px; font-weight:700; margin-bottom:4px; }
     .cc-row input, .cc-row select { width:100%; height:36px; padding:6px; border:1px solid #ccc; border-radius:6px; }
+    @media (max-width:480px){
+        .cc-panel { width:100%; max-width:100%; margin:8px auto; padding:12px; }
+        .cc-row[style] { flex-direction:column !important; }
+    }
     .cc-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
 
     @media (max-width:900px){ .sheet{ grid-template-columns:repeat(2, var(--card-w)); justify-content:center; } }
@@ -341,11 +380,40 @@ include __DIR__ . '/includes/header.php';
                 <button type="submit" class="btn btn-primary" style="color:#fff;">Apply</button>
             </div>
         </form>
+
+        <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+        <h4 style="font-size:14px; margin:0 0 10px;"><i class="fa fa-camera" style="color:#FF7A1B;"></i> Change Student Photo</h4>
+        <?php if (count($students) > 0): ?>
+            <form method="post" enctype="multipart/form-data" action="<?php echo BASE_URL; ?>students_card.php">
+                <input type="hidden" name="action" value="update_card_photo">
+                <input type="hidden" name="class_id" value="<?php echo $sel_class; ?>">
+                <input type="hidden" name="section_id" value="<?php echo $sel_section; ?>">
+                <input type="hidden" name="valid" value="<?php echo $valid; ?>">
+                <input type="hidden" name="color" value="<?php echo ltrim($color, '#'); ?>">
+                <input type="hidden" name="school_name_font_size" value="<?php echo $schoolFs; ?>">
+                <input type="hidden" name="name_font_size" value="<?php echo $nameFs; ?>">
+                <input type="hidden" name="DOB" value="<?php echo $showDOB ? 'YES' : 'NO'; ?>">
+                <input type="hidden" name="cell_number" value="<?php echo $showCell ? 'YES' : 'NO'; ?>">
+                <div class="cc-row"><label>Student</label>
+                    <select name="card_student_id">
+                        <?php foreach ($students as $st): ?>
+                            <option value="<?php echo (int)$st['student_id']; ?>"><?php echo e(trim($st['first_name'] . ' ' . ($st['last_name'] ?? ''))); ?></option>
+                        <?php endforeach; ?>
+                    </select></div>
+                <div class="cc-row"><label>Photo (JPG/PNG)</label>
+                    <input type="file" name="card_photo" accept="image/*" required></div>
+                <div class="cc-actions">
+                    <button type="submit" class="btn btn-success" style="color:#fff;"><i class="fa fa-upload"></i> Update Photo</button>
+                </div>
+            </form>
+        <?php else: ?>
+            <p style="color:#9CA3AF; font-size:12px; margin:0;">Pehle koi class select karein (upar search bar se).</p>
+        <?php endif; ?>
     </div>
 </div>
 
 <script>
-function openCC(){ document.getElementById('ccOverlay').style.display = 'block'; }
+function openCC(){ var ov = document.getElementById('ccOverlay'); ov.style.display = 'block'; var p = ov.querySelector('.cc-panel'); if (p) p.scrollTop = 0; }
 function closeCC(){ document.getElementById('ccOverlay').style.display = 'none'; }
 </script>
 

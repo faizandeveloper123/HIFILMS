@@ -39,6 +39,37 @@ foreach ($employees as $i => $emp) {
     }
 }
 
+function card_photo_upload($file, $dir, $prefix) {
+    if (empty($file) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) { return null; }
+    if ((int)($file['size'] ?? 0) > 5242880) { return null; }
+    $info = @getimagesize($file['tmp_name']);
+    if ($info === false) { return null; }
+    $map = [IMAGETYPE_JPEG => 'jpg', IMAGETYPE_PNG => 'png', IMAGETYPE_GIF => 'gif', IMAGETYPE_WEBP => 'webp'];
+    $ext = $map[$info[2]] ?? strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) { $ext = 'jpg'; }
+    if (!is_dir($dir)) { @mkdir($dir, 0775, true); }
+    $name = $prefix . time() . '_' . rand(1000, 9999) . '.' . $ext;
+    if (!move_uploaded_file($file['tmp_name'], $dir . '/' . $name)) { return null; }
+    return $name;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_card_photo') {
+    $eid = (int)($_POST['card_emp_id'] ?? 0);
+    if ($eid > 0) {
+        $pn = card_photo_upload($_FILES['card_photo'] ?? null, __DIR__ . '/uploads/employees', 'emp_');
+        if ($pn !== null) {
+            $up = db_prepare("UPDATE employees SET photo=? WHERE emp_id=?");
+            $up->bind_param('si', $pn, $eid);
+            $up->execute();
+        }
+    }
+    $ccq = ['valid', 'color', 'school_name_font_size', 'emp_name_font_size'];
+    $qs = [];
+    foreach ($ccq as $k) { if (isset($_POST[$k]) && trim((string)$_POST[$k]) !== '') { $qs[$k] = (string)$_POST[$k]; } }
+    header('Location: ' . BASE_URL . 'cards.php?' . http_build_query($qs));
+    exit;
+}
+
 include __DIR__ . '/includes/header.php';
 ?>
 <style>
@@ -135,11 +166,17 @@ include __DIR__ . '/includes/header.php';
     .cc-ui { position:fixed; top:12px; right:12px; z-index:9999; }
     .cc-btn { background:<?php echo $theme; ?>; color:#fff; border:none; border-radius:6px; padding:8px 12px; font-size:13px; cursor:pointer; margin-left:6px; }
     .cc-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; z-index:10000; }
-    .cc-panel { width:430px; max-width:94%; margin:70px auto; background:#fff; border-radius:10px; padding:14px; box-shadow:0 10px 28px rgba(0,0,0,.25); }
+    .cc-panel { width:430px; max-width:94%; max-height:calc(100vh - 32px); overflow-y:auto; margin:16px auto; background:#fff; border-radius:10px; padding:16px; box-shadow:0 10px 28px rgba(0,0,0,.25); scrollbar-width:thin; }
+    .cc-panel::-webkit-scrollbar { width:6px; }
+    .cc-panel::-webkit-scrollbar-thumb { background:#d1d5db; border-radius:3px; }
     .cc-panel h4 { margin:0 0 10px; font-size:16px; }
     .cc-row { margin-bottom:10px; }
     .cc-row label { display:block; font-size:12px; font-weight:700; margin-bottom:4px; }
     .cc-row input, .cc-row select { width:100%; height:36px; padding:6px; border:1px solid #ccc; border-radius:6px; }
+    @media (max-width:480px){
+        .cc-panel { width:100%; max-width:100%; margin:8px auto; padding:12px; }
+        .cc-row[style] { flex-direction:column !important; }
+    }
     .cc-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
 
     @media (max-width:900px){ .sheet{ grid-template-columns:repeat(2, var(--card-w)); justify-content:center; } }
@@ -270,11 +307,91 @@ include __DIR__ . '/includes/header.php';
                 <button type="submit" class="btn btn-primary" style="color:#fff;">Apply</button>
             </div>
         </form>
+
+        <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+        <h4 style="font-size:14px; margin:0 0 10px;"><i class="fa fa-camera" style="color:#FF7A1B;"></i> Change Staff Photo</h4>
+        <?php if (count($employees) > 0): ?>
+            <?php
+                $empPhotoMap = [];
+                foreach ($employees as $emp) {
+                    $pf = '';
+                    if (!empty($emp['photo']) && is_file(__DIR__ . '/uploads/employees/' . $emp['photo'])) {
+                        $pf = BASE_URL . 'uploads/employees/' . e($emp['photo']);
+                    }
+                    $initial = strtoupper(substr(trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? '')), 0, 1)) ?: 'E';
+                    $empPhotoMap[(int)$emp['emp_id']] = ['url' => $pf, 'initial' => $initial];
+                }
+            ?>
+            <form method="post" enctype="multipart/form-data" action="<?php echo BASE_URL; ?>cards.php">
+                <input type="hidden" name="action" value="update_card_photo">
+                <input type="hidden" name="valid" value="<?php echo $valid; ?>">
+                <input type="hidden" name="color" value="<?php echo ltrim($theme, '#'); ?>">
+                <input type="hidden" name="school_name_font_size" value="<?php echo $schoolFs; ?>">
+                <input type="hidden" name="emp_name_font_size" value="<?php echo $empFs; ?>">
+                <div class="cc-row"><label>Employee</label>
+                    <select name="card_emp_id" id="ccEmpSel" onchange="updStaffPick(this)">
+                        <?php foreach ($employees as $emp): ?>
+                            <option value="<?php echo (int)$emp['emp_id']; ?>">#<?php echo (int)$emp['emp_id']; ?> <?php echo e(trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? ''))); ?></option>
+                        <?php endforeach; ?>
+                    </select></div>
+                <div class="cc-row" style="justify-content:center;">
+                    <label class="pick-box" for="card_photo_input">
+                        <img id="staffPickPrev" alt="">
+                        <span class="pick-empty" id="staffPickEmpty"><i class="fa fa-user"></i><br><small>Photo Pick Karne ke liye Click Karein</small></span>
+                        <span class="pick-cam"><i class="fa fa-camera"></i> Change Photo</span>
+                    </label>
+                    <input type="file" id="card_photo_input" name="card_photo" accept="image/*" style="display:none;" required onchange="previewStaffPhoto(this)">
+                </div>
+                <div class="cc-actions">
+                    <button type="submit" class="btn btn-success" style="color:#fff;"><i class="fa fa-upload"></i> Update Photo</button>
+                </div>
+            </form>
+        <?php else: ?>
+            <p style="color:#9CA3AF; font-size:12px; margin:0;">Koi staff member available nahi hai.</p>
+        <?php endif; ?>
     </div>
 </div>
 
+<style>
+    .pick-box{ position:relative; display:flex; align-items:center; justify-content:center; width:110px; height:110px; border-radius:14px; border:2px dashed #d1d5db; background:#f9fafb; cursor:pointer; overflow:hidden; margin:0 auto; }
+    .pick-box img{ width:100%; height:100%; object-fit:cover; display:none; border-radius:12px; }
+    .pick-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#9CA3AF; font-size:26px; gap:4px; }
+    .pick-empty small{ font-size:10px; line-height:1.3; font-weight:600; text-transform:uppercase; letter-spacing:.3px; padding:0 8px; }
+    .pick-cam{ position:absolute; left:0; right:0; bottom:0; background:rgba(0,0,0,.55); color:#fff; font-size:10.5px; font-weight:700; text-align:center; padding:3px 0; text-transform:uppercase; letter-spacing:.3px; }
+</style>
+
 <script>
-function openCC(){ document.getElementById('ccOverlay').style.display = 'block'; }
+var STAFF_PHOTOS = {
+    <?php foreach ($empPhotoMap as $eid => $info): ?>
+        "<?php echo $eid; ?>": { url: "<?php echo $info['url']; ?>", initial: "<?php echo $info['initial']; ?>" },
+    <?php endforeach; ?>
+};
+function updStaffPick(sel) {
+    var info = STAFF_PHOTOS[sel.value] || { url: '', initial: 'E' };
+    var img = document.getElementById('staffPickPrev');
+    var empty = document.getElementById('staffPickEmpty');
+    if (info.url) { img.src = info.url; img.style.display = 'block'; empty.style.display = 'none'; }
+    else { img.style.display = 'none'; empty.innerHTML = '<i class="fa fa-user"></i><br><small>' + info.initial + ' | No Photo</small>'; empty.style.display = 'flex'; }
+}
+function previewStaffPhoto(input) {
+    if (input.files && input.files[0]) {
+        var rd = new FileReader();
+        rd.onload = function(e) {
+            var img = document.getElementById('staffPickPrev');
+            img.src = e.target.result; img.style.display = 'block';
+            document.getElementById('staffPickEmpty').style.display = 'none';
+        };
+        rd.readAsDataURL(input.files[0]);
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var sel = document.getElementById('ccEmpSel');
+    if (sel) updStaffPick(sel);
+});
+</script>
+
+<script>
+function openCC(){ var ov = document.getElementById('ccOverlay'); ov.style.display = 'block'; var p = ov.querySelector('.cc-panel'); if (p) p.scrollTop = 0; }
 function closeCC(){ document.getElementById('ccOverlay').style.display = 'none'; }
 </script>
 
