@@ -5,6 +5,15 @@ require_login();
 
 $__migrate = [
     "ALTER TABLE employees ADD COLUMN IF NOT EXISTS qualification VARCHAR(191) DEFAULT NULL",
+    "CREATE TABLE IF NOT EXISTS user_module_access (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        module VARCHAR(50) NOT NULL,
+        page VARCHAR(50) NOT NULL,
+        allowed TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_access (user_id, module, page)
+    )",
 ];
 foreach ($__migrate as $__sql) { try { db_query($__sql); } catch (\Throwable $e) {} }
 
@@ -13,13 +22,91 @@ $page_title = 'View Employees';
 $message = '';
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'DeleteEmployee') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'RemoveEmployee') {
     $eid = (int) ($_POST['emp_id'] ?? 0);
+    $reason = trim($_POST['removal_reason'] ?? '');
+    $rdate = trim($_POST['removal_date'] ?? '');
     if ($eid > 0) {
-        $st2 = db_prepare("DELETE FROM employees WHERE emp_id=?");
-        $st2->bind_param('i', $eid);
+        $row = db_query("SELECT first_name, last_name, phone, email FROM employees WHERE emp_id=$eid")->fetch_assoc();
+        $fullName = trim(($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? ''));
+        $phone = trim($row['phone'] ?? '');
+        $uid = (int) ($_SESSION['user_id'] ?? 0);
+
+        db_query("CREATE TABLE IF NOT EXISTS employee_removals (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            emp_id INT NOT NULL,
+            name VARCHAR(191) DEFAULT NULL,
+            phone VARCHAR(50) DEFAULT NULL,
+            reason VARCHAR(500) DEFAULT NULL,
+            removal_date DATE DEFAULT NULL,
+            removed_by INT DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )");
+
+        $rdb = ($rdate !== '' ? $rdate : null);
+        $st2 = db_prepare("INSERT INTO employee_removals (emp_id, name, phone, reason, removal_date, removed_by) VALUES (?, ?, ?, ?, ?, ?)");
+        $st2->bind_param('issssi', $eid, $fullName, $phone, $reason, $rdb, $uid);
         $st2->execute();
-        $message = 'Employee deleted successfully!';
+
+        if (isset($_POST['send_sms']) && $phone !== '') {
+            $body = 'Dear ' . $fullName . ', your services with our school have been concluded as of ' . ($rdate !== '' ? $rdate : date('Y-m-d')) . '. Reason: ' . ($reason !== '' ? $reason : 'Not specified') . '. Thanks for your services.';
+            $title3 = 'Employee Removal - ' . $fullName;
+            $st3 = db_prepare("INSERT INTO messages (title, message, recipient_type, channel, recipient_list, status, message_type, template_title, created_by) VALUES (?, ?, 'employee', 'sms', ?, 'queued', 'employee_removal', 'Employee Removal SMS', ?)");
+            $st3->bind_param('sssi', $title3, $body, $phone, $uid);
+            $st3->execute();
+        }
+
+        $st4 = db_prepare("DELETE FROM employees WHERE emp_id=?");
+        $st4->bind_param('i', $eid);
+        $st4->execute();
+        $message = 'Employee removed successfully!';
+        if ($reason !== '') { $message .= ' Reason recorded.'; }
+        if (isset($_POST['send_sms']) && $phone !== '') { $message .= ' Notification SMS queued.'; }
+    }
+}
+
+function access_clean($v) {
+    return preg_replace('/[^a-z0-9_]/', '', strtolower(trim((string)$v)));
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'GrantAccess') {
+    $eid = (int) ($_POST['emp_id'] ?? 0);
+    $emaill = strtolower(trim($_POST['access_email'] ?? ''));
+    $pw = trim($_POST['access_password'] ?? '');
+    if ($eid <= 0) {
+        $error = 'Invalid employee.';
+    } elseif ($emaill === '') {
+        $error = 'Email is required to grant access.';
+    } else {
+        $row = db_query("SELECT first_name, last_name, phone FROM employees WHERE emp_id=$eid")->fetch_assoc();
+        $fullName = trim(($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? ''));
+        $updEmp = db_prepare("UPDATE employees SET email=? WHERE emp_id=?");
+        $updEmp->bind_param('si', $emaill, $eid);
+        $updEmp->execute();
+        $existing = 0;
+        $chk = db_prepare("SELECT user_id FROM users WHERE email=?");
+        $chk->bind_param('s', $emaill);
+        $chk->execute();
+        if ($rr = $chk->get_result()->fetch_assoc()) { $existing = (int)$rr['user_id']; }
+        if ($existing) {
+            if ($pw !== '') {
+                $up = db_prepare("UPDATE users SET full_name=?, password=?, status=1 WHERE user_id=?");
+                $hash = hash('sha256', $pw);
+                $up->bind_param('ssi', $fullName, $hash, $existing);
+                $up->execute();
+            } else {
+                $up = db_prepare("UPDATE users SET full_name=?, status=1 WHERE user_id=?");
+                $up->bind_param('si', $fullName, $existing);
+                $up->execute();
+            }
+        } else {
+            $hash = hash('sha256', $pw !== '' ? $pw : 'staff123');
+            $ins = db_prepare("INSERT INTO users (email, password, full_name, role, status) VALUES (?, ?, ?, 'staff', 1)");
+            $ins->bind_param('sss', $emaill, $hash, $fullName);
+            $ins->execute();
+        }
+        $message = 'Portal access granted to ' . $fullName . ' (' . $emaill . ').';
+        if ($pw === '') { $message .= ' Default password: staff123'; }
     }
 }
 
@@ -129,6 +216,13 @@ include __DIR__ . '/includes/header.php';
 .profile-photo { width:90px; height:90px; border-radius:999px; object-fit:cover; border:3px solid #FF7A1B; }
 .profile-kv b { display:block; font-size:12px; color:#6B7280; font-weight:600; text-transform:uppercase; }
 .profile-kv span { font-size:14px; color:#111827; font-weight:600; }
+.ad-menu { display:none; position:static; z-index:2050; min-width:240px; max-width:300px; background:#fff; border:1px solid #E5E7EB; border-radius:10px; box-shadow:0 10px 30px rgba(15,23,42,.18); padding:6px; margin-top:6px; }
+.ad-menu a { display:flex; align-items:center; gap:9px; padding:9px 12px; border-radius:7px; font-size:13px; font-weight:600; color:#111827; text-decoration:none; }
+.ad-menu a i { width:16px; text-align:center; color:#FF7A1B; }
+.ad-menu a:hover { background:#FFF7ED; color:#C2410C; }
+.ad-menu a.danger { color:#DC2626; }
+.ad-menu a.danger i { color:#DC2626; }
+.ad-menu a.danger:hover { background:#FEF2F2; }
 @media print { .no-print { display:none !important; } }
 </style>
 
@@ -219,26 +313,22 @@ include __DIR__ . '/includes/header.php';
                             </td>
                             <td><?php echo e($em['qualification'] ?: '-'); ?></td>
                             <td>
-                                <?php if ($em['portal_user']): ?>
-                                    <span class="status-badge status-present"><i class="fa fa-key"></i> Portal</span>
-                                <?php else: ?>
-                                    <span class="status-badge status-pending">None</span>
-                                <?php endif; ?>
+                                <a href="<?php echo BASE_URL; ?>employee_access.php?emp_id=<?php echo $em['emp_id']; ?>" class="btn btn-success btn-sm"><i class="fa fa-key"></i> Access</a>
                             </td>
                             <td>
                                 <span class="status-badge status-active"><?php echo (int)$em['present_days']; ?> days</span>
                                 <a href="<?php echo BASE_URL; ?>view_emp_attendance.php" class="btn btn-default btn-xs" title="Mark Attendance"><i class="fa fa-calendar"></i></a>
                             </td>
-                            <td nowrap>
-                                <button type="button" class="btn btn-primary btn-xs" data-toggle="modal" data-target="#empProfileModal" onclick="showProfile(<?php echo $em['emp_id']; ?>)"><i class="fa fa-eye"></i> Profile</button>
-                                <a href="<?php echo BASE_URL; ?>add_emp.php?emp_id=<?php echo $em['emp_id']; ?>" class="btn btn-warning btn-xs" title="Edit Employee"><i class="fa fa-pencil"></i> Edit</a>
-                                <button type="button" class="btn btn-info btn-xs" onclick="printEmployee(<?php echo $em['emp_id']; ?>)" title="Print Employee Details"><i class="fa fa-print"></i></button>
-                                <a href="<?php echo BASE_URL; ?>view_payroll.php?emp_id=<?php echo $em['emp_id']; ?>" class="btn btn-success btn-xs" title="Payroll"><i class="fa fa-money"></i></a>
-                                <form method="post" action="view_emp.php" style="display:inline;" onsubmit="return confirm('Delete this employee?');">
-                                    <input type="hidden" name="action" value="DeleteEmployee">
-                                    <input type="hidden" name="emp_id" value="<?php echo $em['emp_id']; ?>">
-                                    <button class="btn btn-danger btn-xs" title="Delete"><i class="fa fa-trash"></i></button>
-                                </form>
+                            <td nowrap style="position:relative;">
+                                <button type="button" class="btn btn-primary btn-sm ad-toggle" id="adt_<?php echo $em['emp_id']; ?>" onclick="toggleActions(<?php echo $em['emp_id']; ?>)">
+                                    <i class="fa fa-cog"></i> Actions <span class="caret"></span>
+                                </button>
+                                <div class="ad-menu" id="admenu_<?php echo $em['emp_id']; ?>">
+                                    <a href="<?php echo BASE_URL; ?>emp_experience_certificate.php?emp_id=<?php echo $em['emp_id']; ?>" target="_blank"><i class="fa fa-certificate"></i> Generate Experience Certificate</a>
+                                    <a href="<?php echo BASE_URL; ?>add_emp.php?emp_id=<?php echo $em['emp_id']; ?>"><i class="fa fa-pencil"></i> Edit Employee</a>
+                                    <a href="javascript:void(0)" class="danger" data-id="<?php echo $em['emp_id']; ?>" data-name="<?php echo htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8'); ?>" data-phone="<?php echo htmlspecialchars($em['phone'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" onclick="openRemoveModal(this)"><i class="fa fa-trash"></i> Remove Employee</a>
+                                    <a href="javascript:void(0)" onclick="printEmployee(<?php echo $em['emp_id']; ?>)"><i class="fa fa-print"></i> Print Employee Details</a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -257,6 +347,52 @@ include __DIR__ . '/includes/header.php';
             </ul>
         </nav>
         <?php endif; ?>
+    </div>
+</div>
+
+<div id="removeEmpModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:99990; padding:20px; overflow:auto;">
+    <div style="max-width:480px; margin:8vh auto; background:#fff; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.35);">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid #E5E7EB;">
+            <h4 style="margin:0; font-size:16px; font-weight:800; color:#111827;"><i class="fa fa-trash" style="color:#DC2626;"></i> Remove Employee</h4>
+            <button type="button" onclick="closeRemoveModal()" style="border:0; background:none; font-size:24px; line-height:1; cursor:pointer; color:#6B7280;">&times;</button>
+        </div>
+        <form method="post" action="view_emp.php" id="removeEmpForm" style="padding:20px;">
+            <input type="hidden" name="action" value="RemoveEmployee">
+            <input type="hidden" name="emp_id" id="remEmpId" value="">
+            <p style="font-size:13px; color:#374151; margin:0 0 14px;">You are removing <strong id="remEmpName" style="color:#111827;"></strong>. This action is recorded in removal history.</p>
+            <div class="form-group">
+                <label style="font-weight:700; font-size:13px; color:#111827;">Reason for Removal</label>
+                <select class="form-control" name="removal_reason" id="remReason" required onchange="toggleRemReason()">
+                    <option value="" disabled selected>Select reason...</option>
+                    <option value="Appointment in Government Sector">Appointment in Government Sector</option>
+                    <option value="Migrate to other campus">Migrate to other campus</option>
+                    <option value="Misbehaviour">Misbehaviour</option>
+                    <option value="Went to Abroad">Went to Abroad</option>
+                    <option value="Regular Absents">Regular Absents</option>
+                    <option value="Due to marriage">Due to marriage</option>
+                    <option value="Unsatisfaction">Unsatisfaction</option>
+                    <option value="Wrong entry">Wrong entry</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="form-group" id="remOtherRow" style="display:none;">
+                <label style="font-weight:700; font-size:13px; color:#111827;">Describe Reason</label>
+                <input type="text" class="form-control" name="removal_reason_other" id="remReasonOther" placeholder="Please specify the reason...">
+            </div>
+            <div class="form-group">
+                <label style="font-weight:700; font-size:13px; color:#111827;">Removal Date</label>
+                <input type="date" class="form-control" name="removal_date" id="remRemovalDate" value="<?php echo date('Y-m-d'); ?>" required>
+            </div>
+            <div class="checkbox" style="margin:6px 0 0;">
+                <label style="font-size:13px; font-weight:600;">
+                    <input type="checkbox" name="send_sms" id="remSendSms" value="1"> <i class="fa fa-comment" style="color:#16A34A;"></i> Send notification SMS to <strong id="remEmpPhone" style="color:#111827;"></strong>
+                </label>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:22px;">
+                <button type="button" class="btn btn-default" onclick="closeRemoveModal()">Cancel</button>
+                <button type="submit" class="btn btn-danger"><i class="fa fa-trash"></i> Remove Employee</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -364,6 +500,67 @@ window.printProfile = function() {
     var id = window.currentProfileId;
     if (id) { printEmployee(id); }
 };
+
+window.openRemoveModal = function(el) {
+    var id = el.getAttribute('data-id');
+    var name = el.getAttribute('data-name');
+    var phone = el.getAttribute('data-phone');
+    document.getElementById('remEmpId').value = id;
+    document.getElementById('remEmpName').textContent = name;
+    document.getElementById('remEmpPhone').textContent = (phone && phone !== '') ? phone : '-';
+    var cb = document.getElementById('remSendSms');
+    if (phone && phone !== '') { cb.disabled = false; cb.checked = true; }
+    else { cb.disabled = true; cb.checked = false; }
+    document.getElementById('remReason').value = '';
+    document.getElementById('remReasonOther').value = '';
+    document.getElementById('remOtherRow').style.display = 'none';
+    document.getElementById('remRemovalDate').value = '';
+    document.getElementById('removeEmpModal').style.display = 'block';
+};
+
+window.toggleRemReason = function() {
+    var v = document.getElementById('remReason').value;
+    var otherRow = document.getElementById('remOtherRow');
+    var other = document.getElementById('remReasonOther');
+    if (v === 'Other') { otherRow.style.display = 'block'; other.required = true; }
+    else { otherRow.style.display = 'none'; other.required = false; other.value = ''; }
+};
+
+document.getElementById('removeEmpForm').addEventListener('submit', function(e) {
+    var sel = document.getElementById('remReason');
+    if (sel.value === 'Other') {
+        var other = document.getElementById('remReasonOther');
+        if (other.value.trim() === '') { e.preventDefault(); other.focus(); alert('Please specify the reason.'); return; }
+        sel.value = other.value.trim();
+    }
+});
+
+window.closeRemoveModal = function() {
+    document.getElementById('removeEmpModal').style.display = 'none';
+};
+
+window.onclick = function(e) {
+    var m = document.getElementById('removeEmpModal');
+    if (e.target === m) { m.style.display = 'none'; }
+    var a = document.getElementById('accessModal');
+    if (e.target === a) { a.style.display = 'none'; }
+};
+
+window.toggleActions = function(id) {
+    var m = document.getElementById('admenu_' + id);
+    if (!m) return;
+    var willOpen = m.style.display !== 'block';
+    var all = document.querySelectorAll('.ad-menu');
+    for (var i = 0; i < all.length; i++) { all[i].style.display = 'none'; }
+    if (willOpen) { m.style.display = 'block'; }
+};
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest || !e.target.closest('.ad-toggle')) {
+        var all = document.querySelectorAll('.ad-menu');
+        for (var i = 0; i < all.length; i++) { all[i].style.display = 'none'; }
+    }
+});
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

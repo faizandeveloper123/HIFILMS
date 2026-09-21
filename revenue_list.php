@@ -11,6 +11,7 @@ $error = '';
 $from = $_GET['from'] ?? '';
 $to = $_GET['to'] ?? '';
 $head_id = (int) ($_GET['head_id'] ?? 0);
+$month = (int) ($_GET['month'] ?? 0);
 
 $heads = [];
 $res = db_query("SELECT * FROM revenue_heads ORDER BY head_name");
@@ -32,6 +33,7 @@ $types = '';
 if ($from !== '') { $where[] = "r.paid_date >= ?"; $params[] = $from; $types .= 's'; }
 if ($to !== '') { $where[] = "r.paid_date <= ?"; $params[] = $to; $types .= 's'; }
 if ($head_id > 0) { $where[] = "r.head_id = ?"; $params[] = $head_id; $types .= 'i'; }
+if ($month > 0) { $where[] = "MONTH(r.paid_date) = ? AND YEAR(r.paid_date) = YEAR(CURDATE())"; $params[] = $month; $types .= 'i'; }
 
 $sql = "SELECT r.*, h.head_name,
         CONCAT(s.first_name, ' ', COALESCE(s.father_name, '')) AS student_display, s.class_id, cl.class_name, sec.section_name
@@ -103,6 +105,15 @@ include __DIR__ . '/includes/header.php';
                 <label><i class="fa fa-calendar"></i> To</label>
                 <input type="date" name="to" class="form-control" value="<?php echo e($to); ?>">
             </div>
+            <div class="form-group col-md-2" style="margin-bottom:0;">
+                <label><i class="fa fa-calendar-o"></i> Month</label>
+                <select name="month" class="form-control">
+                    <option value="">All Months</option>
+                    <?php for ($m = 1; $m <= 12; $m++): ?>
+                        <option value="<?php echo $m; ?>" <?php echo $month === $m ? 'selected' : ''; ?>><?php echo date('F', mktime(0, 0, 0, $m, 1)); ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
             <div class="form-group col-md-3" style="margin-bottom:0;">
                 <label><i class="fa fa-tags"></i> Head</label>
                 <select name="head_id" class="form-control">
@@ -112,7 +123,7 @@ include __DIR__ . '/includes/header.php';
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-group col-md-3" style="margin-bottom:0;">
+            <div class="form-group col-md-2" style="margin-bottom:0;">
                 <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fa fa-search"></i> Filter</button>
             </div>
         </form>
@@ -156,6 +167,8 @@ include __DIR__ . '/includes/header.php';
                             <td><?php echo e($r['remarks'] ?: $r['description'] ?: '-'); ?></td>
                             <td style="color:#16A34A; font-weight:700;"><?php echo number_format($r['amount'], 2); ?></td>
                             <td style="text-align:center;">
+                                <a href="<?php echo BASE_URL; ?>add_revenue.php" class="btn btn-success btn-xs" title="Add New Revenue"><i class="fa fa-plus"></i></a>
+                                <a href="<?php echo BASE_URL; ?>print_revenue_voucher.php?revenue_id=<?php echo $r['revenue_id']; ?>" target="_blank" class="btn btn-info btn-xs" title="Print Voucher"><i class="fa fa-print"></i></a>
                                 <form method="post" action="revenue_list.php" style="display:inline;" onsubmit="return confirm('Delete this revenue?');">
                                     <input type="hidden" name="action" value="DeleteRevenue">
                                     <input type="hidden" name="revenue_id" value="<?php echo $r['revenue_id']; ?>">

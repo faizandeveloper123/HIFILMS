@@ -788,9 +788,17 @@ $stateMapDef = [
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label required">Section</label>
-                                        <select name="section" required id="txt_section" class="fieldset-select">
-                                            <option value="" disabled selected>Select Section</option>
-                                        </select>
+                                        <div class="inline-actions">
+                                            <select name="section" required id="txt_section" class="fieldset-select">
+                                                <option value="" disabled selected>Select Section</option>
+                                            </select>
+                                            <a href="javascript:void(0)" class="btn-add-new" onclick="toggleSectionAddBox();"><i class="fas fa-plus"></i> Add New</a>
+                                        </div>
+                                    </div>
+                                    <div class="fieldset-box" id="section_add_box" style="display:none; align-items:center; gap:8px; grid-column:1/-1;">
+                                        <input type="text" id="new_section_name" class="fieldset-input" placeholder="Enter new section name" style="flex:1;" maxlength="50">
+                                        <button type="button" class="btn btn-sm btn-success" onclick="saveNewSection();" style="white-space:nowrap;"><i class="fa fa-check"></i> Add</button>
+                                        <button type="button" class="btn btn-sm btn-secondary" onclick="cancelNewSection();" title="Cancel"><i class="fa fa-times"></i></button>
                                     </div>
                                     <div class="fieldset-box">
                                         <label class="fieldset-label required">Gender</label>
@@ -1367,7 +1375,8 @@ function resetSingleForm() {
     document.getElementById('single-student-form').reset();
     document.getElementById('family_code_value').value = '';
     document.getElementById('com_no').value = '<?php echo e($nextGr); ?>';
-    document.getElementById('txt_section').innerHTML = '<option value="" disabled selected>Select Section</option>';
+    document.getElementById('txt_section').innerHTML = defaultSectionOptions();
+    hideSectionAddBox();
     resetPhotoFrame();
     switchFormTab('basic');
     showToast('Form cleared', 'info');
@@ -1452,24 +1461,70 @@ function previewStudentDoc(input, idx) {
     if (nameEl) { nameEl.textContent = file.name; }
 }
 
-function getSection(cid) {
+function defaultSectionOptions() {
+    return '<option value="" disabled selected>Select Section</option>';
+}
+
+function getSection(cid, selectAfter) {
     var sel = document.getElementById('txt_section');
-    if (!cid) { sel.innerHTML = '<option value="" disabled selected>Select Section</option>'; return; }
+    if (!cid) { sel.innerHTML = defaultSectionOptions(); hideSectionAddBox(); return; }
     sel.innerHTML = '<option value="">Loading...</option>';
     var xhr = new XMLHttpRequest();
     xhr.open('GET', HIIFI_BASE + 'ajax_get_sections.php?class_id=' + encodeURIComponent(cid));
     xhr.onload = function () {
         var data;
         try { data = JSON.parse(xhr.responseText || '[]'); } catch (err) { data = []; }
-        sel.innerHTML = '<option value="" disabled selected>Select Section</option>';
+        var html = '';
         data.forEach(function (s) {
-            var o = document.createElement('option');
-            o.value = s.section_id;
-            o.textContent = s.section_name;
-            sel.appendChild(o);
+            html += '<option value="' + s.section_id + '">' + String(s.section_name).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</option>';
         });
+        html += defaultSectionOptions();
+        sel.innerHTML = html;
+        if (selectAfter) { sel.value = selectAfter; }
+        hideSectionAddBox();
     };
     xhr.send();
+}
+
+function hideSectionAddBox() {
+    var box = document.getElementById('section_add_box');
+    if (box) box.style.display = 'none';
+}
+
+function cancelNewSection() { hideSectionAddBox(); }
+
+function saveNewSection() {
+    var cid = document.getElementById('class').value;
+    var name = document.getElementById('new_section_name').value.trim();
+    if (!cid) { showToast('Pehle Class select karein', 'warning'); return; }
+    if (!name) { showToast('Section name required', 'warning'); document.getElementById('new_section_name').focus(); return; }
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', HIIFI_BASE + 'ajax_add_section.php');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function () {
+        var res = { success: false, message: 'Server error' };
+        try { res = JSON.parse(xhr.responseText); } catch (e) {}
+        if (res.success) {
+            hideSectionAddBox();
+            getSection(cid, res.section_id);
+            showToast(res.created ? 'Section "' + res.section_name + '" added & selected' : 'Section "' + res.section_name + '" already exists', res.created ? 'success' : 'info');
+        } else {
+            showToast(res.message || 'Failed to add section', 'error');
+        }
+    };
+    xhr.send('class_id=' + encodeURIComponent(cid) + '&section_name=' + encodeURIComponent(name));
+}
+
+function toggleSectionAddBox() {
+    var box = document.getElementById('section_add_box');
+    if (!box) return;
+    if (box.style.display === 'none' || box.style.display === '') {
+        box.style.display = 'flex';
+        document.getElementById('new_section_name').value = '';
+        document.getElementById('new_section_name').focus();
+    } else {
+        box.style.display = 'none';
+    }
 }
 
 function getFamilyInfo(code) {

@@ -29,7 +29,7 @@ $res = db_query("SELECT c.class_name, COUNT(s.student_id) c FROM students s JOIN
 while ($row = $res->fetch_assoc()) { $classWise[] = $row; }
 $classLabels = array_column($classWise, 'class_name');
 $classCounts = array_map('intval', array_column($classWise, 'c'));
-$maxClass = max(1, max($classCounts));
+$maxClass = max(1, $classCounts ? max($classCounts) : 0);
 
 $admSources = [];
 $res = db_query("SELECT COALESCE(NULLIF(TRIM(admission_source),''),'Unknown') src, COUNT(*) c FROM students WHERE status=1 GROUP BY src ORDER BY c DESC");
@@ -85,7 +85,8 @@ $relDist = [];
 $rl = db_query("SELECT COALESCE(NULLIF(TRIM(religion),''),'Not Specified') religion, COUNT(*) c
                 FROM students WHERE status=1 GROUP BY religion ORDER BY c DESC");
 while ($row = $rl->fetch_assoc()) { $relDist[] = $row; }
-$maxRel = max(1, max(array_column($relDist, 'c')));
+$relCounts = array_column($relDist, 'c');
+$maxRel = max(1, $relCounts ? max($relCounts) : 0);
 
 // Withdrawal trends (status=0 students by month of this year)
 $withTrend = [];

@@ -265,7 +265,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
         </ul>
       </li>
       <li class="has-children">
-        <a href="javascript:void(0)"><i class="fa fa-paypal"></i><span class="label" style="font-weight: normal !important;">PayRoll</span><span class="fa fa-chevron-right chev"></span></a>
+        <a href="javascript:void(0)"><i class="fab fa-paypal"></i><span class="label" style="font-weight: normal !important;">PayRoll</span><span class="fa fa-chevron-right chev"></span></a>
         <ul class="child_menu" style="display: none;">
           <li><a href="<?php echo BASE_URL; ?>creat_payroll.php">Create PayRoll</a></li>
           <li><a href="<?php echo BASE_URL; ?>view_payroll.php">View PayRoll</a></li>
@@ -455,7 +455,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
         <a href="<?php echo BASE_URL; ?>issue_return_employee.php" class="submenu-item">Employee Issue&amp;Return</a>
       </div>
       <a href="#" class="nav-item has-submenu">
-        <div class="nav-icon"><i class="fa fa-paypal"></i></div>
+        <div class="nav-icon"><i class="fab fa-paypal"></i></div>
         <div class="nav-text">PayRoll</div>
       </a>
       <div class="submenu">

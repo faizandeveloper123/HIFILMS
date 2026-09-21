@@ -1,8 +1,12 @@
 <?php
 session_start();
 
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 define('DB_HOST', 'localhost');
-define('DB_PORT', '3307');
+define('DB_PORT', '3306');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 define('DB_NAME', 'hiifi_lms');

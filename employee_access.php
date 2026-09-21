@@ -1,0 +1,294 @@
+<?php
+define('HIIFI', true);
+require_once __DIR__ . '/config.php';
+require_login();
+
+$page_title = 'Employee Access';
+
+function access_clean($v) {
+    return preg_replace('/[^a-z0-9_]/', '', strtolower(trim((string)$v)));
+}
+
+try {
+    db_query("CREATE TABLE IF NOT EXISTS user_module_access (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        module VARCHAR(50) NOT NULL,
+        page VARCHAR(50) NOT NULL,
+        allowed TINYINT(1) DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_access (user_id, module, page)
+    )");
+} catch (\Throwable $e) {}
+
+$emp_id = (int) ($_GET['emp_id'] ?? 0);
+$emp = null;
+if ($emp_id > 0) {
+    $emp = db_query("SELECT * FROM employees WHERE emp_id=$emp_id AND status IN (0,1)")->fetch_assoc();
+}
+
+$message = '';
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+    if (!$emp) {
+        $error = 'Invalid employee.';
+    } elseif ($action === 'GrantModuleAccess') {
+        $module = access_clean($_POST['module'] ?? '');
+        $page = access_clean($_POST['page'] ?? '');
+        $fullName = trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? ''));
+        $emaill = strtolower(trim($emp['email'] ?? ''));
+        if ($module === '' || $page === '') {
+            $error = 'Missing access details.';
+        } elseif ($emaill === '') {
+            $error = 'Please set an email for this employee first (Edit Employee) before granting module access.';
+        } else {
+            $existing = 0;
+            $chk = db_prepare("SELECT user_id FROM users WHERE email=?");
+            $chk->bind_param('s', $emaill);
+            $chk->execute();
+            if ($rr = $chk->get_result()->fetch_assoc()) { $existing = (int)$rr['user_id']; }
+            if (!$existing) {
+                $hash = hash('sha256', 'staff123');
+                $ins = db_prepare("INSERT INTO users (email, password, full_name, role, status) VALUES (?, ?, ?, 'staff', 1)");
+                $ins->bind_param('sss', $emaill, $hash, $fullName);
+                $ins->execute();
+                $existing = (int)$ins->insert_id;
+            }
+            $st2 = db_prepare("INSERT INTO user_module_access (user_id, module, page, allowed) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE allowed=1");
+            $st2->bind_param('iss', $existing, $module, $page);
+            $st2->execute();
+            $message = 'Access granted to ' . $fullName . ' for ' . $page . '.';
+        }
+    } elseif ($action === 'RemoveModuleAccess') {
+        $module = access_clean($_POST['module'] ?? '');
+        $page = access_clean($_POST['page'] ?? '');
+        $emaill = strtolower(trim($emp['email'] ?? ''));
+        if ($module !== '' && $page !== '' && $emaill !== '') {
+            $st2 = db_prepare("DELETE um FROM user_module_access um JOIN users u ON u.user_id=um.user_id WHERE u.email=? AND um.module=? AND um.page=?");
+            $st2->bind_param('sss', $emaill, $module, $page);
+            $st2->execute();
+            $message = 'Access removed for ' . $page . '.';
+        }
+    }
+    header('Location: ' . BASE_URL . 'employee_access.php?emp_id=' . $emp_id);
+    exit;
+}
+
+$granted = [];
+if ($emp) {
+    $emaill = strtolower(trim($emp['email'] ?? ''));
+    if ($emaill !== '') {
+        $chk = db_prepare("SELECT user_id FROM users WHERE email=?");
+        $chk->bind_param('s', $emaill);
+        $chk->execute();
+        if ($rr = $chk->get_result()->fetch_assoc()) {
+            $uid = (int)$rr['user_id'];
+            $res = db_query("SELECT module, page FROM user_module_access WHERE user_id=$uid");
+            while ($row = $res->fetch_assoc()) { $granted[$row['module']][$row['page']] = 1; }
+        }
+    }
+}
+
+$modules = [
+    ['no' => 1,  'module' => 'front_office',   'label' => 'Front Office', 'icon' => 'fa-phone', 'pages' => [
+        ['page' => 'front_desk_analytics', 'label' => 'Front Desk Overview', 'acl' => 1],
+        ['page' => 'student_inquiry', 'label' => 'Admission Inquiries', 'acl' => 1],
+        ['page' => 'manage_complaint', 'label' => 'Complaint Hub', 'acl' => 0],
+    ]],
+    ['no' => 2,  'module' => 'dashboard',   'label' => 'Dashboard', 'icon' => 'fa-tachometer', 'pages' => [
+        ['page' => 'dashboard', 'label' => 'Executive Dashboard', 'acl' => 0],
+        ['page' => 'basic_dashboard', 'label' => 'Staff Dashboard', 'acl' => 0],
+    ]],
+    ['no' => 3,  'module' => 'students',   'label' => 'Students', 'icon' => 'fa-graduation-cap', 'pages' => [
+        ['page' => 'add_student', 'label' => 'Add New Student', 'acl' => 0],
+        ['page' => 'students_analytics_dashboard', 'label' => 'Student Analytics', 'acl' => 1],
+        ['page' => 'class_promotion', 'label' => 'Class Promotion', 'acl' => 0],
+    ]],
+    ['no' => 4,  'module' => 'attendance',   'label' => 'Attendance', 'icon' => 'fa-calendar-check-o', 'pages' => [
+        ['page' => 'mark_attend', 'label' => 'Mark Attendance', 'acl' => 1],
+        ['page' => 'mark_attendanceReport_list', 'label' => 'Attendance Analytics', 'acl' => 1],
+        ['page' => 'send_msgs', 'label' => 'Send SMS Report', 'acl' => 0],
+    ]],
+    ['no' => 5,  'module' => 'messages',   'label' => 'Messages', 'icon' => 'fa-envelope', 'pages' => [
+        ['page' => 'new_message', 'label' => 'New Message', 'acl' => 0],
+        ['page' => 'messages_history', 'label' => 'View Messages', 'acl' => 0],
+        ['page' => 'view_templates', 'label' => 'View Templates', 'acl' => 1],
+    ]],
+    ['no' => 6,  'module' => 'fee_collection',   'label' => 'Fee Collection', 'icon' => 'fa-money', 'pages' => [
+        ['page' => 'monthly_challan', 'label' => 'Create Challan', 'acl' => 1],
+        ['page' => 'view_challan', 'label' => 'View Challan', 'acl' => 1],
+        ['page' => 'multi_fee_reports', 'label' => 'Fee Reporting', 'acl' => 1],
+        ['page' => 'update_fee_settings', 'label' => 'Fee Settings', 'acl' => 1],
+    ]],
+    ['no' => 7,  'module' => 'timetable',   'label' => 'Timetable', 'icon' => 'fa-clock-o', 'pages' => [
+        ['page' => 'period_categories', 'label' => 'Periods Category', 'acl' => 1],
+        ['page' => 'create_period_details', 'label' => 'Create/Manage Periods', 'acl' => 1],
+        ['page' => 'class_period', 'label' => 'Assign Periods to Classes', 'acl' => 1],
+        ['page' => 'class_period_selection', 'label' => 'Create Timetable', 'acl' => 0],
+        ['page' => 'view_class_period_selection', 'label' => 'View Timetable', 'acl' => 1],
+        ['page' => 'view_teachers_timetable', 'label' => 'Teachers Timetable', 'acl' => 0],
+    ]],
+    ['no' => 12, 'module' => 'library',   'label' => 'Library', 'icon' => 'fa-book', 'pages' => [
+        ['page' => 'list_books', 'label' => 'Book List', 'acl' => 1],
+        ['page' => 'issue_return', 'label' => 'Issue Return', 'acl' => 0],
+        ['page' => 'issue_return_employee', 'label' => 'Employee Issue&Return', 'acl' => 0],
+    ]],
+    ['no' => 13, 'module' => 'payroll',   'label' => 'PayRoll', 'icon' => 'fa-money', 'pages' => [
+        ['page' => 'creat_payroll', 'label' => 'Create PayRoll', 'acl' => 0],
+        ['page' => 'view_payroll', 'label' => 'View PayRoll', 'acl' => 1],
+        ['page' => 'staff_security', 'label' => 'Staff Security Fee', 'acl' => 0],
+        ['page' => 'payroll_setting', 'label' => 'PayRoll Setting', 'acl' => 0],
+    ]],
+    ['no' => 14, 'module' => 'parents_portal',   'label' => 'Parents Portal', 'icon' => 'fa-home', 'pages' => [
+        ['page' => 'parents_portal_dashboard', 'label' => 'Parents Overview', 'acl' => 1],
+    ]],
+    ['no' => 15, 'module' => 'cards_generator',   'label' => 'Cards Generator', 'icon' => 'fa-id-card-o', 'pages' => [
+        ['page' => 'cards', 'label' => 'Staff Cards', 'acl' => 0],
+        ['page' => 'students_card', 'label' => 'Students Cards', 'acl' => 0],
+    ]],
+    ['no' => 16, 'module' => 'expenses',   'label' => 'Expenses', 'icon' => 'fa-file', 'pages' => [
+        ['page' => 'manage_expenses', 'label' => 'Add/View Expenses', 'acl' => 1],
+        ['page' => 'monthly_expenses_report', 'label' => 'Expenses Report', 'acl' => 1],
+    ]],
+    ['no' => 17, 'module' => 'pos',   'label' => 'Point of Sale', 'icon' => 'fa-search', 'pages' => [
+        ['page' => 'canteen_dashboard', 'label' => 'POS Dashboard', 'acl' => 0],
+    ]],
+    ['no' => 18, 'module' => 'academic_setup',   'label' => 'Academic Setup', 'icon' => 'fa-cog', 'pages' => [
+        ['page' => 'academic_setup', 'label' => 'Manage Academics', 'acl' => 0],
+    ]],
+    ['no' => 19, 'module' => 'system_settings',   'label' => 'System Settings', 'icon' => 'fa-wrench', 'pages' => [
+        ['page' => 'settings', 'label' => 'Update Settings', 'acl' => 0],
+        ['page' => 'manage_localities', 'label' => 'Manage Localities', 'acl' => 1],
+    ]],
+    ['no' => 20, 'module' => 'accounts',   'label' => 'Accounts', 'icon' => 'fa-bar-chart', 'pages' => [
+        ['page' => 'add_revenue', 'label' => 'Add Revenue', 'acl' => 0],
+        ['page' => 'revenue_list', 'label' => 'List of Revenues', 'acl' => 0],
+        ['page' => 'revenue_heads', 'label' => 'Revenue Heads', 'acl' => 0],
+    ]],
+];
+
+include __DIR__ . '/includes/header.php';
+?>
+<style>
+.emp-card{ background:#fff; border:1px solid #E5E7EB; border-radius:16px; padding:24px; }
+.emp-head{ display:flex; align-items:center; gap:14px; padding-bottom:20px; border-bottom:1px solid #F3F4F6; flex-wrap:wrap; }
+.emp-head .avatar-big{ width:58px; height:58px; border-radius:999px; background:linear-gradient(135deg,#FF7A1B,#ffa35c); color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; }
+.acl-table{ width:100%; border-collapse:collapse; margin-top:6px; }
+.acl-table th{ background:#FFF7ED; color:#9A3412; font-size:13px; font-weight:800; text-align:left; padding:10px 14px; border:1px solid #FFE9D6; }
+.acl-table td{ border:1px solid #E5E7EB; padding:12px 14px; vertical-align:top; font-size:14px; }
+.prow{ display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:8px; }
+.prow:hover{ background:#FFF7ED; }
+.prow .plink{ flex:1; font-weight:600; font-size:13.5px; color:#111827; text-decoration:none; }
+.prow .plink:hover{ color:#C2410C; }
+.acl-cb{ width:17px; height:17px; cursor:pointer; accent-color:#FF7A1B; flex-shrink:0; }
+.granted-chip{ display:inline-block; font-size:10.5px; font-weight:800; color:#16A34A; background:#DCFCE7; padding:2px 9px; border-radius:999px; }
+.edit-btn{ border:0; background:#EFF6FF; color:#2563EB; font-weight:700; font-size:11.5px; padding:4px 10px; border-radius:7px; cursor:pointer; }
+.del-btn{ border:0; background:#FEF2F2; color:#DC2626; font-weight:700; font-size:11.5px; padding:4px 10px; border-radius:7px; cursor:pointer; }
+.mod-name{ display:flex; align-items:center; gap:8px; font-weight:800; font-size:13.5px; color:#111827; white-space:nowrap; }
+.mod-name i{ color:#FF7A1B; }
+@media print { .no-print { display:none !important; } }
+</style>
+<div class="main-content">
+    <div class="container-fluid">
+
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:14px 4px;">
+            <h3 style="font-size:18px; font-weight:800; color:#111827; margin:0;"><i class="fa fa-key" style="color:#16A34A;"></i> Employee Access / Portal</h3>
+            <a href="<?php echo BASE_URL; ?>view_emp.php" class="toolbar-btn" style="background:#377DFF; color:#fff; text-decoration:none;"><i class="fa fa-arrow-left"></i> Back to Employees</a>
+        </div>
+
+        <?php if ($message): ?><div class="alert alert-success"><?php echo e($message); ?></div><?php endif; ?>
+        <?php if ($error): ?><div class="alert alert-danger"><?php echo e($error); ?></div><?php endif; ?>
+
+        <?php if (!$emp): ?>
+            <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:40px; text-align:center; color:#6B7280;">Employee not found.</div>
+        <?php else: ?>
+            <?php
+            $fullName = trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? ''));
+            $initial = strtoupper(substr($fullName, 0, 1));
+            $initial = $initial !== '' ? $initial : 'E';
+            ?>
+            <div class="emp-card">
+                <div class="emp-head">
+                    <div class="avatar-big"><?php echo $initial; ?></div>
+                    <div style="flex:1;">
+                        <div style="font-size:18px; font-weight:800; color:#111827;"><?php echo e($fullName); ?></div>
+                        <div style="font-size:13px; color:#6B7280; margin-top:2px;">
+                            <?php echo e($emp['designation'] ?? '-'); ?><?php echo !empty($emp['department']) ? ' &middot; ' . e($emp['department']) : ''; ?>
+                        </div>
+                        <div style="font-size:12.5px; color:#9CA3AF; margin-top:2px;">
+                            <?php if (!empty($emp['email'])): ?><i class="fa fa-envelope"></i> <?php echo e($emp['email']); ?><?php endif; ?>
+                            <?php if (!empty($emp['phone'])): ?> &nbsp; <i class="fa fa-phone"></i> <?php echo e($emp['phone']); ?><?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; justify-content:space-between; margin:20px 0 10px;">
+                    <span style="font-weight:800; font-size:15px; color:#111827;"><i class="fa fa-list-alt" style="color:#FF7A1B;"></i> Module &amp; Pages Access</span>
+                    <span style="font-size:11.5px; color:#9CA3AF;">Edit = grant access &middot; Delete = remove access</span>
+                </div>
+
+                <table class="acl-table">
+                    <thead>
+                        <tr><th style="width:70px;">S.No</th><th style="width:190px;">Module</th><th>Pages Access</th></tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($modules as $mod): ?>
+                            <tr>
+                                <td><?php echo $mod['no']; ?></td>
+                                <td><span class="mod-name"><i class="fa <?php echo $mod['icon']; ?>"></i> <?php echo $mod['label']; ?></span></td>
+                                <td>
+                                    <?php foreach ($mod['pages'] as $pg): ?>
+                                        <?php $isGranted = isset($granted[$mod['module']][$pg['page']]); ?>
+                                        <div class="prow">
+                                            <input type="checkbox" class="acl-cb" data-module="<?php echo $mod['module']; ?>" data-page="<?php echo $pg['page']; ?>" onchange="togglePageAccess(this)" <?php echo $isGranted ? 'checked' : ''; ?> title="Grant / Remove access">
+                                            <a class="plink" href="<?php echo BASE_URL . $pg['page'] . '.php'; ?>" target="_blank"><?php echo $pg['label']; ?></a>
+                                            <?php if ($pg['acl']): ?>
+                                                <form method="post" action="<?php echo BASE_URL; ?>employee_access.php?emp_id=<?php echo $emp_id; ?>" style="display:inline; margin:0;">
+                                                    <input type="hidden" name="action" value="GrantModuleAccess">
+                                                    <input type="hidden" name="module" value="<?php echo $mod['module']; ?>">
+                                                    <input type="hidden" name="page" value="<?php echo $pg['page']; ?>">
+                                                    <button type="submit" class="edit-btn" title="Grant access to this page"><i class="fa fa-pencil"></i> Edit</button>
+                                                </form>
+                                                <form method="post" action="<?php echo BASE_URL; ?>employee_access.php?emp_id=<?php echo $emp_id; ?>" style="display:inline; margin:0;" onsubmit="return confirm('Remove access for this page?');">
+                                                    <input type="hidden" name="action" value="RemoveModuleAccess">
+                                                    <input type="hidden" name="module" value="<?php echo $mod['module']; ?>">
+                                                    <input type="hidden" name="page" value="<?php echo $pg['page']; ?>">
+                                                    <button type="submit" class="del-btn" title="Remove access to this page"><i class="fa fa-trash"></i> Delete</button>
+                                                </form>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+
+                <div style="margin-top:16px; padding:12px 14px; background:#FFF7ED; border:1px solid #FFE9D6; border-radius:10px; font-size:12.5px; color:#9A3412;">
+                    <i class="fa fa-info-circle"></i> Agar employee ke paas email nahi hai to pehle <strong>Edit Employee</strong> se email add karein. Access grant karte waqt login account khud ban jata hai (default password: <strong>staff123</strong>).
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+<script>
+var EMP_ACCESS_ID = <?php echo (int)$emp_id; ?>;
+window.togglePageAccess = function(cb) {
+    var module = cb.getAttribute('data-module');
+    var page = cb.getAttribute('data-page');
+    var f = document.createElement('form');
+    f.method = 'post';
+    f.action = '<?php echo BASE_URL; ?>employee_access.php?emp_id=' + EMP_ACCESS_ID;
+    var fields = { action: cb.checked ? 'GrantModuleAccess' : 'RemoveModuleAccess', module: module, page: page };
+    for (var k in fields) {
+        var ip = document.createElement('input');
+        ip.type = 'hidden'; ip.name = k; ip.value = fields[k];
+        f.appendChild(ip);
+    }
+    document.body.appendChild(f);
+    f.submit();
+};
+</script>
+<?php include __DIR__ . '/includes/footer.php'; ?>
