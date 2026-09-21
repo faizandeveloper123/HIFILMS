@@ -30,6 +30,8 @@ if ($emp_id > 0) {
 $message = '';
 $error = '';
 
+if (isset($_GET['saved']) && $message === '') { $message = 'Access saved successfully.'; }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     if (!$emp) {
@@ -71,8 +73,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $st2->execute();
             $message = 'Access removed for ' . $page . '.';
         }
+    } elseif ($action === 'TogglePermission') {
+        $module = access_clean($_POST['module'] ?? '');
+        $page = access_clean($_POST['page'] ?? '');
+        $permission = access_clean($_POST['permission'] ?? '');
+        $grant = !empty($_POST['grant']) ? 1 : 0;
+        $emaill = strtolower(trim($emp['email'] ?? ''));
+        if ($module !== '' && $page !== '' && in_array($permission, ['edit', 'delete'], true) && $emaill !== '') {
+            $existing = 0;
+            $chk = db_prepare("SELECT user_id FROM users WHERE email=?");
+            $chk->bind_param('s', $emaill);
+            $chk->execute();
+            if ($rr = $chk->get_result()->fetch_assoc()) { $existing = (int)$rr['user_id']; }
+            if ($existing > 0) {
+                if ($grant) {
+                    $st3 = db_prepare("INSERT INTO user_module_access (user_id, module, page, permission, allowed) VALUES (?, ?, ?, ?, 1) ON DUPLICATE KEY UPDATE allowed=1");
+                    $st3->bind_param('isss', $existing, $module, $page, $permission);
+                    $st3->execute();
+                } else {
+                    $st3 = db_prepare("DELETE FROM user_module_access WHERE user_id=? AND module=? AND page=? AND permission=?");
+                    $st3->bind_param('isss', $existing, $module, $page, $permission);
+                    $st3->execute();
+                }
+            }
+        }
+    } elseif ($action === 'SaveAccess') {
+        $fullName = trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? ''));
+        $emaill = strtolower(trim($emp['email'] ?? ''));
+        if ($emaill === '') {
+            $error = 'Please set an email for this employee first (Edit Employee) before granting module access.';
+        } else {
+            $existing = 0;
+            $chk = db_prepare("SELECT user_id FROM users WHERE email=?");
+            $chk->bind_param('s', $emaill);
+            $chk->execute();
+            if ($rr = $chk->get_result()->fetch_assoc()) { $existing = (int)$rr['user_id']; }
+            if (!$existing) {
+                $hash = hash('sha256', 'staff123');
+                $ins = db_prepare("INSERT INTO users (email, password, full_name, role, status) VALUES (?, ?, ?, 'staff', 1)");
+                $ins->bind_param('sss', $emaill, $hash, $fullName);
+                $ins->execute();
+                $existing = (int)$ins->insert_id;
+            }
+            $subPage   = $_POST['page'] ?? [];
+            $subPerm   = $_POST['access'] ?? [];
+            $subPage   = is_array($subPage) ? $subPage : [];
+            $subPerm   = is_array($subPerm) ? $subPerm : [];
+            $allPerms  = ['view', 'edit', 'delete'];
+
+            $desired = [];
+            foreach ($subPage as $key => $v) {
+                $parts = explode('::', (string)$key, 2);
+                if (count($parts) !== 2) { continue; }
+                $desired[access_clean($parts[0])][access_clean($parts[1])]['view'] = 1;
+            }
+            foreach ($subPerm as $key => $vals) {
+                $parts = explode('::', (string)$key, 2);
+                if (count($parts) !== 2) { continue; }
+                $mod = access_clean($parts[0]);
+                $pg  = access_clean($parts[1]);
+                $vals = is_array($vals) ? $vals : [$vals];
+                foreach ($vals as $v) {
+                    $v = access_clean($v);
+                    if (in_array($v, ['edit', 'delete'], true)) { $desired[$mod][$pg][$v] = 1; }
+                }
+            }
+
+            $ex = db_query("SELECT id, module, page, permission FROM user_module_access WHERE user_id=$existing");
+            $toDelete = [];
+            while ($row = $ex->fetch_assoc()) {
+                if (!isset($desired[$row['module']][$row['page']][$row['permission']])) { $toDelete[] = (int)$row['id']; }
+            }
+            foreach ($toDelete as $rid) { db_query("DELETE FROM user_module_access WHERE id=$rid"); }
+
+            $upsert = db_prepare("INSERT INTO user_module_access (user_id, module, page, permission, allowed) VALUES (?, ?, ?, ?, 1) ON DUPLICATE KEY UPDATE allowed=1");
+            foreach ($desired as $mod => $pages) {
+                foreach ($pages as $pg => $perms) {
+                    foreach ($perms as $p => $x) {
+                        $upsert->bind_param('isss', $existing, $mod, $pg, $p);
+                        $upsert->execute();
+                    }
+                }
+            }
+            $message = 'Access saved for ' . $fullName . '.';
+        }
     }
-    header('Location: ' . BASE_URL . 'employee_access.php?emp_id=' . $emp_id);
+    $redir = BASE_URL . 'employee_access.php?emp_id=' . $emp_id;
+    if ($action === 'SaveAccess' && $message !== '') { $redir .= '&saved=1'; }
+    header('Location: ' . $redir);
     exit;
 }
 
@@ -85,8 +173,8 @@ if ($emp) {
         $chk->execute();
         if ($rr = $chk->get_result()->fetch_assoc()) {
             $uid = (int)$rr['user_id'];
-            $res = db_query("SELECT module, page FROM user_module_access WHERE user_id=$uid");
-            while ($row = $res->fetch_assoc()) { $granted[$row['module']][$row['page']] = 1; }
+            $res = db_query("SELECT module, page, permission FROM user_module_access WHERE user_id=$uid");
+            while ($row = $res->fetch_assoc()) { $granted[$row['module']][$row['page']][$row['permission']] = 1; }
         }
     }
 }
@@ -184,8 +272,9 @@ include __DIR__ . '/includes/header.php';
 .prow .plink:hover{ color:#C2410C; }
 .acl-cb{ width:17px; height:17px; cursor:pointer; accent-color:#FF7A1B; flex-shrink:0; }
 .granted-chip{ display:inline-block; font-size:10.5px; font-weight:800; color:#16A34A; background:#DCFCE7; padding:2px 9px; border-radius:999px; }
-.edit-btn{ border:0; background:#EFF6FF; color:#2563EB; font-weight:700; font-size:11.5px; padding:4px 10px; border-radius:7px; cursor:pointer; }
-.del-btn{ border:0; background:#FEF2F2; color:#DC2626; font-weight:700; font-size:11.5px; padding:4px 10px; border-radius:7px; cursor:pointer; }
+.pperm{ font-size:10px; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:.3px; }
+.save-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.save-bar .hint{ font-size:12px; color:#6B7280; }
 .mod-name{ display:flex; align-items:center; gap:8px; font-weight:800; font-size:13.5px; color:#111827; white-space:nowrap; }
 .mod-name i{ color:#FF7A1B; }
 @media print { .no-print { display:none !important; } }
@@ -226,10 +315,12 @@ include __DIR__ . '/includes/header.php';
 
                 <div style="display:flex; align-items:center; justify-content:space-between; margin:20px 0 10px;">
                     <span style="font-weight:800; font-size:15px; color:#111827;"><i class="fa fa-list-alt" style="color:#FF7A1B;"></i> Module &amp; Pages Access</span>
-                    <span style="font-size:11.5px; color:#9CA3AF;">Edit = grant access &middot; Delete = remove access</span>
+                    <span style="font-size:11.5px; color:#9CA3AF;">Boxes check karein phir <strong>Save Access</strong> click karein</span>
                 </div>
 
-                <table class="acl-table">
+                <form method="post" action="<?php echo BASE_URL; ?>employee_access.php?emp_id=<?php echo $emp_id; ?>">
+                    <input type="hidden" name="action" value="SaveAccess">
+                    <table class="acl-table">
                     <thead>
                         <tr><th style="width:70px;">S.No</th><th style="width:190px;">Module</th><th>Pages Access</th></tr>
                     </thead>
@@ -240,23 +331,15 @@ include __DIR__ . '/includes/header.php';
                                 <td><span class="mod-name"><i class="fa <?php echo $mod['icon']; ?>"></i> <?php echo $mod['label']; ?></span></td>
                                 <td>
                                     <?php foreach ($mod['pages'] as $pg): ?>
-                                        <?php $isGranted = isset($granted[$mod['module']][$pg['page']]); ?>
+                                        <?php $isGranted = isset($granted[$mod['module']][$pg['page']]['view']); ?>
                                         <div class="prow">
-                                            <input type="checkbox" class="acl-cb" data-module="<?php echo $mod['module']; ?>" data-page="<?php echo $pg['page']; ?>" onchange="togglePageAccess(this)" <?php echo $isGranted ? 'checked' : ''; ?> title="Grant / Remove access">
+                                            <input type="checkbox" class="acl-cb" name="page[<?php echo $mod['module'] . '::' . $pg['page']; ?>]" value="1" <?php echo $isGranted ? 'checked' : ''; ?> title="Grant / Remove access">
                                             <a class="plink" href="<?php echo BASE_URL . $pg['page'] . '.php'; ?>" target="_blank"><?php echo $pg['label']; ?></a>
                                             <?php if ($pg['acl']): ?>
-                                                <form method="post" action="<?php echo BASE_URL; ?>employee_access.php?emp_id=<?php echo $emp_id; ?>" style="display:inline; margin:0;">
-                                                    <input type="hidden" name="action" value="GrantModuleAccess">
-                                                    <input type="hidden" name="module" value="<?php echo $mod['module']; ?>">
-                                                    <input type="hidden" name="page" value="<?php echo $pg['page']; ?>">
-                                                    <button type="submit" class="edit-btn" title="Grant access to this page"><i class="fa fa-pencil"></i> Edit</button>
-                                                </form>
-                                                <form method="post" action="<?php echo BASE_URL; ?>employee_access.php?emp_id=<?php echo $emp_id; ?>" style="display:inline; margin:0;" onsubmit="return confirm('Remove access for this page?');">
-                                                    <input type="hidden" name="action" value="RemoveModuleAccess">
-                                                    <input type="hidden" name="module" value="<?php echo $mod['module']; ?>">
-                                                    <input type="hidden" name="page" value="<?php echo $pg['page']; ?>">
-                                                    <button type="submit" class="del-btn" title="Remove access to this page"><i class="fa fa-trash"></i> Delete</button>
-                                                </form>
+                                                <span class="pperm">Edit</span>
+                                                <input type="checkbox" class="acl-cb" name="access[<?php echo $mod['module'] . '::' . $pg['page']; ?>][]" value="edit" <?php echo isset($granted[$mod['module']][$pg['page']]['edit']) ? 'checked' : ''; ?> title="Edit access">
+                                                <span class="pperm">Delete</span>
+                                                <input type="checkbox" class="acl-cb" name="access[<?php echo $mod['module'] . '::' . $pg['page']; ?>][]" value="delete" <?php echo isset($granted[$mod['module']][$pg['page']]['delete']) ? 'checked' : ''; ?> title="Delete access">
                                             <?php endif; ?>
                                         </div>
                                     <?php endforeach; ?>
@@ -266,6 +349,12 @@ include __DIR__ . '/includes/header.php';
                     </tbody>
                 </table>
 
+                <div class="save-bar">
+                    <span class="hint"><i class="fa fa-info-circle"></i> Changes apply only after clicking <strong>Save Access</strong>.</span>
+                    <button type="submit" class="btn btn-success" style="font-weight:700;"><i class="fa fa-save"></i> Save Access</button>
+                </div>
+                </form>
+
                 <div style="margin-top:16px; padding:12px 14px; background:#FFF7ED; border:1px solid #FFE9D6; border-radius:10px; font-size:12.5px; color:#9A3412;">
                     <i class="fa fa-info-circle"></i> Agar employee ke paas email nahi hai to pehle <strong>Edit Employee</strong> se email add karein. Access grant karte waqt login account khud ban jata hai (default password: <strong>staff123</strong>).
                 </div>
@@ -274,21 +363,6 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 <script>
-var EMP_ACCESS_ID = <?php echo (int)$emp_id; ?>;
-window.togglePageAccess = function(cb) {
-    var module = cb.getAttribute('data-module');
-    var page = cb.getAttribute('data-page');
-    var f = document.createElement('form');
-    f.method = 'post';
-    f.action = '<?php echo BASE_URL; ?>employee_access.php?emp_id=' + EMP_ACCESS_ID;
-    var fields = { action: cb.checked ? 'GrantModuleAccess' : 'RemoveModuleAccess', module: module, page: page };
-    for (var k in fields) {
-        var ip = document.createElement('input');
-        ip.type = 'hidden'; ip.name = k; ip.value = fields[k];
-        f.appendChild(ip);
-    }
-    document.body.appendChild(f);
-    f.submit();
-};
+// Access is saved via the "Save Access" button.
 </script>
 <?php include __DIR__ . '/includes/footer.php'; ?>
