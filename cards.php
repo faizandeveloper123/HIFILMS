@@ -131,7 +131,7 @@ include __DIR__ . '/includes/header.php';
         text-transform:uppercase; word-break:break-word;
     }
     .photo-wrap {
-        margin:6px auto 4px; width:70px; height:70px; border-radius:50%; border:4px solid var(--accent);
+        margin:16px auto 6px; width:70px; height:70px; border-radius:50%; border:4px solid var(--accent);
         background:#f3f4f6; padding:2px; flex-shrink:0; overflow:hidden;
     }
     .photo-wrap img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
@@ -262,6 +262,7 @@ include __DIR__ . '/includes/header.php';
             <h3><i class="fa fa-id-card"></i> Staff Card</h3>
             <div class="cards-actions no-print">
                 <a href="<?php echo BASE_URL; ?>cards.php" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
+                <button type="button" class="btn btn-primary" style="color:#fff;" onclick="openCC()"><i class="fa fa-camera"></i> Change Photo</button>
                 <button onclick="window.print()" class="btn btn-success"><i class="fa fa-print"></i> Print Card</button>
             </div>
         </div>
@@ -347,6 +348,7 @@ include __DIR__ . '/includes/header.php';
 <!-- Customization modal -->
 <div id="ccOverlay" class="cc-overlay no-print" onclick="if(event.target===this) closeCC();">
     <div class="cc-panel">
+        <?php if (!$viewMode): ?>
         <h4>Card Settings</h4>
         <form method="get" action="<?php echo BASE_URL; ?>cards.php">
             <div class="cc-row"><label>Theme Color</label>
@@ -370,8 +372,13 @@ include __DIR__ . '/includes/header.php';
                 <button type="submit" class="btn btn-primary" style="color:#fff;">Apply</button>
             </div>
         </form>
+        <?php endif; ?>
 
+        <?php if ($viewMode): ?>
+        <h4>Photo Settings</h4>
+        <?php else: ?>
         <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
+        <?php endif; ?>
         <h4 style="font-size:14px; margin:0 0 10px;"><i class="fa fa-camera" style="color:#FF7A1B;"></i> Change Staff Photo</h4>
         <?php if (count($employees) > 0): ?>
             <?php
