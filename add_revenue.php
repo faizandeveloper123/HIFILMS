@@ -58,7 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'AddRe
 
 include __DIR__ . '/includes/header.php';
 ?>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
 <style>
 .search-bar-student { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:16px; margin-bottom:16px; }
 .page-head-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:14px 4px; }
@@ -95,7 +94,6 @@ include __DIR__ . '/includes/header.php';
         <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:16px;">
             <form id="revenueForm" class="" method="post" action="add_revenue.php">
                 <input type="hidden" name="action" value="AddRevenue">
-                <input type="hidden" name="student" value="" id="hiddenStudent">
                 <input type="hidden" name="class_id" value="" id="hiddenClass">
 
                 <h3 style="font-size:16px; font-weight:800; color:#111827; margin:0 0 6px;">Add Income / Revenue</h3>
@@ -105,14 +103,13 @@ include __DIR__ . '/includes/header.php';
                         <div class="form-group">
                             <label class="required">Choose option</label>
                             <select name="stdOther" id="stdOther" class="form-control" required>
-                                <option value="">Select</option>
-                                <option value="1">Student</option>
+                                <option value="1" selected>Student</option>
                                 <option value="0">Other's</option>
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-4 col-xs-6" id="studentName" style="padding:8px; margin-top:24px; display:none;">
-                        <select name="student_search" id="student" class="form-control" data-placeholder="Select Student">
+                    <div class="col-md-4 col-xs-6" id="studentName" style="padding:8px; margin-top:24px;">
+                        <select name="student" id="student" class="form-control">
                             <option value="">Select Student</option>
                             <?php foreach ($students as $s): ?>
                                 <option value="<?php echo $s['student_id']; ?>" data-class="<?php echo $s['class_id'] ?? ''; ?>">
@@ -173,26 +170,20 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
 function HideDate(val) {
     var div = document.getElementById('studentName');
-    if (parseInt(val) === 1) { div.style.display = 'block'; } else { div.style.display = 'none'; document.getElementById('hiddenStudent').value = ''; document.getElementById('hiddenClass').value = ''; }
+    if (parseInt(val) === 1) { div.style.display = 'block'; document.getElementById('student').focus(); } else { div.style.display = 'none'; document.getElementById('student').value = ''; document.getElementById('hiddenClass').value = ''; }
 }
 
 $(document).ready(function(){
+    HideDate($('#stdOther').val());
+
     $('#stdOther').on('change', function(){ HideDate(this.value); });
 
-    $('#student').select2({ width:'100%', placeholder:'Select Student', allowClear:true });
-
-    $('#student').on('select2:select change', function(){
-        var opt = $(this).find('option:selected');
-        $('#hiddenStudent').val($(this).val());
-        $('#hiddenClass').val(opt.data('class') || '');
-    });
-    $('#student').on('select2:unselect', function(){
-        $('#hiddenStudent').val('');
-        $('#hiddenClass').val('');
+    $('#student').on('change', function(){
+        var opt = $(this).options[$(this).prop('selectedIndex')];
+        $('#hiddenClass').val(opt.getAttribute('data-class') || '');
     });
 
     $('.add-row').click(function(){
@@ -204,8 +195,7 @@ $(document).ready(function(){
 
     $('#revenueForm').on('submit', function(){
         var stdOther = $('#stdOther').val();
-        if (stdOther === '') { alert('Please choose Student or Other is.'); return false; }
-        if (stdOther === '1' && $('#hiddenStudent').val() === '') { alert('Please select a student.'); return false; }
+        if (stdOther === '1' && $('#student').val() === '') { alert('Please select a student.'); $('#student').focus(); return false; }
         if ($('#paidBy').val() === '') { alert('Please select Paid By.'); return false; }
         var validRow = false;
         $('#mytable tbody tr').each(function(){
