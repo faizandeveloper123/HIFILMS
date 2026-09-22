@@ -15,7 +15,8 @@ $__migrate = [
     "ALTER TABLE employees ADD COLUMN IF NOT EXISTS contract_end DATE DEFAULT NULL",
     "ALTER TABLE employees ADD COLUMN IF NOT EXISTS class_head VARCHAR(191) DEFAULT NULL",
     "ALTER TABLE employees ADD COLUMN IF NOT EXISTS incharge_class INT DEFAULT NULL",
-    "ALTER TABLE employees ADD COLUMN IF NOT EXISTS incharge_section INT DEFAULT NULL",
+    "ALTER TABLE employees ADD COLUMN IF NOT EXISTS incharge_section VARCHAR(10) DEFAULT NULL",
+    "ALTER TABLE employees MODIFY COLUMN incharge_section VARCHAR(10) DEFAULT NULL",
     "ALTER TABLE employees ADD COLUMN IF NOT EXISTS reg_no VARCHAR(100) DEFAULT NULL",
     "ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_title VARCHAR(191) DEFAULT NULL",
     "ALTER TABLE employees ADD COLUMN IF NOT EXISTS bank_name VARCHAR(191) DEFAULT NULL",
@@ -105,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'AddEm
     $contract_end = trim($_POST['contract_ending_date'] ?? '');
     $class_head = trim($_POST['class_head'] ?? '');
     $incharge_class = (int) ($_POST['class_id'] ?? 0);
-    $incharge_section = (int) ($_POST['section'] ?? 0);
+    $incharge_section = trim((string) ($_POST['section'] ?? ''));
     $reg_no = trim($_POST['registratin_number'] ?? '');
     $bank_title = trim($_POST['account_holder'] ?? '');
     $bank_name = trim($_POST['bank_name'] ?? '');
@@ -128,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'AddEm
         if ($edit_id > 0) {
             if ($photo === null && !empty($emp['photo'])) { $photo = $emp['photo']; }
             $st2 = db_prepare("UPDATE employees SET first_name=?, last_name=?, father_name=?, email=?, phone=?, designation=?, department=?, dob=?, joining_date=?, salary=?, address=?, religion=?, gender=?, blood_group=?, cnic=?, marital_status=?, qualification=?, job_type=?, contract_end=?, class_head=?, incharge_class=?, incharge_section=?, reg_no=?, bank_title=?, bank_name=?, bank_account=?, home_phone=?, postal_code=?, allowance_traveling=?, allowance_reimbursement=?, allowance_others=?, photo=IFNULL(?, photo), status=1 WHERE emp_id=?");
-            $st2->bind_param('sssssssssdssssssssssiissssssdddsi',
+            $st2->bind_param('sssssssssdsssssssssssissssssdddsi',
                 $first, $father, $father, $email, $phone, $designation, $department,
                 $dob_db, $join_db, $salary, $address, $religion, $gender, $blood,
                 $cnic, $marital, $qualification, $jobtype, $contract_db, $class_head,
@@ -138,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'AddEm
             $message = 'Employee updated successfully!';
         } else {
             $st2 = db_prepare("INSERT INTO employees (first_name, last_name, father_name, email, phone, designation, department, dob, joining_date, salary, address, religion, gender, blood_group, cnic, marital_status, qualification, job_type, contract_end, class_head, incharge_class, incharge_section, reg_no, bank_title, bank_name, bank_account, home_phone, postal_code, allowance_traveling, allowance_reimbursement, allowance_others, photo, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)");
-            $st2->bind_param('sssssssssdssssssssssiissssssddds',
+            $st2->bind_param('sssssssssdsssssssssssissssssddds',
                 $first, $father, $father, $email, $phone, $designation, $department,
                 $dob_db, $join_db, $salary, $address, $religion, $gender, $blood,
                 $cnic, $marital, $qualification, $jobtype, $contract_db, $class_head,
@@ -405,6 +406,10 @@ label { font-weight:600; font-size:13px; color:#374151; }
                             <label>Incharge Section</label>
                             <select name="section" id="txt_section" class="form-control">
                                 <option value="">No Section</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
                             </select>
                         </div>
                     </div>
@@ -578,15 +583,16 @@ function togglePassword() {
 }
 function getInchargeSections(classId) {
     var sel = document.getElementById('txt_section');
-    if (!classId) { sel.innerHTML = '<option value="">No Section</option>'; return; }
+    var abc = '<option value="">No Section</option><option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>';
+    if (!classId) { sel.innerHTML = abc; return; }
     fetch('<?php echo BASE_URL; ?>ajax_get_sections.php?class_id=' + encodeURIComponent(classId))
         .then(function(r){ return r.json(); })
         .then(function(data){
-            var html = '<option value="">No Section</option>';
+            var html = abc;
             data.forEach(function(s){ html += '<option value="' + s.section_id + '">' + s.section_name + '</option>'; });
             sel.innerHTML = html;
-            <?php if ($emp !== null && (int)($emp['incharge_section'] ?? 0) > 0): ?>
-            sel.value = '<?php echo (int)($emp['incharge_section'] ?? 0); ?>';
+            <?php if ($emp !== null && trim((string)($emp['incharge_section'] ?? '')) !== ''): ?>
+            sel.value = '<?php echo e($emp['incharge_section']); ?>';
             <?php endif; ?>
         });
 }

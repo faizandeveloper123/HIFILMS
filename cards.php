@@ -27,7 +27,7 @@ $allEmployees = [];
 $res = db_query("SELECT e.*, qt.token AS qr_token
                  FROM employees e
                  LEFT JOIN qr_tokens qt ON qt.user_id = e.emp_id AND qt.user_type IN ('staff','employee') AND qt.is_active = 1
-                 WHERE e.status = 1 ORDER BY e.first_name");
+                 WHERE e.status = 1 ORDER BY e.emp_id");
 while ($row = $res->fetch_assoc()) { $allEmployees[] = $row; }
 
 // Ensure every staff member has a unique random QR token
@@ -235,10 +235,10 @@ include __DIR__ . '/includes/header.php';
             <div class="form-group col-md-4" style="margin-bottom:0;">
                 <label>Select Staff</label>
                 <select name="emp_id" class="form-control" onchange="this.form.submit()">
-                    <option value="0">All Staff</option>
+                    <option value="0">Select Staff Name</option>
                     <?php foreach ($allEmployees as $se): ?>
                         <option value="<?php echo (int)$se['emp_id']; ?>" <?php echo $selEmp === (int)$se['emp_id'] ? 'selected' : ''; ?>>
-                            #<?php echo (int)$se['emp_id']; ?> - <?php echo e(trim(($se['first_name'] ?? '') . ' ' . ($se['last_name'] ?? ''))); ?><?php echo !empty($se['designation']) ? ' (' . e($se['designation']) . ')' : ''; ?>
+                            <?php echo (int)$se['emp_id']; ?>. <?php echo e(trim(($se['first_name'] ?? '') . ' ' . ($se['last_name'] ?? ''))); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -255,6 +255,13 @@ include __DIR__ . '/includes/header.php';
                 </div>
             <?php endif; ?>
         </form>
+
+        <div class="sheet" id="cardSheet">
+            <?php if ($selEmp <= 0): ?>
+                <div class="no-record" style="grid-column:1/-1;">Pehle staff ka naam select karein, phir uska card khulega.</div>
+            <?php elseif (count($employees) === 0): ?>
+                <div class="no-record" style="grid-column:1/-1;">Koi staff card nahi mila.</div>
+            <?php else: ?>
             <?php foreach ($employees as $emp):
                 $fullName = trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? ''));
                 $initial = strtoupper(substr($fullName !== '' ? $fullName : 'E', 0, 1));
@@ -321,6 +328,8 @@ include __DIR__ . '/includes/header.php';
                     </div>
                 </div>
             <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
         </div>
     </div>
 </div>

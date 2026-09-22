@@ -194,8 +194,10 @@ $res = $st2->get_result();
 while ($row = $res->fetch_assoc()) { $emps[] = $row; }
 
 function emp_class_name($emp, $type) {
-    $id = (int) ($emp[$type] ?? 0);
-    if ($id <= 0) { return ''; }
+    $raw = trim((string) ($emp[$type] ?? ''));
+    if ($raw === '') { return ''; }
+    if ($type === 'incharge_section' && !ctype_digit($raw)) { return $raw; }
+    $id = (int) $raw;
     $table = $type === 'incharge_class' ? 'classes' : 'sections';
     $col = $type === 'incharge_class' ? 'class_name' : 'section_name';
     $r = db_query("SELECT $col AS n FROM $table WHERE " . ($type === 'incharge_class' ? 'class_id' : 'section_id') . "=$id")->fetch_assoc();

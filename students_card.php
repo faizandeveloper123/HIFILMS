@@ -15,6 +15,7 @@ $sigSrc      = $sigImg !== '' ? BASE_URL . 'assets/uploads/' . basename($sigImg)
 
 $sel_class = (int) ($_GET['class_id'] ?? 0);
 $sel_section = (int) ($_GET['section_id'] ?? 0);
+$sel_student = (int) ($_GET['student_id'] ?? 0);
 
 $valid   = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['valid'] ?? '') ? $_GET['valid'] : date('Y-m-d', strtotime('+1 year'));
 $color   = isset($_GET['color']) && preg_match('/^[0-9a-fA-F]{6}$/', $_GET['color']) ? '#' . $_GET['color'] : '#0067d7';
@@ -37,6 +38,7 @@ if ($sel_class > 0) {
 }
 
 $students = [];
+$allClassStudents = [];
 if ($sel_class > 0) {
     $sql = "SELECT s.*, c.class_name, sec.section_name, qt.token AS qr_token
             FROM students s
@@ -47,7 +49,7 @@ if ($sel_class > 0) {
     if ($sel_section > 0) { $sql .= " AND s.section_id=$sel_section"; }
     $sql .= " ORDER BY s.first_name";
     $res = db_query($sql);
-    while ($row = $res->fetch_assoc()) { $students[] = $row; }
+    while ($row = $res->fetch_assoc()) { $students[] = $row; $allClassStudents[] = $row; }
 
     // Ensure every student has a unique random QR token
     $insToken = db_prepare("INSERT INTO qr_tokens (user_id, user_type, token, created_at, expires_at, is_active) VALUES (?, 'student', ?, NOW(), DATE_ADD(NOW(), INTERVAL 2 YEAR), 1)");
@@ -59,6 +61,12 @@ if ($sel_class > 0) {
             $insToken->execute();
             $students[$i]['qr_token'] = $token;
         }
+    }
+
+    if ($sel_student > 0) {
+        $students = array_values(array_filter($students, function ($st) use ($sel_student) {
+            return (int) $st['student_id'] === $sel_student;
+        }));
     }
 }
 
@@ -86,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
             $up->execute();
         }
     }
-    $ccq = ['class_id', 'section_id', 'valid', 'color', 'school_name_font_size', 'name_font_size', 'DOB', 'cell_number'];
+    $ccq = ['class_id', 'section_id', 'student_id', 'valid', 'color', 'school_name_font_size', 'name_font_size', 'DOB', 'cell_number'];
     $qs = [];
     foreach ($ccq as $k) { if (isset($_POST[$k]) && trim((string)$_POST[$k]) !== '') { $qs[$k] = (string)$_POST[$k]; } }
     $qs['class_id'] = (int)($_POST['class_id'] ?? 0);
@@ -259,6 +267,17 @@ include __DIR__ . '/includes/header.php';
                     <option value="0">All Sections</option>
                     <?php foreach ($sections as $s): ?>
                         <option value="<?php echo $s['section_id']; ?>" <?php echo $sel_section == $s['section_id'] ? 'selected' : ''; ?>><?php echo e($s['section_name']); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group col-md-3" style="margin-bottom:0;">
+                <label>Student</label>
+                <select name="student_id" class="form-control" onchange="this.form.submit()">
+                    <option value="0">None</option>
+                    <?php foreach ($allClassStudents as $ss): $ssn = trim(($ss['first_name'] ?? '') . ' ' . ($ss['last_name'] ?? '')); ?>
+                        <option value="<?php echo (int)$ss['student_id']; ?>" <?php echo $sel_student === (int)$ss['student_id'] ? 'selected' : ''; ?>>
+                            <?php echo (int)$ss['student_id']; ?>. <?php echo e($ssn); ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
             </div>
