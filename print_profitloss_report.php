@@ -252,7 +252,7 @@ $profit = $total_revenue - $expense_total;
         }
         .summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
             gap: 20px;
         }
         .summary-item {
@@ -354,6 +354,22 @@ $profit = $total_revenue - $expense_total;
             .dr-modal { flex-direction: column; max-height: 85vh; }
             .filter-btn-wrap { position: static; margin-bottom: 16px; text-align: right; }
         }
+        @media screen and (max-width: 600px) {
+            body { padding: 10px; }
+            .report-container { padding: 16px; }
+            .report-title { font-size: 24px; }
+            .report-subtitle { font-size: 13px; }
+            .report-range { font-size: 13px; }
+            .section-title { font-size: 17px; }
+        }
+        @media screen and (max-width: 480px) {
+            .report-container { padding: 12px; border-radius: 0; }
+            .summary-value { font-size: 19px; }
+            table { font-size: 12px; }
+            th, td { padding: 8px !important; }
+            .table-wrap { overflow-x: auto; }
+            .table-wrap table { min-width: 420px; }
+        }
     </style>
 </head>
 <body>
@@ -377,6 +393,7 @@ $profit = $total_revenue - $expense_total;
             <h2 class="section-title">
                 <i class="fa fa-arrow-up" style="color: #e74c3c;"></i> Expenses
             </h2>
+            <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
@@ -405,12 +422,14 @@ $profit = $total_revenue - $expense_total;
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
 
         <div class="revenue-section">
             <h2 class="section-title">
                 <i class="fa fa-arrow-down" style="color: #27ae60;"></i> Revenue
             </h2>
+            <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
@@ -466,12 +485,14 @@ $profit = $total_revenue - $expense_total;
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
 
         <div class="collection-by-user-section">
             <h2 class="section-title" style="border-bottom-color: #3498db;">
                 <i class="fa fa-users" style="color: #3498db;"></i> Fee Collection by Staff
             </h2>
+            <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
@@ -506,6 +527,7 @@ $profit = $total_revenue - $expense_total;
                     </tr>
                 </tbody>
             </table>
+            </div>
         </div>
         
         <div class="summary-box">
@@ -528,6 +550,7 @@ $profit = $total_revenue - $expense_total;
             </div>
         </div>
 
+        <div class="table-wrap">
         <table>
             <tbody>
                 <tr class="profit-row <?php echo $profit < 0 ? 'loss' : ''; ?>">
@@ -540,6 +563,7 @@ $profit = $total_revenue - $expense_total;
                 </tr>
             </tbody>
         </table>
+        </div>
     </div>
 
     <div class="dr-overlay" id="dateRangeOverlay" role="dialog" aria-modal="true" aria-labelledby="drModalTitle">

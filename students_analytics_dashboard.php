@@ -208,20 +208,14 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <!-- Data Issues card -->
-        <div class="data-issues-card" id="dataIssuesCard">
-            <button style="width:100%; background:#FEF2F2; border:1px solid #FECACA; border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="toggleDataIssues()" id="dataIssuesToggleBtn">
+        <a href="<?php echo BASE_URL; ?>data_issues.php" class="data-issues-card" id="dataIssuesCard" style="display:block; text-decoration:none;">
+            <div style="width:100%; background:#FEF2F2; border:1px solid #FECACA; border-radius:14px; padding:12px 16px; display:flex; align-items:center; gap:12px;">
                 <span class="dih-icon"><i class="fa fa-exclamation-triangle"></i></span>
                 <span style="font-weight:800; color:#B91C1C; font-size:14px;">Data Issues</span>
                 <span style="background:#DC2626; color:#fff; border-radius:999px; padding:1px 10px; font-weight:800; font-size:12px;"><?php echo $dataIssues; ?></span>
-                <span style="margin-left:auto; color:#B91C1C;"><i class="fa fa-chevron-down"></i> View Details</span>
-            </button>
-            <div id="dataIssuesContent" style="display:none;">
-                <div class="data-issues-inner">
-                    Students missing required fields (father name / contact / address / DOB / section): <strong><?php echo $dataIssues; ?></strong> record(s).
-                    <a href="<?php echo BASE_URL; ?>manage_students.php" style="color:#C2410C; font-weight:700;">Review students &rarr;</a>
-                </div>
+                <span style="margin-left:auto; color:#B91C1C;" id="dihToggleLabel"><i class="fa fa-chevron-down"></i> View Details</span>
             </div>
-        </div>
+        </a>
 
         <div class="analytics-layout">
             <div style="min-width:0;">
@@ -488,7 +482,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="section-container">
                     <div class="section-title"><i class="fa fa-bolt"></i><span>Quick Access Reports</span></div>
                     <div class="quick-links sidebar">
-                        <a href="#dataIssuesCard" class="quick-link2 danger" onclick="toggleDataIssues(); return false;">
+                        <a href="<?php echo BASE_URL; ?>data_issues.php" class="quick-link2 danger">
                             <span class="ql-icon"><i class="fa fa-exclamation-triangle"></i></span>
                             <span>Data Issues (<?php echo $dataIssues; ?>)</span>
                             <i class="fa fa-chevron-right ql-chevron"></i>
@@ -542,16 +536,6 @@ include __DIR__ . '/includes/header.php';
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
-function toggleDataIssues() {
-    var content = document.getElementById('dataIssuesContent');
-    var btn = document.getElementById('dataIssuesToggleBtn');
-    if (!content || !btn) return;
-    var isHidden = content.style.display === 'none' || content.style.display === '';
-    content.style.display = isHidden ? 'block' : 'none';
-    btn.innerHTML = btn.innerHTML.replace(/<span[^>]*>View Details[\s\S]*/i, '');
-    if (isHidden) { btn.insertAdjacentHTML('beforeend', '<span style="margin-left:auto; color:#B91C1C;"><i class="fa fa-chevron-up"></i> Hide Details</span>'); }
-    else { btn.insertAdjacentHTML('beforeend', '<span style="margin-left:auto; color:#B91C1C;"><i class="fa fa-chevron-down"></i> View Details</span>'); }
-}
 
 (function () {
     var data = <?php echo json_encode($withTrend); ?>;

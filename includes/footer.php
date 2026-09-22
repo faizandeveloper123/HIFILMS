@@ -10,6 +10,12 @@
     // Always show expanded on load so any previously stored collapsed
     // preference cannot override the new theme.
     document.body.className = 'sidebar-expanded';
+    var savedCollapsed = '0';
+    try { savedCollapsed = localStorage.getItem('sb_collapsed') || '0'; } catch (e) {}
+    if (savedCollapsed === '1') {
+        document.body.classList.add('sidebar-collapsed');
+        document.body.classList.remove('sidebar-expanded');
+    }
 })();
 document.addEventListener('dblclick', function(e){
     if (e.target.closest('#sidebar-menu, .sidebar-logo, .left_col')) {
@@ -19,6 +25,29 @@ document.addEventListener('dblclick', function(e){
         localStorage.setItem('sb_collapsed', exp ? '1' : '0');
     }
 });
+function dsSetSidebarCollapsed(collapsed){
+    document.body.classList.toggle('sidebar-collapsed', collapsed);
+    document.body.classList.toggle('sidebar-expanded', !collapsed);
+    document.body.classList.remove('sidebar-hidden');
+    try { localStorage.setItem('sb_collapsed', collapsed ? '1' : '0'); } catch (e) {}
+}
+function dsInitSidebarToggle(){
+    document.getElementById('dsToggleIn').addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        dsSetSidebarCollapsed(!document.body.classList.contains('sidebar-collapsed'));
+    });
+    var out = document.getElementById('dsSidebarToggleOut');
+    if (out) {
+        out.addEventListener('click', function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            dsSetSidebarCollapsed(false);
+        });
+    }
+}
+document.addEventListener('DOMContentLoaded', dsInitSidebarToggle);
+if (document.readyState === 'interactive' || document.readyState === 'complete') dsInitSidebarToggle();
 document.addEventListener('click', function(e){
     var item = e.target.closest('.side-menu>li>a, .side-menu>li.has-children>a');
     if (item) {

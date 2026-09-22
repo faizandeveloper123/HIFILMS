@@ -183,10 +183,17 @@ include __DIR__ . '/includes/header.php';
 .breadcrumb-modern { display:flex; align-items:center; gap:8px; font-size:12.5px; color:#6B7280; margin:6px 0 0; padding:0; list-style:none; }
 .breadcrumb-modern a { color:#377DFF; text-decoration:none; }
 .breadcrumb-modern i { font-size:11px; color:#9CA3AF; }
-.page-actions { margin-bottom:16px; }
+.page-actions { margin-bottom:16px; display:flex; flex-wrap:wrap; gap:8px; }
 .table-actions .btn { padding: 4px 9px; font-size: 12px; }
 .total-amount-box { display:inline-flex; align-items:center; gap:8px; background:#FEF2F2; border:1px solid #FECACA; color:#DC2626; font-weight:800; font-size:14px; border-radius:12px; padding:10px 16px; margin-top:14px; }
 .dataTables_wrapper { padding: 0 12px 12px; }
+@media (max-width: 480px) {
+  .page-actions .btn { flex:1 1 100%; white-space:normal; }
+  #listofstudents { font-size: 12px !important; }
+  #listofstudents th, #listofstudents td { padding: 6px 4px !important; }
+  #listofstudents .btn { padding: 3px 6px; font-size: 11px; }
+  .filter-panel { padding:12px; }
+}
 </style>
 
 <div class="main-content">
@@ -275,7 +282,7 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <!-- Expense Records -->
-        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; overflow-x:auto;">
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px;">
             <h4 style="margin:0; font-size:15px; font-weight:800; color:#111827; padding:14px 16px; border-bottom:2px solid #F3F4F6;">
                 <i class="fa fa-list"></i> Expense Records
             </h4>
@@ -511,7 +518,9 @@ function fillSubCategory(select, catId, selectedVal) {
 $(document).ready(function() {
     $('#listofstudents').DataTable({
         order: [],
-        pageLength: 10
+        pageLength: 10,
+        scrollX: true,
+        scrollCollapse: true
     });
 });
 

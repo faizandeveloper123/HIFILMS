@@ -60,6 +60,23 @@ function get_setting($key, $default = '') {
     return $cache[$key] ?? $default;
 }
 
+function set_setting($key, $value) {
+    $k = (string) $key;
+    $v = (string) $value;
+    $p = db_prepare("SELECT setting_key FROM settings WHERE setting_key = ? LIMIT 1");
+    $p->bind_param('s', $k);
+    $p->execute();
+    $rp = $p->get_result();
+    if ($rp && $rp->num_rows > 0) {
+        $u = db_prepare("UPDATE settings SET setting_value = ? WHERE setting_key = ?");
+        $u->bind_param('ss', $v, $k);
+        return $u->execute();
+    }
+    $i = db_prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)");
+    $i->bind_param('ss', $k, $v);
+    return $i->execute();
+}
+
 function role() {
     return $_SESSION['user_role'] ?? 'admin';
 }

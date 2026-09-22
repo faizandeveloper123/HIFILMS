@@ -144,6 +144,8 @@ include __DIR__ . '/includes/header.php';
 .rating-icon.active { color:#169F85 !important; }
 .btn-closed { background:#169F85; border-color:#169F85; color:#fff; }
 .btn-open   { background:#f97316; border-color:#f97316; color:#fff; }
+@media (max-width: 767px) { .rating-icon { font-size:20px; } .ticket-actions { flex-wrap:wrap; } }
+@media (max-width: 480px) { .main-content { padding:10px !important; } .stat-value { font-size:22px; } }
 </style>
 
 <div class="main-content">
@@ -274,8 +276,8 @@ include __DIR__ . '/includes/header.php';
         <div class="main-content" style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
                 <h3 style="margin:0; font-size:16px; font-weight:800; color:#111827;">Tickets List <small>(<?php echo count($tickets); ?> records)</small></h3>
-                <div style="display:flex; gap:8px; align-items:center;">
-                    <input type="text" id="tktSearch" class="form-control" placeholder="Search tickets..." style="width:220px;">
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <input type="text" id="tktSearch" class="form-control" placeholder="Search tickets..." style="width:220px; max-width:100%;">
                     <select id="tktPageSize" class="form-control" style="width:auto;">
                         <option value="10">10 / page</option>
                         <option value="25">25 / page</option>
@@ -284,6 +286,7 @@ include __DIR__ . '/includes/header.php';
                     </select>
                 </div>
             </div>
+            <div class="table-responsive">
             <table class="table table-striped table-bordered" style="background:#fff; margin:0;">
                 <thead>
                     <tr>
@@ -349,7 +352,8 @@ include __DIR__ . '/includes/header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; gap:8px;">
                 <div style="font-size:13px; color:#6b7280;">Page <span id="tktPgInfo">1</span></div>
                 <div>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="tktPgPrev">&laquo; Prev</button>

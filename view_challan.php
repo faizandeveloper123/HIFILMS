@@ -98,6 +98,17 @@ foreach ($challans as $c) {
 
 include __DIR__ . '/includes/header.php';
 ?>
+<style>
+@media (max-width: 767px) {
+  body { overflow-x: hidden; }
+  .main-content { overflow-x: hidden; }
+}
+@media (max-width: 480px) {
+  #listofstudents { font-size: 11px !important; }
+  #listofstudents th, #listofstudents td { padding: 6px 4px !important; }
+  #listofstudents .btn { padding: 3px 6px; font-size: 11px; white-space: nowrap; }
+}
+</style>
 <div class="row" style="margin-top: 0px;">
     <a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard </a> &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
     <a href="<?php echo BASE_URL; ?>view_challan.php"> Fee Collection </a> &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp; View Challan

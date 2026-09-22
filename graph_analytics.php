@@ -91,6 +91,12 @@ border-radius: 10px;
 box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 margin-bottom: 20px;
 }
+.main-content .container-fluid .container {
+max-width: 100%;
+width: 100%;
+padding-left: 0;
+padding-right: 0;
+}
 </style>
 
 <div class="main-content">
@@ -143,10 +149,12 @@ Analytics Dashboard
 
     <div class="col-md-5 col-sm-6 col-xs-12" style="margin-top: 15px;">
         <div style="background: white; padding: 15px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); max-width: 450px; height: 360px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-            <h2 style="text-align: center; font-size: 18px; margin-bottom: 10px;">Student Distribution by Locality</h2>
+            <h2 style="text-align: center; font-size: 18px; margin-bottom: 10px; text-align: center;">Student Distribution by Locality</h2>
             <canvas id="localityChart" style="width: 100% !important; height: 100% !important;"></canvas>
         </div>
     </div>
+
+</div>
 
 </div>
 
@@ -523,7 +531,7 @@ Analytics Dashboard
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'right',
+                        position: (window.innerWidth < 768) ? 'bottom' : 'right',
                         labels: {
                             font: { size: 14 },
                             color: "#333"

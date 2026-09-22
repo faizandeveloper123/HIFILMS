@@ -55,10 +55,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'Updat
     $status      = (int) ($_POST['status'] ?? 1);
     $email       = trim($_POST['email'] ?? '');
     $address     = trim($_POST['address'] ?? '');
+    $section_id  = (int) ($_POST['section_id'] ?? 0);
+    $dob         = trim($_POST['dob'] ?? '');
+    if ($dob === '' || $dob === '0000-00-00') { $dob = null; }
 
     if ($id > 0 && $first_name !== '') {
-        $stmt = db_prepare("UPDATE students SET first_name=?, last_name=?, father_name=?, phone=?, email=?, gender=?, class_id=?, address=?, status=? WHERE student_id=?");
-        $stmt->bind_param('sssssssisi', $first_name, $last_name, $father_name, $cellno, $email, $gender, $class_id, $address, $status, $id);
+        $stmt = db_prepare("UPDATE students SET first_name=?, last_name=?, father_name=?, phone=?, email=?, gender=?, class_id=?, section_id=?, dob=?, address=?, status=? WHERE student_id=?");
+        $stmt->bind_param('ssssssiissii', $first_name, $last_name, $father_name, $cellno, $email, $gender, $class_id, $section_id, $dob, $address, $status, $id);
         try {
             $stmt->execute();
             $message = 'Student updated successfully!';
@@ -532,6 +535,18 @@ include __DIR__ . '/includes/header.php';
                             </select>
                         </div>
                         <div class="form-group col-md-4">
+                            <label>Section</label>
+                            <select name="section_id" id="m_section" class="form-control">
+                                <option value="">Select Section</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>DOB</label>
+                            <input type="date" class="form-control" name="dob" id="m_dob">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-4">
                             <label>Gender</label>
                             <select name="gender" id="m_gender" class="form-control">
                                 <option value="male">Male</option>
@@ -563,6 +578,21 @@ include __DIR__ . '/includes/header.php';
 
 <script>
 var studentData = <?php echo json_encode($students, JSON_UNESCAPED_UNICODE); ?>;
+function loadEditSections(cid, selected) {
+    var sel = document.getElementById('m_section');
+    sel.innerHTML = '<option value="">Select Section</option>';
+    if (!cid) return;
+    fetch('ajax_get_sections.php?class_id=' + cid)
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            data.forEach(function(s){
+                var o = document.createElement('option');
+                o.value = s.section_id; o.textContent = s.section_name;
+                if (s.section_id == selected) o.selected = true;
+                sel.appendChild(o);
+            });
+        });
+}
 function openEdit(id) {
     var s = studentData.find(function(x){ return x.student_id == id; });
     if (!s) return;
@@ -572,6 +602,8 @@ function openEdit(id) {
     document.getElementById('m_phone').value = s.phone || '';
     document.getElementById('m_email').value = s.email || '';
     document.getElementById('m_class').value = s.class_id || '';
+    loadEditSections(s.class_id || '', s.section_id || '');
+    document.getElementById('m_dob').value = (s.dob && s.dob !== '0000-00-00') ? s.dob : '';
     document.getElementById('m_gender').value = s.gender || 'male';
     document.getElementById('m_status').value = s.status || 1;
     document.getElementById('m_address').value = s.address || '';
@@ -674,6 +706,19 @@ loadFilterSections();
         render();
     });
     render();
+})();
+
+(function(){
+    var mClass = document.getElementById('m_class');
+    if (mClass) {
+        mClass.addEventListener('change', function(){
+            loadEditSections(this.value, '');
+        });
+    }
+    var editId = <?php echo (int) ($_GET['edit_id'] ?? 0); ?>;
+    if (editId > 0) {
+        setTimeout(function(){ openEdit(editId); }, 300);
+    }
 })();
 
 function exportStudentList() {

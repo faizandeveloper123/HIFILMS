@@ -81,6 +81,9 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
   body.sidebar-collapsed .right_col { margin-left: var(--sb-collapsed) !important; transition: margin-left .25s ease; width: calc(100% - var(--sb-collapsed)); }
   body.sidebar-expanded .right_col { margin-left: var(--sb-expanded) !important; transition: margin-left .25s ease; width: calc(100% - var(--sb-expanded)); }
   .right_col { position: relative; min-height: 100vh; box-sizing: border-box; }
+  body.sidebar-hidden .left_col { display: none !important; }
+  body.sidebar-hidden .right_col { margin-left: 0 !important; width: 100% !important; }
+  body.sidebar-hidden .top_nav .nav_menu { padding-left: 0 !important; }
   .main_content, .content-wrapper, .dashboard-content { position: relative; z-index: 1; }
   .ds-brand { display: flex; align-items: center; justify-content: center; padding: 10px 12px; height: 60px; box-sizing: border-box; }
   .ds-brand .ds-toggle { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; color: #fff; }
@@ -110,11 +113,16 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
   body.sidebar-collapsed #sidebar-menu .side-menu>li>.child_menu { position: fixed; left: var(--sb-collapsed); min-width: 220px; max-height: 80vh; overflow: auto; display: none; z-index: 2001; border: 1px solid rgba(255, 255, 255, 0.05); }
   @media (max-width: 768px) {
     .left_col { width: var(--sb-collapsed) !important; }
-    body.sidebar-collapsed .right_col { margin-left: var(--sb-collapsed) !important; width: calc(100% - var(--sb-collapsed)) !important; }
+    body.sidebar-expanded .right_col, body.sidebar-collapsed .right_col { margin-left: var(--sb-collapsed) !important; width: calc(100% - var(--sb-collapsed)) !important; }
     #sidebar-menu .side-menu>li>a { min-height: 44px; padding: 12px 8px; }
     body.sidebar-collapsed #sidebar-menu .side-menu>li>.child_menu { left: var(--sb-collapsed); min-width: 200px; max-width: calc(100vw - var(--sb-collapsed) - 20px); }
     .child_menu { font-size: 14px; }
     .child_menu li a { padding: 12px 16px; min-height: 44px; display: flex; align-items: center; }
+  }
+  @media (max-width: 480px) {
+    body.sidebar-expanded .right_col, body.sidebar-collapsed .right_col { margin-left: var(--sb-collapsed) !important; width: calc(100% - var(--sb-collapsed)) !important; }
+    .main-content { overflow-x: hidden; }
+    .right_col { overflow-x: hidden; }
   }
   body.sidebar-expanded #sidebar-menu .side-menu>li>a .label { font-weight: 500; font-size: 14px; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
   body.sidebar-expanded #sidebar-menu .side-menu>li>a .chev { font-size: 12px; transition: transform 0.2s ease; }
@@ -129,8 +137,17 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
   .left_col::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgb(67, 67, 68), rgb(241, 243, 245)); border-radius: 10px; }
   .left_col::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, rgb(86, 85, 87), rgb(237, 232, 247)); }
   .left_col { scrollbar-width: thin; scrollbar-color: rgb(100, 98, 101) transparent; border-top-right-radius: 1%; border-bottom-right-radius: 1%; }
-  .sidebar-logo { text-align: center; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-  .sidebar-logo img { height: 54px; width: 54px; border-radius: 50%; object-fit: cover; border: 2px solid #ff8c00; box-shadow: 0 4px 14px rgba(255, 140, 0, 0.35); background: #fff; display: block; margin: 0 auto; }
+  .sidebar-logo { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+  .sidebar-logo img { height: 48px; width: 48px; border-radius: 50%; object-fit: cover; border: 2px solid #ff8c00; box-shadow: 0 4px 14px rgba(255, 140, 0, 0.35); background: #fff; display: block; flex-shrink: 0; }
+  .ds-sidebar-toggle { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; color: #fff; background: rgba(255, 255, 255, 0.10); border: none; flex-shrink: 0; padding: 0; }
+  .ds-sidebar-toggle:hover { background: rgba(255, 255, 255, 0.20); }
+  .ds-sidebar-toggle i { font-size: 15px; }
+  #dsSidebarToggleOut { display: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; border: none; background: var(--sb-bg); color: #fff; font-size: 16px; cursor: pointer; flex-shrink: 0; margin-right: 10px; padding: 0; }
+  #dsSidebarToggleOut:hover { background: #1f3548; }
+  body.sidebar-collapsed #dsSidebarToggleOut, body.sidebar-hidden #dsSidebarToggleOut { display: inline-flex; }
+  @media (max-width: 992px){ #dsSidebarToggleOut { margin-right: 4px; } }
+  body.sidebar-collapsed #dsToggleIn { display: none; }
+  body.sidebar-collapsed .sidebar-logo { gap: 0; padding: 10px 6px; }
   #ios_toggle_btn { display: none; position: fixed; top: 12px; left: 12px; z-index: 2004; width: 42px; height: 42px; border-radius: 10px; border: none; background: var(--sb-bg); color: #fff; font-size: 18px; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0, 0, 0, .3); }
   #menu-ios { display: none; padding: 8px 10px 16px; }
   .ios-nav .nav-item { display: flex; align-items: center; gap: 0; text-decoration: none; color: #fff; padding: 12px 16px; border-radius: 8px; margin: 2px 6px; background: transparent; }
@@ -154,6 +171,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
 <div class="left_col scroll-view" id="dsLeftCol">
   <div class="sidebar-logo">
     <img src="<?php echo BASE_URL; ?>assets/img/favicon.png" alt="LAPS Logo" style="border-radius:50%">
+    <button class="ds-sidebar-toggle" id="dsToggleIn" type="button" title="Collapse Sidebar" aria-label="Collapse Sidebar"><i class="fa fa-bars"></i></button>
   </div>
   <div class="ds-branch">
     <div style="font-weight:700; font-size:12px;"><?php echo e(get_setting('school_name', 'LAPS School & College')); ?></div>
@@ -182,6 +200,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
         <ul class="child_menu" style="display: none;">
           <li><a href="<?php echo BASE_URL; ?>add_student.php">Add New Student</a></li>
           <li><a href="<?php echo BASE_URL; ?>students_analytics_dashboard.php">Student Analytics</a></li>
+          <li><a href="<?php echo BASE_URL; ?>data_issues.php">Data Issues</a></li>
           <li><a href="<?php echo BASE_URL; ?>class_promotion.php">Class Promotion</a></li>
         </ul>
       </li>
@@ -364,6 +383,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
       <div class="submenu">
         <a href="<?php echo BASE_URL; ?>add_student.php" class="submenu-item">Add New Student</a>
         <a href="<?php echo BASE_URL; ?>students_analytics_dashboard.php" class="submenu-item">Student Analytics</a>
+        <a href="<?php echo BASE_URL; ?>data_issues.php" class="submenu-item">Data Issues</a>
         <a href="<?php echo BASE_URL; ?>class_promotion.php" class="submenu-item">Class Promotion</a>
       </div>
       <a href="#" class="nav-item has-submenu">
@@ -638,6 +658,7 @@ $topRoleLabel = ucfirst($topUserRole);
     .user-name{ font-size:13px; font-weight:600; }
     .user-designation{ font-size:11px; opacity:.7; }
     @media (max-width: 1200px){ .user-info{ display:none; } }
+    @media (max-width: 992px){ .brand-info{ display:none; } }
     .mobile-profile { display: none !important; }
     .desktop-profile { display: flex !important; }
     .user-dropdown { background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 12px 32px rgba(15,23,42,0.12); overflow:hidden; }
@@ -675,6 +696,8 @@ $topRoleLabel = ucfirst($topUserRole);
 <div class="nav_menu">
 <nav>
 <div class="flex header" style="padding:0px;">
+
+<button type="button" id="dsSidebarToggleOut" title="Show Sidebar" aria-label="Show Sidebar"><i class="fa fa-bars"></i></button>
 
 <div class="brand-info" style="width:260px;min-width:180px;max-width:400px;flex:1 1 260px;margin-right:0;">
     <div class="brand-title" style="font-size:15px;font-weight:700;color:#212B36;line-height:1.2;"><?php echo e($topSchoolName); ?></div>

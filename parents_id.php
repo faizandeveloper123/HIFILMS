@@ -144,8 +144,9 @@ include __DIR__ . '/includes/header.php';
 .pid-filterbar label { font-size: 11px; font-weight: 700; color: var(--pid-muted); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 4px; display: block; }
 .pid-filterbar select, .pid-filterbar input[type="text"] { border-radius: 8px; border: 1px solid var(--pid-border); font-size: 12.5px; height: 36px; padding: 6px 10px; }
 .pid-filterbar .search-wrap { position: relative; flex: 1 1 220px; }
-.pid-filterbar .search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--pid-muted); font-size: 12px; }
-.pid-filterbar .search-wrap input { width: 100%; padding-left: 28px; }
+.pid-filterbar .pid-search-box { position: relative; }
+.pid-filterbar .pid-search-box i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--pid-muted); font-size: 12px; z-index: 1; pointer-events: none; }
+.pid-filterbar .pid-search-box input { width: 100%; padding-left: 28px; margin-bottom: 0; }
 .pid-card { background: #fff; border: 1px solid var(--pid-border); border-radius: 12px; overflow: hidden; break-inside: avoid; box-shadow: 0 2px 8px rgba(16,24,40,0.06); }
 .pid-card .pc-band { background: linear-gradient(90deg, #4f46e5, #6366f1); color: #fff; padding: 10px 14px; font-weight: 800; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
 .pid-card .pc-body { padding: 14px; }
@@ -155,7 +156,7 @@ include __DIR__ . '/includes/header.php';
 .pid-card td { padding: 3px 0; }
 .pid-card .lbl { color: var(--pid-muted); width: 76px; }
 .pid-card .pc-id { color: #4f46e5; font-weight: 800; letter-spacing: 0.5px; }
-.pid-barcode { display: flex; align-items: flex-end; margin: 8px 0 2px; }
+.pid-barcode { display: flex; align-items: flex-end; margin: 8px 0 2px; overflow-x: auto; }
 .pid-barcode .bc-bar, .pid-barcode .bc-space { height: 30px; display: inline-block; }
 .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .barcode-id { font-weight: 700; font-size: 13px; color: #1f2937; letter-spacing: 2px; text-align: center; }
@@ -164,11 +165,16 @@ include __DIR__ . '/includes/header.php';
 @media (max-width: 1100px) { .pid-stats { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 900px) { .card-grid { grid-template-columns: 1fr; } }
 @media (max-width: 576px) { .pid-stats { grid-template-columns: 1fr; } }
+@media (max-width: 480px) {
+    .pid-card .pc-body { padding: 10px; }
+    .pid-barcode { transform: scale(0.9); transform-origin: left; }
+}
 @media print {
     .left_col, .top_nav, .pid-topbar, .pid-stats, .pid-filterbar { display: none !important; }
     .right_col { margin-left: 0 !important; width: 100% !important; }
     .card-grid { grid-template-columns: repeat(3, 1fr); }
     .pid-print-head, .pid-print-foot { display: block !important; }
+    .pid-barcode { overflow: visible; transform: none; }
 }
 </style>
 
@@ -254,8 +260,10 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="form-group search-wrap">
                 <label for="search_term">Search</label>
-                <i class="fa fa-search"></i>
-                <input type="text" name="search_term" id="search_term" class="form-control" placeholder="Search by Parent Name, Cell No, ID..." value="<?php echo e($sel_search); ?>">
+                <div class="pid-search-box">
+                    <i class="fa fa-search"></i>
+                    <input type="text" name="search_term" id="search_term" class="form-control" placeholder="Search by Parent Name, Cell No, ID..." value="<?php echo e($sel_search); ?>">
+                </div>
             </div>
             <div class="form-group">
                 <label>&nbsp;</label>
@@ -274,9 +282,9 @@ include __DIR__ . '/includes/header.php';
             </tr></table>
         </div>
 
-        <div class="no-print" style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
-            <button onclick="window.print()" class="btn btn-success btn-xs" style="border-radius:9px;"><i class="fa fa-print"></i> Print ID Cards</button>
-            <span style="color:#8a94a6; font-size:12.5px;"><?php echo count($students); ?> record(s) shown</span>
+        <div class="no-print" style="margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <button onclick="window.print()" class="btn btn-success btn-xs" style="border-radius:9px; white-space:nowrap;"><i class="fa fa-print"></i> Print ID Cards</button>
+            <span style="color:#8a94a6; font-size:12.5px; white-space:nowrap;"><?php echo count($students); ?> record(s) shown</span>
         </div>
 
         <div class="card-grid">

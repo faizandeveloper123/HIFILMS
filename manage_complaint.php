@@ -197,7 +197,7 @@ include __DIR__ . '/includes/header.php';
 ?>
 <style>
 :root { --cp-brand: #17202a; }
-.cp-topbar { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:14px 4px 10px; }
+.cp-topbar { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:14px 4px 10px; flex-wrap:wrap; }
 .cp-crumb { margin:0 0 6px; font-size:12.5px; color:#6b7280; }
 .cp-crumb a { color:#6b7280; }
 .cp-title-row h2 { font-size:22px; font-weight:800; color:#111827; margin:0; }
@@ -234,6 +234,19 @@ include __DIR__ . '/includes/header.php';
 .cp-icon-sms   { background:#25d36622; color:#1da851; }
 .cp-icon-edit  { background:#f59e0b22; color:#d97706; }
 .cp-icon-delete{ background:#ef444422; color:#dc2626; }
+@media (max-width: 767px) {
+    .cp-table-card { margin-left:-4px; margin-right:-4px; }
+}
+@media (max-width: 480px) {
+    .cp-topbar { padding: 10px 4px 8px; }
+    .cp-title-row h2 { font-size: 18px; }
+    .cp-stat-grid { grid-template-columns: 1fr 1fr; }
+    .cp-filter-actions { align-items: stretch; }
+    .cp-filter-actions .btn { flex: 1 1 100%; white-space: normal; }
+    .cp-table-card { padding: 10px; font-size: 12px; }
+    .cp-table-card th, .cp-table-card td { padding: 7px 5px !important; }
+    .cp-icon-btn { width: 26px; height: 26px; font-size: 12px; }
+}
 </style>
 
 <div class="main-content">

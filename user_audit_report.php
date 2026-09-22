@@ -113,6 +113,13 @@ include __DIR__ . '/includes/header.php';
 .btn-primary:hover {
     background-color: #217dbb;
 }
+@media (max-width: 768px) {
+    .page-card { padding: 15px; margin: 6px; }
+    .page-meta { flex-wrap: wrap; gap: 8px; }
+}
+@media (max-width: 480px) {
+    .page-card { padding: 12px; margin: 4px; }
+}
 </style>
 
 <div class="main-content">

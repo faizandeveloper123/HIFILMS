@@ -5,20 +5,24 @@ require_login();
 
 $page_title = 'Staff Cards';
 
-$schoolName  = get_setting('school_name', 'LAPS School & College');
-$schoolPhone = get_setting('school_phone', '');
-$schoolLogo  = get_setting('school_logo', '');
-$logoSrc     = $schoolLogo !== '' ? BASE_URL . $schoolLogo : BASE_URL . 'assets/img/logo.jpg';
-$sigImg      = get_setting('signature_image', '');
-$sigSrc      = $sigImg !== '' ? BASE_URL . 'assets/uploads/' . basename($sigImg) : '';
+require_once __DIR__ . '/includes/card_design.php';
 
-$theme   = isset($_GET['color']) && preg_match('/^[0-9a-fA-F]{6}$/', $_GET['color']) ? '#' . $_GET['color'] : '#0b5a43';
-$schoolFs = (int)($_GET['school_name_font_size'] ?? 16);
-if ($schoolFs < 8) $schoolFs = 8; if ($schoolFs > 30) $schoolFs = 30;
-$empFs    = (int)($_GET['emp_name_font_size'] ?? 15);
-if ($empFs < 8) $empFs = 8; if ($empFs > 26) $empFs = 26;
+$design   = card_design('staff');
+$theme    = $design['theme'];
+$accent   = $design['accent'];
+$ink      = $design['name_color'];
+$topText  = $design['top_text'];
+$roleColor = $design['role_color'];
+$schoolFs = (int) $design['school_font'];
+$empFs    = (int) $design['name_font'];
+$schoolName = $design['school_name'] !== '' ? $design['school_name'] : get_setting('school_name', 'LAPS School & College');
+$schoolAddr = $design['school_addr'];
+$schoolLogo = $design['logo'] !== '' ? $design['logo'] : get_setting('school_logo', '');
+$logoSrc  = $schoolLogo !== '' ? BASE_URL . $schoolLogo : BASE_URL . 'assets/img/logo.jpg';
+$sigImg   = get_setting('signature_image', '');
+$sigSrc   = $sigImg !== '' ? BASE_URL . 'assets/uploads/' . basename($sigImg) : '';
+
 $valid    = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['valid'] ?? '') ? $_GET['valid'] : date('Y-m-d', strtotime('+1 year'));
-$accent   = '#f2d500';
 
 $selEmp  = (int) ($_GET['emp_id'] ?? 0);
 $selDept = isset($_GET['department']) && trim($_GET['department']) !== '' ? trim($_GET['department']) : '';
@@ -78,9 +82,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
             $up->execute();
         }
     }
-    $ccq = ['valid', 'color', 'school_name_font_size', 'emp_name_font_size'];
-    $qs = [];
-    foreach ($ccq as $k) { if (isset($_POST[$k]) && trim((string)$_POST[$k]) !== '') { $qs[$k] = (string)$_POST[$k]; } }
+    $qs = ['emp_id' => (int)($_POST['emp_id'] ?? 0), 'view' => (int)($_POST['view'] ?? 0)];
+    if (isset($_POST['valid']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$_POST['valid'])) { $qs['valid'] = (string)$_POST['valid']; }
+    header('Location: ' . BASE_URL . 'cards.php?' . http_build_query($qs));
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_card_design') {
+    card_design_save('staff', $_POST, $_FILES['logo_file'] ?? null);
+    $qs = ['emp_id' => (int)($_POST['emp_id'] ?? 0), 'view' => (int)($_POST['view'] ?? 0)];
+    if (isset($_POST['valid']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$_POST['valid'])) { $qs['valid'] = (string)$_POST['valid']; }
     header('Location: ' . BASE_URL . 'cards.php?' . http_build_query($qs));
     exit;
 }
@@ -91,7 +102,9 @@ include __DIR__ . '/includes/header.php';
     :root {
         --theme: <?php echo $theme; ?>;
         --accent: <?php echo $accent; ?>;
-        --ink: <?php echo $theme; ?>;
+        --ink: <?php echo $ink; ?>;
+        --top-text: <?php echo $topText; ?>;
+        --role-color: <?php echo $roleColor; ?>;
         --card-w: 2.2in;
         --card-h: 3.6in;
         --safe-inset: 0.125in;
@@ -118,7 +131,7 @@ include __DIR__ . '/includes/header.php';
     }
     .id-card-inner { position:relative; z-index:1; width:100%; min-height:100%; display:flex; flex-direction:column; }
     .top {
-        background:var(--theme); color:#fff; padding:8px 8px 22px; position:relative; flex-shrink:0;
+        background:var(--theme); color:var(--top-text); padding:8px 8px 22px; position:relative; flex-shrink:0;
     }
     .top:after {
         content:""; position:absolute; left:-12%; right:-12%; bottom:0; height:0; background:#fff;
@@ -129,6 +142,10 @@ include __DIR__ . '/includes/header.php';
     .school {
         font-size:var(--school-font); line-height:1.05; font-weight:800; letter-spacing:.2px;
         text-transform:uppercase; word-break:break-word;
+    }
+    .school-sub {
+        font-size:6.5px; font-weight:600; color:var(--top-text); opacity:.85;
+        line-height:1.25; margin-top:2px; word-break:break-word;
     }
     .photo-wrap {
         margin:16px auto 6px; width:70px; height:70px; border-radius:50%; border:4px solid var(--accent);
@@ -146,7 +163,7 @@ include __DIR__ . '/includes/header.php';
     }
     .role {
         width:78%; max-width:100%; margin:0 auto; border-radius:999px; background:var(--accent);
-        color:#083a2b; text-align:center; font-size:8px; font-weight:800;
+        color:var(--role-color); text-align:center; font-size:8px; font-weight:800;
         letter-spacing:0.8px; padding:4px 6px; flex-shrink:0;
     }
     .details {
@@ -193,6 +210,12 @@ include __DIR__ . '/includes/header.php';
         .cc-row[style] { flex-direction:column !important; }
     }
     .cc-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+    .cc-panel details { margin-bottom:8px; }
+    .cc-panel summary { cursor:pointer; font-weight:700; font-size:13px; padding:6px 10px; background:#f3f4f6; border-radius:6px; margin-bottom:6px; }
+    .cc-grid2 { display:flex; gap:10px; }
+    .cc-grid2 > div { flex:1; min-width:0; }
+    .cc-inline { display:flex; gap:10px; align-items:center; }
+    .cc-inline > div { flex:1; min-width:0; }
 
     @media (max-width:900px){ .sheet{ grid-template-columns:repeat(2, var(--card-w)); justify-content:center; } }
     @media (max-width:520px){ .sheet{ grid-template-columns:1fr; justify-items:center; } }
@@ -205,6 +228,7 @@ include __DIR__ . '/includes/header.php';
             position:absolute; left:0; top:0; width:100%; margin:0; padding:2mm;
             background:#fff; grid-template-columns:repeat(3, var(--card-w));
         }
+        #cardSheet, #cardSheet * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
         .no-print { display:none !important; }
         .id-card { box-shadow:none; border:1px solid #bbb; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
         .id-card::before { display:none; }
@@ -262,7 +286,7 @@ include __DIR__ . '/includes/header.php';
             <h3><i class="fa fa-id-card"></i> Staff Card</h3>
             <div class="cards-actions no-print">
                 <a href="<?php echo BASE_URL; ?>cards.php" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
-                <button type="button" class="btn btn-primary" style="color:#fff;" onclick="openCC()"><i class="fa fa-camera"></i> Change Photo</button>
+                <button type="button" class="btn btn-primary" style="color:#fff;" onclick="openCC()"><i class="fa fa-paint-brush"></i> Customize Card</button>
                 <button onclick="window.print()" class="btn btn-success"><i class="fa fa-print"></i> Print Card</button>
             </div>
         </div>
@@ -270,9 +294,7 @@ include __DIR__ . '/includes/header.php';
 
         <div id="cardSheet">
             <?php if ($selEmp <= 0): ?>
-                <div class="no-record" style="grid-column:1/-1;">&nbsp;</div>
             <?php elseif (count($employees) === 0): ?>
-                <div class="no-record" style="grid-column:1/-1;">&nbsp;</div>
             <?php else: ?>
             <?php foreach ($employees as $emp):
                 $fullName = trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? ''));
@@ -289,7 +311,16 @@ include __DIR__ . '/includes/header.php';
                         <div class="top">
                             <div class="brand">
                                 <img src="<?php echo $logoSrc; ?>" alt="Logo" onerror="this.src='<?php echo BASE_URL; ?>assets/img/logo.jpg';">
-                                <div><div class="school">Test Portal</div></div>
+                                <?php if ($design['show_school'] === 'YES' || $design['show_addr'] === 'YES'): ?>
+                                    <div>
+                                        <?php if ($design['show_school'] === 'YES'): ?>
+                                            <div class="school"><?php echo e($schoolName); ?></div>
+                                        <?php endif; ?>
+                                        <?php if ($design['show_addr'] === 'YES' && trim($schoolAddr) !== ''): ?>
+                                            <div class="school-sub"><?php echo e((strlen($schoolAddr) > 34 ? substr($schoolAddr, 0, 34) . '…' : $schoolAddr)); ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -302,36 +333,46 @@ include __DIR__ . '/includes/header.php';
                         </div>
 
                         <div class="name"><?php echo e($fullName); ?></div>
-                        <div class="role">STAFF MEMBER</div>
+                        <div class="role"><?php echo e($design['role_text']); ?></div>
 
                         <div class="details">
-                            <div class="line"><i class="fa fa-id-badge"></i> <b>Employee ID:</b>&nbsp;<span><?php echo $emp['emp_id']; ?></span></div>
-                            <div class="line"><i class="fa fa-briefcase"></i> <b>Designation:</b>&nbsp;<span><?php echo e($emp['designation'] ?? '-'); ?></span></div>
-                            <div class="line"><i class="fa fa-building"></i> <b>Department:</b>&nbsp;<span><?php echo e($emp['department'] ?? '-'); ?></span></div>
+                            <?php if ($design['show_emp'] === 'YES'): ?>
+                                <div class="line"><i class="fa fa-id-badge"></i> <b><?php echo e($design['id_label']); ?>:</b>&nbsp;<span><?php echo $emp['emp_id']; ?></span></div>
+                            <?php endif; ?>
+                            <?php if ($design['show_desig'] === 'YES'): ?>
+                                <div class="line"><i class="fa fa-briefcase"></i> <b><?php echo e($design['designation_label']); ?>:</b>&nbsp;<span><?php echo e($emp['designation'] ?? '-'); ?></span></div>
+                            <?php endif; ?>
+                            <?php if ($design['show_dept'] === 'YES'): ?>
+                                <div class="line"><i class="fa fa-building"></i> <b><?php echo e($design['department_label']); ?>:</b>&nbsp;<span><?php echo e($emp['department'] ?? '-'); ?></span></div>
+                            <?php endif; ?>
                         </div>
 
                         <div class="foot">
                             <div class="foot-left">
                                 <div class="foot-date-line"><?php echo date('d-M-Y', strtotime($valid)); ?></div>
-                                <div class="foot-date-line"><span class="foot-lbl">Valid Till:</span></div>
+                                <div class="foot-date-line"><span class="foot-lbl"><?php echo e($design['valid_label']); ?></span></div>
                             </div>
+                            <?php if ($design['show_qr'] === 'YES'): ?>
                             <div class="foot-qr">
                                 <div class="qr-wrap">
                                     <img src="<?php echo $qrSrc; ?>" alt="QR Code" onerror="this.onerror=null; this.src='<?php echo BASE_URL; ?>assets/img/qr-default.png';">
                                 </div>
                             </div>
+                            <?php endif; ?>
                             <div class="foot-right">
                                 <div class="foot-principal-label">
-                                    <?php if ($sigSrc !== ''): ?>
-                                        <div class="sign-below">
-                                            <img src="<?php echo $sigSrc; ?>" onerror="this.style.display='none';">
-                                            <div class="sig-cap">Principal</div>
-                                        </div>
-                                    <?php else: ?>
-                                        <div class="sign-below">
-                                            <div style="border-top:1px solid #333; width:56px; margin:0 auto 1px;"></div>
-                                            <div class="sig-cap">Principal</div>
-                                        </div>
+                                    <?php if ($design['show_sign'] === 'YES'): ?>
+                                        <?php if ($sigSrc !== ''): ?>
+                                            <div class="sign-below">
+                                                <img src="<?php echo $sigSrc; ?>" onerror="this.style.display='none';">
+                                                <div class="sig-cap"><?php echo e($design['principal_text']); ?></div>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="sign-below">
+                                                <div style="border-top:1px solid #333; width:56px; margin:0 auto 1px;"></div>
+                                                <div class="sig-cap"><?php echo e($design['principal_text']); ?></div>
+                                            </div>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -348,37 +389,119 @@ include __DIR__ . '/includes/header.php';
 <!-- Customization modal -->
 <div id="ccOverlay" class="cc-overlay no-print" onclick="if(event.target===this) closeCC();">
     <div class="cc-panel">
-        <?php if (!$viewMode): ?>
-        <h4>Card Settings</h4>
-        <form method="get" action="<?php echo BASE_URL; ?>cards.php">
-            <div class="cc-row"><label>Theme Color</label>
-                <input type="color" name="color" value="<?php echo $theme; ?>"></div>
-            <div class="cc-row"><label>School Name Font Size</label>
-                <select name="school_name_font_size">
-                    <?php for ($f = 8; $f <= 28; $f++): ?>
-                        <option value="<?php echo $f; ?>" <?php echo $f == $schoolFs ? 'selected' : ''; ?>><?php echo $f; ?>px</option>
-                    <?php endfor; ?>
-                </select></div>
-            <div class="cc-row"><label>Employee Name Font Size</label>
-                <select name="emp_name_font_size">
-                    <?php for ($f = 8; $f <= 24; $f++): ?>
-                        <option value="<?php echo $f; ?>" <?php echo $f == $empFs ? 'selected' : ''; ?>><?php echo $f; ?>px</option>
-                    <?php endfor; ?>
-                </select></div>
-            <div class="cc-row"><label>Validity Date</label>
-                <input type="date" name="valid" value="<?php echo $valid; ?>"></div>
+        <h4><i class="fa fa-paint-brush"></i> Card Designer <small style="color:#9CA3AF;">Staff Card</small></h4>
+        <p style="color:#6B7280; font-size:12px; margin:0 0 12px; line-height:1.4;">Yahan design save karo — har tab (logos, colors, texts, QR) ka hissa alag section me hai. Save hone par aapki tarah card har baar usi design par banega.</p>
+
+        <form method="post" enctype="multipart/form-data" action="<?php echo BASE_URL; ?>cards.php">
+            <input type="hidden" name="action" value="save_card_design">
+            <input type="hidden" name="emp_id" value="<?php echo $selEmp; ?>">
+            <input type="hidden" name="view" value="<?php echo $viewMode ? 1 : 0; ?>">
+            <input type="hidden" name="valid" value="<?php echo $valid; ?>">
+
+            <details open>
+                <summary>Brand: Logo, School Name & Address</summary>
+                <div class="cc-row"><label>Card Logo (change karein)</label>
+                    <div class="cc-inline">
+                        <img src="<?php echo $logoSrc; ?>" alt="" onerror="this.src='<?php echo BASE_URL; ?>assets/img/logo.jpg';" style="width:44px;height:44px;object-fit:contain;border:1px solid #e5e7eb;border-radius:8px;background:#fff;padding:2px;">
+                        <input type="file" name="logo_file" accept="image/*" style="height:auto;padding:4px;">
+                    </div></div>
+                <div class="cc-row"><label>School Name</label>
+                    <input type="text" name="school_name" value="<?php echo e($schoolName); ?>"></div>
+                <div class="cc-row"><label>Address Line</label>
+                    <input type="text" name="school_addr" value="<?php echo e($schoolAddr); ?>"></div>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>Show School Name</label>
+                        <select name="show_school"><option value="YES" <?php echo $design['show_school'] === 'YES' ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo $design['show_school'] === 'NO' ? 'selected' : ''; ?>>NO</option></select></div>
+                    <div class="cc-row"><label>Show Address</label>
+                        <select name="show_addr"><option value="YES" <?php echo $design['show_addr'] === 'YES' ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo $design['show_addr'] === 'NO' ? 'selected' : ''; ?>>NO</option></select></div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Colors</summary>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>Header Color</label>
+                        <input type="color" name="theme" value="<?php echo $design['theme']; ?>"></div>
+                    <div class="cc-row"><label>Accent Color</label>
+                        <input type="color" name="accent" value="<?php echo $design['accent']; ?>"></div>
+                </div>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>Header Text Color</label>
+                        <input type="color" name="top_text" value="<?php echo $design['top_text']; ?>"></div>
+                    <div class="cc-row"><label>Name & Details Color</label>
+                        <input type="color" name="name_color" value="<?php echo $design['name_color']; ?>"></div>
+                </div>
+                <div class="cc-row"><label>Role Badge Text Color</label>
+                    <input type="color" name="role_color" value="<?php echo $design['role_color']; ?>"></div>
+            </details>
+
+            <details>
+                <summary>Font Sizes</summary>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>School Name Font Size</label>
+                        <select name="school_font">
+                            <?php for ($f = 8; $f <= 28; $f++): ?>
+                                <option value="<?php echo $f; ?>" <?php echo $f == $schoolFs ? 'selected' : ''; ?>><?php echo $f; ?>px</option>
+                            <?php endfor; ?>
+                        </select></div>
+                    <div class="cc-row"><label>Employee Name Font Size</label>
+                        <select name="name_font">
+                            <?php for ($f = 8; $f <= 24; $f++): ?>
+                                <option value="<?php echo $f; ?>" <?php echo $f == $empFs ? 'selected' : ''; ?>><?php echo $f; ?>px</option>
+                            <?php endfor; ?>
+                        </select></div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Labels & Text</summary>
+                <div class="cc-row"><label>Role Badge Text</label>
+                    <input type="text" name="role_text" value="<?php echo e($design['role_text']); ?>"></div>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>Employee ID Label</label>
+                        <input type="text" name="id_label" value="<?php echo e($design['id_label']); ?>"></div>
+                    <div class="cc-row"><label>Show Employee ID</label>
+                        <select name="show_emp"><option value="YES" <?php echo $design['show_emp'] === 'YES' ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo $design['show_emp'] === 'NO' ? 'selected' : ''; ?>>NO</option></select></div>
+                </div>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>Designation Label</label>
+                        <input type="text" name="designation_label" value="<?php echo e($design['designation_label']); ?>"></div>
+                    <div class="cc-row"><label>Show Designation</label>
+                        <select name="show_desig"><option value="YES" <?php echo $design['show_desig'] === 'YES' ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo $design['show_desig'] === 'NO' ? 'selected' : ''; ?>>NO</option></select></div>
+                </div>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>Department Label</label>
+                        <input type="text" name="department_label" value="<?php echo e($design['department_label']); ?>"></div>
+                    <div class="cc-row"><label>Show Department</label>
+                        <select name="show_dept"><option value="YES" <?php echo $design['show_dept'] === 'YES' ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo $design['show_dept'] === 'NO' ? 'selected' : ''; ?>>NO</option></select></div>
+                </div>
+            </details>
+
+            <details>
+                <summary>Footer, QR & Signature</summary>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>Valid Till Label</label>
+                        <input type="text" name="valid_label" value="<?php echo e($design['valid_label']); ?>"></div>
+                    <div class="cc-row"><label>Show QR Code</label>
+                        <select name="show_qr"><option value="YES" <?php echo $design['show_qr'] === 'YES' ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo $design['show_qr'] === 'NO' ? 'selected' : ''; ?>>NO</option></select></div>
+                </div>
+                <div class="cc-grid2">
+                    <div class="cc-row"><label>Principal Text</label>
+                        <input type="text" name="principal_text" value="<?php echo e($design['principal_text']); ?>"></div>
+                    <div class="cc-row"><label>Show Signature</label>
+                        <select name="show_sign"><option value="YES" <?php echo $design['show_sign'] === 'YES' ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo $design['show_sign'] === 'NO' ? 'selected' : ''; ?>>NO</option></select></div>
+                </div>
+                <div class="cc-row"><label>Validity Date</label>
+                    <input type="date" name="valid" value="<?php echo $valid; ?>"></div>
+            </details>
+
             <div class="cc-actions">
                 <button type="button" class="btn btn-default" onclick="closeCC();">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="color:#fff;">Apply</button>
+                <button type="submit" class="btn btn-primary" style="color:#fff;"><i class="fa fa-check"></i> Apply Design</button>
             </div>
         </form>
-        <?php endif; ?>
 
-        <?php if ($viewMode): ?>
-        <h4>Photo Settings</h4>
-        <?php else: ?>
         <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
-        <?php endif; ?>
         <h4 style="font-size:14px; margin:0 0 10px;"><i class="fa fa-camera" style="color:#FF7A1B;"></i> Change Staff Photo</h4>
         <?php if (count($employees) > 0): ?>
             <?php
@@ -394,10 +517,9 @@ include __DIR__ . '/includes/header.php';
             ?>
             <form method="post" enctype="multipart/form-data" action="<?php echo BASE_URL; ?>cards.php">
                 <input type="hidden" name="action" value="update_card_photo">
+                <input type="hidden" name="emp_id" value="<?php echo $selEmp; ?>">
+                <input type="hidden" name="view" value="<?php echo $viewMode ? 1 : 0; ?>">
                 <input type="hidden" name="valid" value="<?php echo $valid; ?>">
-                <input type="hidden" name="color" value="<?php echo ltrim($theme, '#'); ?>">
-                <input type="hidden" name="school_name_font_size" value="<?php echo $schoolFs; ?>">
-                <input type="hidden" name="emp_name_font_size" value="<?php echo $empFs; ?>">
                 <div class="cc-row"><label>Employee</label>
                     <select name="card_emp_id" id="ccEmpSel" onchange="updStaffPick(this)">
                         <?php foreach ($employees as $emp): ?>
@@ -464,5 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function openCC(){ var ov = document.getElementById('ccOverlay'); ov.style.display = 'block'; var p = ov.querySelector('.cc-panel'); if (p) p.scrollTop = 0; }
 function closeCC(){ document.getElementById('ccOverlay').style.display = 'none'; }
 </script>
+
+<script>document.body.classList.add('sidebar-hidden');</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

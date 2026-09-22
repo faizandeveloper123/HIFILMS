@@ -140,6 +140,15 @@ include __DIR__ . '/includes/header.php';
 .att-option.leave   input:checked ~ span { background:#D97706; color:#fff; }
 .att-option .att-label { color:inherit; }
 .att-option.present { color:#16A34A; } .att-option.absent { color:#DC2626; } .att-option.late { color:#2563EB; } .att-option.leave { color:#D97706; }
+@media (max-width: 767px) {
+  .search-bar-student .form-group { padding:4px !important; }
+  .search-bar-student .form-group input, .search-bar-student .form-group select { width:100% !important; }
+}
+@media (max-width: 480px) {
+  .qr-scan-btn { width:100%; white-space:normal; }
+  #saveAttendanceBtn { width:100%; }
+  .search-bar-student { padding:12px; }
+}
 </style>
 
 <div class="main-content">

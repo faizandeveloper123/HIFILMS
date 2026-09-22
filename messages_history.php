@@ -131,6 +131,12 @@ include __DIR__ . '/includes/header.php';
 .msg-search i { position:absolute; left:10px; top:11px; color:#9CA3AF; }
 .msg-search input { padding-left:32px; }
 .msg-progress-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:13px; color:#374151; }
+@media (max-width: 767px) { .msg-card { padding:12px; } .msg-search { flex:1 1 100%; } }
+@media (max-width: 480px) {
+  .msg-toolbar { align-items:stretch; }
+  .msg-toolbar select { width:100% !important; min-width:0 !important; }
+  .msg-search input { width:100%; }
+}
 </style>
 
 <div class="main-content">
@@ -138,7 +144,7 @@ include __DIR__ . '/includes/header.php';
         <?php if ($message): ?><div class="alert alert-success"><?php echo e($message); ?></div><?php endif; ?>
         <?php if ($error): ?><div class="alert alert-danger"><?php echo e($error); ?></div><?php endif; ?>
 
-        <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 4px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 4px; flex-wrap:wrap; gap:10px;">
             <h3 style="font-size:18px; font-weight:800; color:#111827; margin:0;"><i class="fa fa-clock-o"></i> Message History (<?php echo count($messages); ?> records)</h3>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <a href="<?php echo BASE_URL; ?>new_message.php" class="btn btn-success"><i class="fa fa-envelope"></i> Send New</a>
@@ -186,7 +192,8 @@ include __DIR__ . '/includes/header.php';
             </form>
         </div>
 
-        <div class="msg-card" style="overflow-x:auto;">
+        <div class="msg-card">
+            <div style="overflow-x:auto;">
             <table class="table table-bordered" style="min-width:820px; margin:0;">
                 <thead>
                     <tr>
@@ -239,6 +246,7 @@ include __DIR__ . '/includes/header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            </div>
             <div class="msg-toolbar" style="margin-top:12px;">
                 <div style="font-size:13px; color:#6B7280;">
                     Page <span id="pgInfo">1</span>

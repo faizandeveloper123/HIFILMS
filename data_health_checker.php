@@ -14,7 +14,7 @@ if ($res) { while ($row = $res->fetch_assoc()) { $rows[] = $row; $n++; } }
 $checks[] = [
     'key' => 'pictures',
     'title' => 'PROFILE PICTURES',
-    'icon' => 'flaticon-user text-red',
+    'icon' => 'fa fa-user text-red',
     'icon_bg' => 'bg-light-red',
     'bar' => 'bg-red',
     'text_color' => 'text-red',
@@ -149,13 +149,23 @@ include __DIR__ . '/includes/header.php';
 ?>
 <style type="text/css">
 .dashboard-summery-one { background: #fff; border-radius: 8px; padding: 14px; margin-bottom: 18px; }
-.dashboard-summery-one .item-icon { height: 90px; width: 90px; padding-top: 13%; border-radius: 18%; font-size: 36px; text-align: center; }
+.dashboard-summery-one .item-icon { height: 90px; width: 90px; border-radius: 18%; font-size: 36px; text-align: center; display: flex; align-items: center; justify-content: center; }
+@media (min-width: 992px) and (max-width: 1700px) {
+  .dashboard-summery-one .row > .col-sm-2 { width: 96px; max-width: 96px; flex: 0 0 96px; }
+  .dashboard-summery-one .row > .col-sm-10 { width: calc(100% - 96px); max-width: calc(100% - 96px); flex: 0 0 auto; }
+  .dashboard-summery-one .item-icon { height: 84px; width: 84px; font-size: 32px; }
+}
+@media (max-width: 767px) {
+  .dashboard-summery-one .item-icon { height: 56px; width: 56px; font-size: 24px; }
+  .dashboard-summery-one .row { display: flex; align-items: center; }
+  .dashboard-summery-one .item-content { padding-left: 12px; }
+  .dashboard-summery-one .item-number .progress { width: 100% !important; margin-left: 0 !important; }
+}
 .dashboard-summery-one .row { margin-left: 0; margin-right: 0; }
 .dashboard-summery-one .item-content { padding-left: 8px; }
 .dashboard-summery-one .item-title { font-weight: 600; font-size: 13px; letter-spacing: 0.3px; }
 .dashboard-summery-one .item-number .progress { height: 8px; margin-bottom: 6px; border-radius: 4px; }
 .dashboard-summery-one .item-number .progress-bar { height: 100%; }
-.flaticon-user:before { content: "\f007"; font-family: "Font Awesome 5 Free"; font-weight: 900; }
 .bg-light-red { background: #fee2e2; } .text-red { color: #dc2626; } .bg-red { background: #dc2626; }
 .bg-light-green { background: #dcfce7; } .text-green { color: #16a34a; } .bg-green { background: #16a34a; }
 .bg-light-blue { background: #dbeafe; } .text-blue { color: #2563eb; } .bg-blue { background: #2563eb; }
@@ -188,12 +198,12 @@ include __DIR__ . '/includes/header.php';
 <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
     <div class="dashboard-summery-one" style="border: 1px solid lightgray;">
         <div class="row">
-            <div class="col-md-2">
+            <div class="col-xs-3 col-sm-2">
                 <div class="item-icon <?php echo $c['icon_bg']; ?>">
                     <i class="<?php echo $c['icon']; ?>"></i>
                 </div>
             </div>
-            <div class="col-md-10">
+            <div class="col-xs-9 col-sm-10">
                 <div class="item-content" style="text-align: left;">
                     <div class="item-title pull-left">
                         <strong><?php echo $c['title']; ?></strong>
@@ -227,6 +237,7 @@ include __DIR__ . '/includes/header.php';
             <h4 style="margin: 0 0 10px 0; font-weight: 700; color: #111827;">
                 <i class="fa fa-list"></i> <?php echo $c['title']; ?> - Affected Records
             </h4>
+            <div class="table-responsive">
             <table class="table table-striped table-bordered" style="width:100%;background-color:#FFFFFF;">
                 <thead>
                     <tr>
@@ -250,6 +261,7 @@ include __DIR__ . '/includes/header.php';
                 <?php endif; ?>
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
 <?php endforeach; ?>

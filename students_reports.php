@@ -116,25 +116,30 @@ Classwise Students Reports
 </div>
 <br><br>
 
-<h3 style="float: left;">Class &amp; Section Wise Report </h3>
-
-<a target="_blank" class="btn btn-success pull-right" title="Print Students List" href="<?php echo BASE_URL; ?>print_students_report.php">
+<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
+<h3 style="margin:0;">Class &amp; Section Wise Report </h3>
+<div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px;">
+<a target="_blank" class="btn btn-success" title="Print Students List" href="<?php echo BASE_URL; ?>print_students_report.php">
 <i class="fa fa-print m-right-xs"></i> &nbsp; Print Report
 </a>
 
-<a style="margin-right: 8px;" class="btn btn-primary pull-right" data-toggle="modal" data-target="#ModalAllClasses" href="#" title="Print List All Classes">
+<a class="btn btn-primary" data-toggle="modal" data-target="#ModalAllClasses" href="#" title="Print List All Classes">
 <i class="fa fa-print m-right-xs"></i> &nbsp; Print List All Classes
 </a>
 
-<a href="<?php echo BASE_URL; ?>watch_video.php?videourl=6q_-ZLWVtaI" target="_blank" class="btn btn-success" style="padding: 5px 5px; font-size:14px;color:white;float: right;"><i class="fa fa-play"></i>&nbsp;&nbsp;Watch Video</a>
+<a href="<?php echo BASE_URL; ?>watch_video.php?videourl=6q_-ZLWVtaI" target="_blank" class="btn btn-success" style="padding: 5px 5px; font-size:14px;color:white;"><i class="fa fa-play"></i>&nbsp;&nbsp;Watch Video</a>
 
-<a href="<?php echo BASE_URL; ?>class_drag.php" target="_blank" class="btn btn-success" style="padding: 5px 5px; font-size:14px;color:white;float: right;"><i class="fa fa-sort"></i>&nbsp;&nbsp;Class Order</a>
+<a href="<?php echo BASE_URL; ?>class_drag.php" target="_blank" class="btn btn-success" style="padding: 5px 5px; font-size:14px;color:white;"><i class="fa fa-sort"></i>&nbsp;&nbsp;Class Order</a>
+</div>
+</div>
 
 <style>
 #ModalAllClasses .modal-dialog { width: 90%; max-width: 720px; }
 #ModalAllClasses .checkbox-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px 16px; margin-top: 8px; }
 #ModalAllClasses .checkbox-grid .container1 {padding-bottom:3%; margin-bottom: 0; white-space: nowrap; font-size:12px; }
 @media (max-width: 600px) { #ModalAllClasses .checkbox-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px) { #ModalAllClasses .checkbox-grid { grid-template-columns: 1fr; } #ModalAllClasses .checkbox-grid .container1 { white-space: normal; } }
+#ModalAllClasses .modal-dialog { width: 94%; margin: 20px auto; }
 .class-parent-row td { background-color:#e3edf9 !important; border-top:2px solid #c9d9ec !important; }
 .class-parent-row:hover td { background-color:#d6e5f6 !important; }
 .class-child-row-even td { background-color:#ffffff !important; }
@@ -192,6 +197,7 @@ Classwise Students Reports
 
 <input type="hidden" id="sessionValue" value="<?php echo e($session); ?>" />
 
+<div class="table-responsive">
 <table class="table table-striped table-bordered" style="width:100%;background-color:#FFFFFF;">
     <thead>
         <tr>
@@ -244,14 +250,14 @@ Classwise Students Reports
                       <input type="hidden" name="section" value="" />
                       <input type="hidden" name="session" value="<?php echo e($session); ?>" />
                       <label style="text-align: left; float: left;"> <b>Select Listing Order:</b> </label>
-                      <select name="orderBy" style="width: 562px;" id="orderBy" class="form-control">
+                      <select name="orderBy" style="width:100%; max-width:562px;" id="orderBy" class="form-control">
                         <option value="GRnoWise">GR. No Wise</option>
                         <option value="asc">Alphabetic</option>
                         <option value="default">Default</option>
                       </select>
                       <br>
                       <label style="text-align: left;"> <b>Page Heading:</b>
-                        <input type="text" style="width: 562px; height:40px;" name="studnetlist" value="Students Class Wise List"/>
+                        <input type="text" style="width:100%; max-width:562px; height:40px;" name="studnetlist" value="Students Class Wise List"/>
                       </label>
                       <br><br>
                       <label class="container1" style="text-align: left;">
@@ -361,14 +367,14 @@ Classwise Students Reports
                       <input type="hidden" name="section" value="<?php echo $sid; ?>" />
                       <input type="hidden" name="session" value="<?php echo e($session); ?>" />
                       <label style="text-align: left; float: left;"> <b>Select Listing Order:</b> </label>
-                      <select name="orderBy" style="width: 562px;" id="orderBy" class="form-control">
+                      <select name="orderBy" style="width:100%; max-width:562px;" id="orderBy" class="form-control">
                         <option value="GRnoWise">GR. No Wise</option>
                         <option value="asc">Alphabetic</option>
                         <option value="default">Default</option>
                       </select>
                       <br>
                       <label style="text-align: left;"> <b>Page Heading:</b>
-                        <input type="text" style="width: 562px; height:40px;" name="studnetlist" value="Students Class Wise List"/>
+                        <input type="text" style="width:100%; max-width:562px; height:40px;" name="studnetlist" value="Students Class Wise List"/>
                       </label>
                       <br><br>
                       <label class="container1" style="text-align: left;">
@@ -455,6 +461,7 @@ Classwise Students Reports
         </tr>
     </tfoot>
 </table>
+</div>
 
 </div>
 </div>
