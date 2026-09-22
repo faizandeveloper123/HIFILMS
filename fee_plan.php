@@ -56,45 +56,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['save_fee_plan'] ?? '') ===
         $st->bind_param('i', $sid);
         $st->execute();
         $st->close();
-        
-        $heads = isset($_POST['heads']) ? $_POST['heads'] : [];
-        $done = 0;
-        $ins = db_prepare('INSERT INTO student_fee_plan (student_id, head_id, head_name, amount, discount) VALUES (?, ?, ?, ?, ?)');
-        foreach ((array) $heads as $head_id => $row) {
-            if (empty($row)) continue;
-            $hname = trim($_POST['head_names'][$head_id] ?? '');
-            $amt = (float) ($_POST['amounts'][$head_id] ?? 0);
-            $disc = (float) ($_POST['discounts'][$head_id] ?? 0);
-            $ins->bind_param('iisdd', $sid, (int) $head_id, $hname, $amt, $disc);
-            $ins->execute();
-            $done++;
-        }
-        $ins->close();
-        
+
         // Save additional fields
         $discount_package = (int) ($_POST['discount_package'] ?? 0);
-        $course_package = (int) ($_POST['course_package'] ?? 0);
+        $course_package = trim($_POST['course_package'] ?? '');
         $old_balance = (float) ($_POST['old_balance'] ?? 0);
         $misc_fee = (float) ($_POST['miscellaneous_fee'] ?? 0);
         $transport = (float) ($_POST['transport'] ?? 0);
         $discount_reason = trim($_POST['discount_reason'] ?? '');
         $payment_mode = trim($_POST['payment_mode'] ?? 'monthly');
+        $monthly_fee = (float) ($_POST['monthly_fee'] ?? 0);
         
         // Save to student_fee_plan as meta or update student table
         $upd = db_prepare("UPDATE students SET 
             discount_package_id = ?, 
-            course_package_id = ?, 
+            course_package_id = 0,
+            course_package = ?,
             old_balance = ?, 
             miscellaneous_fee = ?,
             transport_fee = ?,
             discount_reason = ?,
-            payment_mode = ?
+            payment_mode = ?,
+            monthly_fee = ?
             WHERE student_id = ?");
-        $upd->bind_param('iidddssi', $discount_package, $course_package, $old_balance, $misc_fee, $transport, $discount_reason, $payment_mode, $sid);
+        $upd->bind_param('isdddssdi', $discount_package, $course_package, $old_balance, $misc_fee, $transport, $discount_reason, $payment_mode, $monthly_fee, $sid);
         $upd->execute();
         $upd->close();
         
-        $message = 'Fee plan saved with ' . $done . ' fee head(s).';
+        $message = 'Fee plan saved successfully.';
         $saved = true;
         $savedMessage = $message;
     } else {
@@ -106,7 +95,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['save_fee_plan'] ?? '') ===
 $student = null;
 if ($studentId > 0) {
     $sq = db_prepare('SELECT student_id, first_name, last_name, gr_no, class_id, section_id, admission_date, 
-        discount_package_id, course_package_id, old_balance, miscellaneous_fee, transport_fee, discount_reason, payment_mode 
+        discount_package_id, course_package_id, course_package, old_balance, miscellaneous_fee, transport_fee, monthly_fee, discount_reason, payment_mode 
         FROM students WHERE student_id = ?');
     $sq->bind_param('i', $studentId);
     $sq->execute();
@@ -114,31 +103,10 @@ if ($studentId > 0) {
     $sq->close();
 }
 
-// Existing fee plan for pre-fill
-$savedPlan = [];
-if ($studentId > 0) {
-    $fp = db_prepare('SELECT head_id, head_name, amount, discount FROM student_fee_plan WHERE student_id = ? ORDER BY id');
-    $fp->bind_param('i', $studentId);
-    $fp->execute();
-    $res = $fp->get_result();
-    while ($r = $res->fetch_assoc()) { $savedPlan[(int) $r['head_id']] = $r; }
-    $fp->close();
-}
-
-// Active fee heads
-$feeHeads = [];
-$fr = db_query("SELECT head_id, head_name, amount FROM fee_heads WHERE status=1 ORDER BY head_id");
-if ($fr) { while ($row = $fr->fetch_assoc()) { $feeHeads[] = $row; } }
-
 // Discount packages
 $discountPackages = [];
 $dp = db_query("SELECT id, name, discount_percent FROM fee_discount_packages WHERE status=1 ORDER BY name");
 if ($dp) { while ($row = $dp->fetch_assoc()) { $discountPackages[] = $row; } }
-
-// Course packages
-$coursePackages = [];
-$cp = db_query("SELECT id, name, amount FROM fee_course_packages WHERE status=1 ORDER BY name");
-if ($cp) { while ($row = $cp->fetch_assoc()) { $coursePackages[] = $row; } }
 
 // Class / section labels
 $classLabel = '';
@@ -386,11 +354,13 @@ include __DIR__ . '/includes/header.php';
     $classDisplay = $classLabel . ($sectionLabel ? ' - ' . $sectionLabel : '');
     $discountPackageId = $student['discount_package_id'] ?? 0;
     $coursePackageId = $student['course_package_id'] ?? 0;
+    $coursePackageText = $student['course_package'] ?? '';
     $oldBalance = (float) ($student['old_balance'] ?? 0);
     $miscFee = (float) ($student['miscellaneous_fee'] ?? 0);
     $transportFee = (float) ($student['transport_fee'] ?? 0);
     $discountReason = $student['discount_reason'] ?? '';
     $paymentMode = $student['payment_mode'] ?? 'monthly';
+    $monthlyFeeValue = (float) ($student['monthly_fee'] ?? 0);
     ?>
 
     <!-- Wizard Steps -->
@@ -488,7 +458,7 @@ include __DIR__ . '/includes/header.php';
                             <select name="discount_package">
                                 <option value="">Select Discount</option>
                                 <?php foreach ($discountPackages as $dp): ?>
-                                <option value="<?php echo $dp['id']; ?>" <?php echo ($discountPackageId == $dp['id']) ? 'selected' : ''; ?>>
+                                <option value="<?php echo $dp['id']; ?>" data-percent="<?php echo (float) $dp['discount_percent']; ?>" <?php echo ($discountPackageId == $dp['id']) ? 'selected' : ''; ?>>
                                     <?php echo e($dp['name']); ?> (<?php echo $dp['discount_percent']; ?>%)
                                 </option>
                                 <?php endforeach; ?>
@@ -498,20 +468,13 @@ include __DIR__ . '/includes/header.php';
                         <!-- Monthly Fee -->
                         <div class="field-group">
                             <label>Monthly Fee</label>
-                            <div class="field-value"><span class="amount" id="monthlyFeeDisplay">0.00</span></div>
+                            <input type="number" step="0.01" min="0" name="monthly_fee" id="monthlyFeeDisplay" placeholder="0.00" value="<?php echo number_format($monthlyFeeValue, 2, '.', ''); ?>">
                         </div>
 
                         <!-- Course Package -->
                         <div class="field-group">
                             <label>Course Package</label>
-                            <select name="course_package">
-                                <option value="">Select Course</option>
-                                <?php foreach ($coursePackages as $cp): ?>
-                                <option value="<?php echo $cp['id']; ?>" data-amount="<?php echo (float) $cp['amount']; ?>" <?php echo ($coursePackageId == $cp['id']) ? 'selected' : ''; ?>>
-                                    <?php echo e($cp['name']); ?> (<?php echo number_format($cp['amount'], 2); ?>)
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <input type="text" name="course_package" placeholder="Type course package (e.g. BS 4 Years)" value="<?php echo e($coursePackageText); ?>">
                         </div>
 
                         <!-- Miscellaneous Fee -->
@@ -539,68 +502,8 @@ include __DIR__ . '/includes/header.php';
                         </div>
                     </div>
 
-                    <!-- Fee Heads Table -->
-                    <?php if ($feeHeads): ?>
-                    <div style="margin-top: 20px;">
-                        <h4 style="font-size:13px; font-weight:600; color:var(--gray-600); margin-bottom:10px;">Fee Heads Breakdown</h4>
-                        <div class="fee-table-wrapper">
-                            <table class="fee-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width:40px;">#</th>
-                                        <th>Fee Head</th>
-                                        <th style="width:160px;">Amount (PKR)</th>
-                                        <th style="width:160px;">Discount (PKR)</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php 
-                                    $totalAmount = 0;
-                                    $totalDiscount = 0;
-                                    foreach ($feeHeads as $i => $fh):
-                                        $hid = (int) $fh['head_id'];
-                                        $existing = $savedPlan[$hid] ?? null;
-                                        $checked = $existing ? 'checked' : '';
-                                        $amt = $existing ? (float) $existing['amount'] : (float) $fh['amount'];
-                                        $disc = $existing ? (float) $existing['discount'] : 0;
-                                        if ($checked) {
-                                            $totalAmount += $amt;
-                                            $totalDiscount += $disc;
-                                        }
-                                    ?>
-                                    <tr>
-                                        <td><?php echo $i + 1; ?></td>
-                                        <td>
-                                            <label style="display:flex; align-items:center; gap:8px; font-weight:500; cursor:pointer;">
-                                                <input type="hidden" name="heads[<?php echo $hid; ?>]" value="0">
-                                                <input type="checkbox" name="heads[<?php echo $hid; ?>]" value="1" <?php echo $checked; ?> class="fh-check" style="width:16px; height:16px; accent-color: var(--primary);">
-                                                <span><?php echo e($fh['head_name']); ?></span>
-                                                <input type="hidden" name="head_names[<?php echo $hid; ?>]" value="<?php echo e($fh['head_name']); ?>">
-                                            </label>
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01" min="0" class="fh-amount-input" name="amounts[<?php echo $hid; ?>]" value="<?php echo $amt; ?>" style="width:100%; padding:6px 10px; border:1px solid var(--gray-200); border-radius:6px; font-size:clamp(12px,1.1vw,14px); outline:none; transition:border-color 0.2s;">
-                                        </td>
-                                        <td>
-                                            <input type="number" step="0.01" min="0" class="fh-discount-input" name="discounts[<?php echo $hid; ?>]" value="<?php echo $disc; ?>" style="width:100%; padding:6px 10px; border:1px solid var(--gray-200); border-radius:6px; font-size:clamp(12px,1.1vw,14px); outline:none; transition:border-color 0.2s;">
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                                <tfoot>
-                                    <tr class="total-row">
-                                        <td colspan="2" class="total-label">Total:</td>
-                                        <td><strong id="feeTotal"><?php echo number_format($totalAmount - $totalDiscount, 2); ?></strong></td>
-                                        <td></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
                     <p style="font-size: 12px; color: var(--gray-400); margin-top: 16px;">
-                        <i class="fas fa-info-circle"></i> Amounts are auto-filled from class fee settings — adjust if required.
+                        <i class="fas fa-info-circle"></i> You can type the Monthly Fee and Course Package directly.
                     </p>
 
                     <!-- Form Actions -->
@@ -624,57 +527,6 @@ include __DIR__ . '/includes/header.php';
 <div id="toast-container"></div>
 
 <script>
-(function () {
-    var form = document.getElementById('feePlanForm');
-    if (!form) return;
-    
-    // Calculate total
-    function calcTotal() {
-        var total = 0;
-        document.querySelectorAll('.fh-check').forEach(function (cb) {
-            if (cb.checked) {
-                var tr = cb.closest('tr');
-                var amt = parseFloat((tr.querySelector('.fh-amount-input') || {}).value || 0) || 0;
-                var disc = parseFloat((tr.querySelector('.fh-discount-input') || {}).value || 0) || 0;
-                total += amt - disc;
-            }
-        });
-        var t = document.getElementById('feeTotal');
-        if (t) t.textContent = total.toFixed(2);
-        var display = document.getElementById('monthlyFeeDisplay');
-        if (display) display.textContent = total.toFixed(2);
-    }
-    
-    form.addEventListener('change', calcTotal);
-    form.addEventListener('input', calcTotal);
-    calcTotal();
-
-    // Auto-check checkbox when amount is entered
-    document.querySelectorAll('.fh-amount-input').forEach(function(input) {
-        input.addEventListener('input', function() {
-            var tr = this.closest('tr');
-            var cb = tr.querySelector('.fh-check');
-            if (parseFloat(this.value) > 0) {
-                cb.checked = true;
-                calcTotal();
-            }
-        });
-    });
-
-    // Update monthly fee display when course package changes
-    var courseSelect = form.querySelector('select[name="course_package"]');
-    if (courseSelect) {
-        courseSelect.addEventListener('change', function() {
-            var selected = this.options[this.selectedIndex];
-            var amount = parseFloat(selected.getAttribute('data-amount') || selected.textContent.match(/\(([\d.]+)\)/)?.[1] || 0);
-            var display = document.getElementById('monthlyFeeDisplay');
-            if (display && amount > 0) {
-                display.textContent = amount.toFixed(2);
-            }
-        });
-    }
-})();
-
 function showToast(msg, type) {
     var types = { success: 'success', warning: 'warning', info: 'info', error: 'error' };
     var icons = { success: 'fa-check-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle', error: 'fa-exclamation-circle' };

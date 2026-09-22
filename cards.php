@@ -226,7 +226,7 @@ include __DIR__ . '/includes/header.php';
                         <div class="top">
                             <div class="brand">
                                 <img src="<?php echo $logoSrc; ?>" alt="Logo" onerror="this.src='<?php echo BASE_URL; ?>assets/img/logo.jpg';">
-                                <div><div class="school"><?php echo e($schoolName); ?></div></div>
+                                <div><div class="school">Test Portal</div></div>
                             </div>
                         </div>
 

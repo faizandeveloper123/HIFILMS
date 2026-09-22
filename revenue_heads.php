@@ -22,27 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Revenue head added successfully!';
         }
     }
-
-    if ($action === 'UpdateHead') {
-        $hid = (int) ($_POST['head_id'] ?? 0);
-        $name = trim($_POST['revenue_head'] ?? '');
-        if ($hid <= 0 || $name === '') {
-            $error = 'Revenue Head is required.';
-        } else {
-            $st2 = db_prepare("UPDATE revenue_heads SET head_name=? WHERE head_id=?");
-            $st2->bind_param('si', $name, $hid);
-            $st2->execute();
-            $message = 'Revenue head updated successfully!';
-        }
-    }
-
-    if ($action === 'DeleteRevenueHead' || $action === 'DeleteHead') {
-        $hid = (int) ($_POST['head_id'] ?? 0);
-        $st2 = db_prepare("DELETE FROM revenue_heads WHERE head_id=?");
-        $st2->bind_param('i', $hid);
-        $st2->execute();
-        $message = 'Revenue head deleted successfully!';
-    }
 }
 
 $heads = [];
@@ -109,26 +88,17 @@ include __DIR__ . '/includes/header.php';
                 <thead>
                     <tr>
                         <th width="5%" style="text-align:center;">S.No</th>
-                        <th width="70%">Revenue Head Name</th>
-                        <th width="25%" style="text-align:center;">Action</th>
+                        <th width="95%">Revenue Head Name</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (count($heads) === 0): ?>
-                        <tr><td colspan="3" class="dataTables_empty">No data available in table</td></tr>
+                        <tr><td colspan="2" class="dataTables_empty">No data available in table</td></tr>
                     <?php endif; ?>
                     <?php $i = 1; foreach ($heads as $h): ?>
                         <tr>
                             <td style="text-align:center;"><?php echo $i++; ?></td>
                             <td><strong><?php echo e($h['head_name']); ?></strong></td>
-                            <td style="text-align:center; white-space:nowrap;">
-                                <button type="button" class="btn btn-success btn-xs" style="padding:4px 9px; font-size:13px;" onclick="openEdit(<?php echo $h['head_id']; ?>)"><i class="fa fa-pencil"></i></button>
-                                <form method="post" action="revenue_heads.php" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this record');">
-                                    <input type="hidden" name="action" value="DeleteRevenueHead">
-                                    <input type="hidden" name="head_id" value="<?php echo $h['head_id']; ?>">
-                                    <button type="submit" class="btn btn-danger btn-xs" style="padding:4px 9px; font-size:13px;"><i class="fa fa-remove"></i></button>
-                                </form>
-                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -137,47 +107,8 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
-<!-- Edit Revenue Head Modal -->
-<div id="EditHead" class="modal fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">×</button>
-                <h4 class="modal-title" style="text-align:center;"><i class="fa fa-edit"></i> Update Revenue Head</h4>
-            </div>
-            <div class="modal-body">
-                <form method="post" action="revenue_heads.php" class="form-horizontal form-label-left">
-                    <input type="hidden" name="action" value="UpdateHead">
-                    <input type="hidden" name="head_id" id="edit_head_id" value="">
-                    <div class="form-group">
-                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Revenue Head</label>
-                        <div class="col-md-7 col-sm-7 col-xs-12">
-                            <input class="form-control" name="revenue_head" id="edit_head_name" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-6 col-md-offset-4">
-                            <button type="submit" class="btn btn-primary">Update</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
 <script>
-var HEADS = <?php echo json_encode($heads); ?>;
-
-function openEdit(id) {
-    var h = HEADS.find(function(x){ return x.head_id === id; });
-    if (!h) return;
-    document.getElementById('edit_head_id').value = h.head_id;
-    document.getElementById('edit_head_name').value = h.head_name;
-    $('#EditHead').modal('show');
-}
-
 $(document).ready(function(){
     $('#datatable').DataTable({ order:[], pageLength: 10 });
 });

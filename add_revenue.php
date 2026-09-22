@@ -145,10 +145,9 @@ include __DIR__ . '/includes/header.php';
                 <table id="mytable" class="table table-striped table-bordered" style="width:100%; background-color:#fff;">
                     <thead>
                         <tr>
-                            <th width="30%"><i class="fa fa-tasks"></i> Revenue Head</th>
-                            <th width="20%"><i class="fa fa-dollar"></i> Amount</th>
-                            <th width="40%"><i class="fa fa-comment"></i> Remarks</th>
-                            <th width="10%" style="text-align:center;">Action</th>
+                            <th width="33%"><i class="fa fa-tasks"></i> Revenue Head</th>
+                            <th width="22%"><i class="fa fa-dollar"></i> Amount</th>
+                            <th width="45%"><i class="fa fa-comment"></i> Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -163,7 +162,6 @@ include __DIR__ . '/includes/header.php';
                             </td>
                             <td><input class="form-control" name="amount[]" type="number" min="0" step="0.01" required></td>
                             <td><input class="form-control" name="remarks[]" type="text"></td>
-                            <td style="text-align:center;"><button type="button" class="btn btn-danger btn-xs row-del"><i class="fa fa-trash"></i></button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -202,14 +200,6 @@ $(document).ready(function(){
         tpl.find('select').val('');
         tpl.find('input').val('');
         $('#mytable tbody').append(tpl);
-    });
-
-    $(document).on('click', '.row-del', function(){
-        if ($('#mytable tbody tr').length > 1) {
-            $(this).closest('tr').remove();
-        } else {
-            alert('At least one row is required.');
-        }
     });
 
     $('#revenueForm').on('submit', function(){

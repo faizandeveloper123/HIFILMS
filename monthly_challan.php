@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 foreach ($students as $stdId) {
                     $stdId = (int) $stdId;
                     if ($stdId <= 0) continue;
-                    $st = db_prepare("SELECT st.student_id, st.first_name, st.last_name, st.father_name, st.gr_no, st.class_id, st.section_id, st.session
+                    $st = db_prepare("SELECT st.student_id, st.first_name, st.last_name, st.father_name, st.gr_no, st.class_id, st.section_id, st.session, st.monthly_fee
                                       FROM students st WHERE st.student_id=? AND st.status=1");
                     $st->bind_param('i', $stdId);
                     $st->execute();
@@ -84,13 +84,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if ($st2->get_result()->fetch_assoc()) { $skipped++; continue; }
 
                     $baseFee = 0.0;
-                    $clsRes = db_query("SELECT f.head_name, f.amount FROM fee_heads f WHERE f.status=1 ORDER BY f.head_id");
                     $items = [];
-                    while ($fh = $clsRes->fetch_assoc()) {
-                        $amt = (float) $fh['amount'];
-                        if ($amt > 0) {
-                            $baseFee += $amt;
-                            $items[] = $fh;
+                    $stdMonthlyFee = (float) ($student['monthly_fee'] ?? 0);
+                    if ($stdMonthlyFee > 0) {
+                        $baseFee = $stdMonthlyFee;
+                        $items[] = ['head_id' => 0, 'head_name' => 'Monthly Fee', 'amount' => $stdMonthlyFee];
+                    } else {
+                        $clsRes = db_query("SELECT f.head_name, f.amount FROM fee_heads f WHERE f.status=1 ORDER BY f.head_id");
+                        while ($fh = $clsRes->fetch_assoc()) {
+                            $amt = (float) $fh['amount'];
+                            if ($amt > 0) {
+                                $baseFee += $amt;
+                                $items[] = $fh;
+                            }
                         }
                     }
 

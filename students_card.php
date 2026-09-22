@@ -129,44 +129,54 @@ include __DIR__ . '/includes/header.php';
     }
     .id-card-inner { position:relative; z-index:1; width:100%; min-height:100%; display:flex; flex-direction:column; }
     .top {
-        background:var(--theme); color:#fff; padding:8px 8px 22px; position:relative; flex-shrink:0;
+        background:linear-gradient(135deg, var(--theme) 0%, var(--ink) 100%); color:#fff;
+        padding:9px 10px 16px; position:relative; flex-shrink:0;
+        border-bottom:6px solid var(--accent);
     }
-    .top:after {
-        content:""; position:absolute; left:-12%; right:-12%; bottom:0; height:0; background:#fff;
-        border-top:4px solid var(--accent); border-radius:0 0 50% 50%;
+    .brand { display:flex; align-items:center; gap:8px; position:relative; z-index:2; }
+    .brand img {
+        width:38px; height:38px; object-fit:contain; background:#fff;
+        border-radius:50%; padding:3px; box-shadow:0 2px 5px rgba(0,0,0,.25);
     }
-    .brand { display:flex; align-items:center; gap:6px; position:relative; z-index:2; }
-    .brand img { width:32px; height:32px; object-fit:contain; background:#fff; border-radius:50%; padding:2px; }
     .school {
         font-size:var(--school-font); line-height:1.05; font-weight:800; letter-spacing:.2px;
         text-transform:uppercase; word-break:break-word;
     }
-    .photo-wrap {
-        margin:6px auto 4px; width:70px; height:70px; border-radius:50%; border:4px solid var(--accent);
-        background:#f3f4f6; padding:2px; flex-shrink:0; overflow:hidden;
+    .school-sub {
+        font-size:7px; font-weight:600; color:rgba(255,255,255,.9);
+        line-height:1.25; margin-top:2px; word-break:break-word;
     }
-    .photo-wrap img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+    .photo-wrap {
+        margin:8px auto 5px; width:80px; height:98px; border-radius:10px;
+        border:3px solid var(--theme); background:#fff; padding:3px; flex-shrink:0;
+        overflow:hidden; box-shadow:0 3px 8px rgba(0,0,0,.14);
+    }
+    .photo-wrap img { width:100%; height:100%; border-radius:7px; object-fit:cover; display:block; }
     .photo-placeholder {
-        width:100%; height:100%; border-radius:50%; background:#e5e7eb; color:#6b7280;
-        display:flex; align-items:center; justify-content:center; text-align:center;
-        font-size:9px; font-weight:700; line-height:1.2; padding:4px;
+        width:100%; height:100%; border-radius:7px; background:#eef0f3; color:var(--theme);
+        display:flex; align-items:center; justify-content:center;
+        font-size:34px; font-weight:900;
     }
     .name {
-        margin:2px 6px 2px; text-align:center; color:var(--ink); font-size:var(--st-name-font);
+        margin:2px 8px 2px; text-align:center; color:var(--ink); font-size:var(--st-name-font);
         font-weight:900; line-height:1.15; text-transform:uppercase; flex-shrink:0; word-break:break-word;
     }
     .role {
-        width:78%; max-width:100%; margin:0 auto; border-radius:999px; background:var(--accent);
+        width:72%; max-width:100%; margin:0 auto; border-radius:999px; background:var(--accent);
         color:#083a2b; text-align:center; font-size:8px; font-weight:800;
         letter-spacing:0.8px; padding:4px 6px; flex-shrink:0;
     }
     .details {
-        margin:6px 4px 4px; padding:3px 8px 6px; flex-shrink:0; display:flex;
-        flex-direction:column; justify-content:flex-start;
+        margin:5px 8px 4px; padding:0; flex-shrink:0;
+        display:grid; grid-template-columns:1fr 1fr; gap:5px 8px;
     }
-    .line { display:flex; align-items:flex-start; gap:5px; font-size:8.5px; margin:3px 0; line-height:1.25; }
-    .line i { width:11px; flex-shrink:0; font-size:10px; color:var(--theme); font-style:normal; }
-    .line b { color:var(--ink); }
+    .detail {
+        background:#f2f4f7; border:1px solid #eceff3; border-radius:7px;
+        padding:3px 8px; min-width:0; line-height:1.35;
+    }
+    .detail.wide { grid-column:1/-1; }
+    .detail .lbl { display:block; font-size:6.5px; font-weight:800; color:#9aa3af; text-transform:uppercase; letter-spacing:.5px; }
+    .detail .val { display:block; font-size:9.5px; font-weight:700; color:#111827; word-break:break-word; }
     .foot {
         margin:0 6px 6px; display:grid; grid-template-columns:1fr auto 1fr; align-items:end;
         gap:4px 6px; font-size:8px; flex-shrink:0;
@@ -280,7 +290,12 @@ include __DIR__ . '/includes/header.php';
                             <div class="top">
                                 <div class="brand">
                                     <img src="<?php echo $logoSrc; ?>" alt="Logo" onerror="this.src='<?php echo BASE_URL; ?>assets/img/logo.jpg';">
-                                    <div><div class="school"><?php echo e($schoolName); ?></div></div>
+                                    <div>
+                                        <div class="school"><?php echo e($schoolName); ?></div>
+                                        <?php if (trim($schoolAddr) !== ''): ?>
+                                            <div class="school-sub"><?php echo e((strlen($schoolAddr) > 44 ? substr($schoolAddr, 0, 44) . '…' : $schoolAddr)); ?></div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
 
@@ -296,14 +311,14 @@ include __DIR__ . '/includes/header.php';
                             <div class="role">STUDENT</div>
 
                             <div class="details">
-                                <div class="line"><i class="fa fa-user"></i> <b>Father Name:</b>&nbsp;<span><?php echo e($st['father_name'] ?? '-'); ?></span></div>
-                                <div class="line"><i class="fa fa-barcode"></i> <b>GR No:</b>&nbsp;<span><?php echo e($grNo); ?></span></div>
-                                <div class="line"><i class="fa fa-graduation-cap"></i> <b>Class:</b>&nbsp;<span><?php echo e($st['class_name'] ?? '-'); ?><?php echo !empty($st['section_name']) ? ' - ' . e($st['section_name']) : ''; ?></span></div>
+                                <div class="detail wide"><span class="lbl">Father Name</span><span class="val"><?php echo e($st['father_name'] ?? '-'); ?></span></div>
+                                <div class="detail"><span class="lbl">Class</span><span class="val"><?php echo e($st['class_name'] ?? '-'); ?><?php echo !empty($st['section_name']) ? ' - ' . e($st['section_name']) : ''; ?></span></div>
+                                <div class="detail"><span class="lbl">GR No</span><span class="val"><?php echo e($grNo); ?></span></div>
                                 <?php if ($showDOB): ?>
-                                    <div class="line"><i class="fa fa-calendar"></i> <b>DOB:</b>&nbsp;<span><?php echo $st['dob'] ? date('d-M-Y', strtotime($st['dob'])) : '-'; ?></span></div>
+                                    <div class="detail"><span class="lbl">DOB</span><span class="val"><?php echo $st['dob'] ? date('d-M-Y', strtotime($st['dob'])) : '-'; ?></span></div>
                                 <?php endif; ?>
                                 <?php if ($showCell): ?>
-                                    <div class="line"><i class="fa fa-phone"></i> <b>Cell No:</b>&nbsp;<span><?php echo e($st['phone'] ?? '-'); ?></span></div>
+                                    <div class="detail"><span class="lbl">Cell No</span><span class="val"><?php echo e($st['phone'] ?? '-'); ?></span></div>
                                 <?php endif; ?>
                             </div>
 

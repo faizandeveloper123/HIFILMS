@@ -2,10 +2,21 @@
 -- HIIFI / LAPS School & College — Complete Database (hiifi_lms)
 -- MariaDB / MySQL 10.4+ (XAMPP)
 --
--- This is the full, consolidated schema for the HIFILMS application.
--- It includes every table the PHP pages create at runtime so the whole
--- system works out of the box. Import it once:
+-- This is the FULL, consolidated schema for the HIFILMS application.
+-- It includes every table the PHP pages create at runtime (including
+-- employee_removals and user_module_access) so the whole system works
+-- out of the box with a SINGLE import. To import:
+--
+--   Option A (Command line):
 --     mysql -u root -P 3306 < hiifi_lms.sql
+--
+--   Option B (phpMyAdmin):
+--     1. Open http://localhost/phpmyadmin
+--     2. Import tab -> choose this file -> Go
+--
+-- Default logins created after import:
+--   kashif123@gmail.com / kash7395515   (admin)
+--   laps@gmail.com      / Laps@2026     (admin)
 -- ============================================================================
 
 CREATE DATABASE IF NOT EXISTS `hiifi_lms` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
@@ -506,6 +517,29 @@ CREATE TABLE IF NOT EXISTS `staff_attendance` (
   CONSTRAINT `fk_satt_emp` FOREIGN KEY (`employee_id`) REFERENCES `employees`(`emp_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `employee_removals` (
+  `id`           INT AUTO_INCREMENT PRIMARY KEY,
+  `emp_id`       INT NOT NULL,
+  `name`         VARCHAR(191) DEFAULT NULL,
+  `phone`        VARCHAR(50) DEFAULT NULL,
+  `reason`       VARCHAR(500) DEFAULT NULL,
+  `removal_date` DATE DEFAULT NULL,
+  `removed_by`   INT DEFAULT NULL,
+  `created_at`   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY `idx_er_emp` (`emp_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `user_module_access` (
+  `id`         INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id`    INT NOT NULL,
+  `module`     VARCHAR(50) NOT NULL,
+  `page`       VARCHAR(50) NOT NULL,
+  `allowed`    TINYINT(1) DEFAULT 1,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY `uq_access` (`user_id`,`module`,`page`),
+  CONSTRAINT `fk_uma_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- ----------------------------------------------------------------------------
 -- 8. Payroll
 -- ----------------------------------------------------------------------------
@@ -642,6 +676,15 @@ CREATE TABLE IF NOT EXISTS `revenue_heads` (
   `head_name` VARCHAR(191) NOT NULL,
   `status`    TINYINT(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO `revenue_heads` (`head_name`, `status`) VALUES
+('Adm Fee', 1),
+('Reg Fee', 1),
+('Paper Fund', 1),
+('Dummy Head 1', 1),
+('Bus Head', 1),
+('Donation from xyz', 1),
+('Fee', 1);
 
 CREATE TABLE IF NOT EXISTS `revenues` (
   `revenue_id`   INT AUTO_INCREMENT PRIMARY KEY,
@@ -1022,6 +1065,14 @@ INSERT INTO `period_categories` (`name`) VALUES ('Primary'), ('Middle'), ('High'
 -- Class heads / campuses
 INSERT INTO `class_heads` (`class_head_name`, `status`) VALUES
 ('Hajvery Campus', 1), ('Main Campus', 1), ('Pharm-D', 1), ('Modern Edu', 1);
+
+-- Discount packages (fee plan dropdown)
+INSERT INTO `fee_discount_packages` (`name`, `discount_percent`, `status`) VALUES
+('75', 75, 1), ('Sibling', 25, 1), ('Orphan', 50, 1);
+
+-- Discount manager list
+INSERT INTO `fee_discounts` (`name`, `type`, `value`, `status`) VALUES
+('75', 'percentage', 75, 1), ('Subbling', 'percentage', 25, 1), ('Orphan', 'percentage', 50, 1);
 
 -- Expense categories + sub categories
 INSERT INTO `expense_categories` (`name`, `status`) VALUES ('Utilities', 1), ('Salaries', 1), ('Rent', 1),
