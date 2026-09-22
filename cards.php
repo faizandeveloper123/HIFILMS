@@ -20,23 +20,37 @@ if ($empFs < 8) $empFs = 8; if ($empFs > 26) $empFs = 26;
 $valid    = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['valid'] ?? '') ? $_GET['valid'] : date('Y-m-d', strtotime('+1 year'));
 $accent   = '#f2d500';
 
-$employees = [];
+$selEmp  = (int) ($_GET['emp_id'] ?? 0);
+$selDept = isset($_GET['department']) && trim($_GET['department']) !== '' ? trim($_GET['department']) : '';
+
+$allEmployees = [];
 $res = db_query("SELECT e.*, qt.token AS qr_token
                  FROM employees e
                  LEFT JOIN qr_tokens qt ON qt.user_id = e.emp_id AND qt.user_type IN ('staff','employee') AND qt.is_active = 1
-                 WHERE e.status = 1 ORDER BY e.emp_id");
-while ($row = $res->fetch_assoc()) { $employees[] = $row; }
+                 WHERE e.status = 1 ORDER BY e.first_name");
+while ($row = $res->fetch_assoc()) { $allEmployees[] = $row; }
 
 // Ensure every staff member has a unique random QR token
 $insToken = db_prepare("INSERT INTO qr_tokens (user_id, user_type, token, created_at, expires_at, is_active) VALUES (?, 'staff', ?, NOW(), DATE_ADD(NOW(), INTERVAL 2 YEAR), 1)");
-foreach ($employees as $i => $emp) {
+foreach ($allEmployees as $i => $emp) {
     if (empty($emp['qr_token'])) {
         $token = 'QR-' . strtoupper(bin2hex(random_bytes(8)));
         $eid = (int) $emp['emp_id'];
         $insToken->bind_param('is', $eid, $token);
         $insToken->execute();
-        $employees[$i]['qr_token'] = $token;
+        $allEmployees[$i]['qr_token'] = $token;
     }
+}
+
+$employees = $allEmployees;
+if ($selEmp > 0) {
+    $employees = array_values(array_filter($allEmployees, function ($e) use ($selEmp) {
+        return (int) $e['emp_id'] === $selEmp;
+    }));
+} elseif ($selDept !== '') {
+    $employees = array_values(array_filter($allEmployees, function ($e) use ($selDept) {
+        return strcasecmp(trim((string)($e['department'] ?? '')), $selDept) === 0;
+    }));
 }
 
 function card_photo_upload($file, $dir, $prefix) {
@@ -207,10 +221,40 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
-        <div class="sheet" id="cardSheet">
-            <?php if (count($employees) === 0): ?>
-                <div class="no-record" style="grid-column:1/-1;">No staff added yet. HRM module se employees add karein.</div>
+<?php
+            $depts = [];
+            foreach ($allEmployees as $demp) {
+                $dd = trim((string)($demp['department'] ?? ''));
+                if ($dd !== '') {
+                    $depts[$dd] = true;
+                }
+            }
+            ksort($depts);
+        ?>
+        <form method="get" action="cards.php" class="search-bar-student no-print">
+            <div class="form-group col-md-4" style="margin-bottom:0;">
+                <label>Select Staff</label>
+                <select name="emp_id" class="form-control" onchange="this.form.submit()">
+                    <option value="0">All Staff</option>
+                    <?php foreach ($allEmployees as $se): ?>
+                        <option value="<?php echo (int)$se['emp_id']; ?>" <?php echo $selEmp === (int)$se['emp_id'] ? 'selected' : ''; ?>>
+                            #<?php echo (int)$se['emp_id']; ?> - <?php echo e(trim(($se['first_name'] ?? '') . ' ' . ($se['last_name'] ?? ''))); ?><?php echo !empty($se['designation']) ? ' (' . e($se['designation']) . ')' : ''; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <?php if (count($depts) > 0): ?>
+                <div class="form-group col-md-3" style="margin-bottom:0;">
+                    <label>Department</label>
+                    <select name="department" class="form-control" onchange="this.form.submit()">
+                        <option value="">All Departments</option>
+                        <?php foreach (array_keys($depts) as $dep): ?>
+                            <option value="<?php echo e($dep); ?>" <?php echo $selDept === $dep ? 'selected' : ''; ?>><?php echo e($dep); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             <?php endif; ?>
+        </form>
             <?php foreach ($employees as $emp):
                 $fullName = trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? ''));
                 $initial = strtoupper(substr($fullName !== '' ? $fullName : 'E', 0, 1));
