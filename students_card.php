@@ -16,6 +16,7 @@ $sigSrc      = $sigImg !== '' ? BASE_URL . 'assets/uploads/' . basename($sigImg)
 $sel_class = (int) ($_GET['class_id'] ?? 0);
 $sel_section = (int) ($_GET['section_id'] ?? 0);
 $sel_student = (int) ($_GET['student_id'] ?? 0);
+$viewMode = isset($_GET['view']) && (int)($_GET['view'] ?? 0) === 1;
 
 $valid   = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['valid'] ?? '') ? $_GET['valid'] : date('Y-m-d', strtotime('+1 year'));
 $color   = isset($_GET['color']) && preg_match('/^[0-9a-fA-F]{6}$/', $_GET['color']) ? '#' . $_GET['color'] : '#0067d7';
@@ -242,10 +243,11 @@ include __DIR__ . '/includes/header.php';
 
 <div class="main-content">
     <div class="container-fluid">
+        <?php if (!$viewMode): ?>
         <div class="cards-head">
             <h3><i class="fa fa-id-card"></i> Students Cards</h3>
             <div class="cards-actions no-print">
-                <button onclick="window.print()" class="btn btn-success" <?php echo $sel_class > 0 ? '' : 'disabled'; ?>><i class="fa fa-print"></i> Print Cards</button>
+                <button onclick="window.print()" class="btn btn-success" <?php echo $sel_student > 0 ? '' : 'disabled'; ?>><i class="fa fa-print"></i> Print Cards</button>
                 <button type="button" class="btn btn-primary" style="color:#fff;" onclick="openCC()"><i class="fa fa-paint-brush"></i> Apply Customization</button>
                 <a href="<?php echo BASE_URL; ?>cards.php" class="btn btn-primary" style="color:#fff;"><i class="fa fa-id-card"></i> Staff Cards</a>
             </div>
@@ -272,8 +274,8 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="form-group col-md-3" style="margin-bottom:0;">
                 <label>Student</label>
-                <select name="student_id" class="form-control" onchange="this.form.submit()">
-                    <option value="0">None</option>
+                <select name="student_id" class="form-control" onchange="if(this.value){location.href='<?php echo BASE_URL; ?>students_card.php?class_id=<?php echo $sel_class; ?>&section_id=<?php echo $sel_section; ?>&student_id='+encodeURIComponent(this.value)+'&view=1';}">
+                    <option value="0">Select Student</option>
                     <?php foreach ($allClassStudents as $ss): $ssn = trim(($ss['first_name'] ?? '') . ' ' . ($ss['last_name'] ?? '')); ?>
                         <option value="<?php echo (int)$ss['student_id']; ?>" <?php echo $sel_student === (int)$ss['student_id'] ? 'selected' : ''; ?>>
                             <?php echo (int)$ss['student_id']; ?>. <?php echo e($ssn); ?>
@@ -287,11 +289,23 @@ include __DIR__ . '/includes/header.php';
             </div>
         </form>
 
+        <?php else: ?>
+        <div class="cards-head no-print">
+            <h3><i class="fa fa-id-card"></i> Student Card</h3>
+            <div class="cards-actions no-print">
+                <a href="<?php echo BASE_URL; ?>students_card.php?class_id=<?php echo $sel_class; ?>&section_id=<?php echo $sel_section; ?>" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
+                <button onclick="window.print()" class="btn btn-success"><i class="fa fa-print"></i> Print Card</button>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <div class="sheet" id="cardSheet">
-            <?php if ($sel_class > 0 && count($students) === 0): ?>
-                <div class="no-record" style="grid-column:1/-1;">No students in this class.</div>
-            <?php elseif ($sel_class === 0): ?>
+            <?php if ($sel_class === 0): ?>
                 <div class="no-record" style="grid-column:1/-1;">Select a class to generate student cards.</div>
+            <?php elseif ($sel_student === 0): ?>
+                <div class="no-record" style="grid-column:1/-1;">Pehle student ka naam select karein, phir uska card khulega.</div>
+            <?php elseif (count($students) === 0): ?>
+                <div class="no-record" style="grid-column:1/-1;">No students in this class.</div>
             <?php else: ?>
                 <?php foreach ($students as $st):
                     $fullName = trim(($st['first_name'] ?? '') . ' ' . ($st['last_name'] ?? ''));
@@ -383,32 +397,29 @@ include __DIR__ . '/includes/header.php';
         <form method="get" action="<?php echo BASE_URL; ?>students_card.php">
             <input type="hidden" name="class_id" value="<?php echo $sel_class; ?>">
             <input type="hidden" name="section_id" value="<?php echo $sel_section; ?>">
+            <input type="hidden" name="student_id" value="<?php echo $sel_student; ?>">
+            <div class="cc-row"><label>Theme Color</label>
+                <input type="color" name="color" value="<?php echo $color; ?>"></div>
             <div class="cc-row" style="display:flex; gap:10px;">
-                <div style="flex:1;"><label>Theme Color</label>
-                    <input type="color" name="color" value="<?php echo $color; ?>"></div>
                 <div style="flex:1;"><label>Display DOB</label>
                     <select name="DOB"><option value="YES" <?php echo $showDOB ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo !$showDOB ? 'selected' : ''; ?>>NO</option></select></div>
-            </div>
-            <div class="cc-row" style="display:flex; gap:10px;">
                 <div style="flex:1;"><label>Display Cell Number</label>
                     <select name="cell_number"><option value="YES" <?php echo $showCell ? 'selected' : ''; ?>>YES</option><option value="NO" <?php echo !$showCell ? 'selected' : ''; ?>>NO</option></select></div>
-                <div style="flex:1;"><label>Validity Date</label>
-                    <input type="date" name="valid" value="<?php echo $valid; ?>"></div>
             </div>
-            <div class="cc-row" style="display:flex; gap:10px;">
-                <div style="flex:1;"><label>School Name Font Size</label>
-                    <select name="school_name_font_size">
-                        <?php for ($f = 8; $f <= 24; $f++): ?>
-                            <option value="<?php echo $f; ?>" <?php echo $f == $schoolFs ? 'selected' : ''; ?>><?php echo $f; ?>px</option>
-                        <?php endfor; ?>
-                    </select></div>
-                <div style="flex:1;"><label>Student Name Font Size</label>
-                    <select name="name_font_size">
-                        <?php for ($f = 8; $f <= 24; $f++): ?>
-                            <option value="<?php echo $f; ?>" <?php echo $f == $nameFs ? 'selected' : ''; ?>><?php echo $f; ?>px</option>
-                        <?php endfor; ?>
-                    </select></div>
-            </div>
+            <div class="cc-row"><label>School Name Font Size</label>
+                <select name="school_name_font_size">
+                    <?php for ($f = 8; $f <= 24; $f++): ?>
+                        <option value="<?php echo $f; ?>" <?php echo $f == $schoolFs ? 'selected' : ''; ?>><?php echo $f; ?>px</option>
+                    <?php endfor; ?>
+                </select></div>
+            <div class="cc-row"><label>Student Name Font Size</label>
+                <select name="name_font_size">
+                    <?php for ($f = 8; $f <= 24; $f++): ?>
+                        <option value="<?php echo $f; ?>" <?php echo $f == $nameFs ? 'selected' : ''; ?>><?php echo $f; ?>px</option>
+                    <?php endfor; ?>
+                </select></div>
+            <div class="cc-row"><label>Validity Date</label>
+                <input type="date" name="valid" value="<?php echo $valid; ?>"></div>
             <div class="cc-actions">
                 <button type="button" class="btn btn-default" onclick="closeCC();">Cancel</button>
                 <button type="submit" class="btn btn-primary" style="color:#fff;">Apply</button>
@@ -417,7 +428,18 @@ include __DIR__ . '/includes/header.php';
 
         <hr style="border:none; border-top:1px solid #eee; margin:16px 0;">
         <h4 style="font-size:14px; margin:0 0 10px;"><i class="fa fa-camera" style="color:#FF7A1B;"></i> Change Student Photo</h4>
-        <?php if (count($students) > 0): ?>
+        <?php if (count($allClassStudents) > 0): ?>
+            <?php
+                $stuPhotoMap = [];
+                foreach ($allClassStudents as $st) {
+                    $pf = '';
+                    if (!empty($st['photo']) && is_file(__DIR__ . '/uploads/students/' . $st['photo'])) {
+                        $pf = BASE_URL . 'uploads/students/' . e($st['photo']);
+                    }
+                    $initial = strtoupper(substr(trim(($st['first_name'] ?? '') . ' ' . ($st['last_name'] ?? '')), 0, 1)) ?: 'S';
+                    $stuPhotoMap[(int)$st['student_id']] = ['url' => $pf, 'initial' => $initial];
+                }
+            ?>
             <form method="post" enctype="multipart/form-data" action="<?php echo BASE_URL; ?>students_card.php">
                 <input type="hidden" name="action" value="update_card_photo">
                 <input type="hidden" name="class_id" value="<?php echo $sel_class; ?>">
@@ -429,13 +451,19 @@ include __DIR__ . '/includes/header.php';
                 <input type="hidden" name="DOB" value="<?php echo $showDOB ? 'YES' : 'NO'; ?>">
                 <input type="hidden" name="cell_number" value="<?php echo $showCell ? 'YES' : 'NO'; ?>">
                 <div class="cc-row"><label>Student</label>
-                    <select name="card_student_id">
-                        <?php foreach ($students as $st): ?>
-                            <option value="<?php echo (int)$st['student_id']; ?>"><?php echo e(trim($st['first_name'] . ' ' . ($st['last_name'] ?? ''))); ?></option>
+                    <select name="card_student_id" id="ccStuSel" onchange="updStudentPick(this)">
+                        <?php foreach ($allClassStudents as $st): ?>
+                            <option value="<?php echo (int)$st['student_id']; ?>"><?php echo (int)$st['student_id']; ?>. <?php echo e(trim($st['first_name'] . ' ' . ($st['last_name'] ?? ''))); ?></option>
                         <?php endforeach; ?>
                     </select></div>
-                <div class="cc-row"><label>Photo (JPG/PNG)</label>
-                    <input type="file" name="card_photo" accept="image/*" required></div>
+                <div class="cc-row" style="justify-content:center;">
+                    <label class="pick-box" for="card_photo_input">
+                        <img id="studentPickPrev" alt="">
+                        <span class="pick-empty" id="studentPickEmpty"><i class="fa fa-graduation-cap"></i><br><small>Photo Pick Karne ke liye Click Karein</small></span>
+                        <span class="pick-cam"><i class="fa fa-camera"></i> Change Photo</span>
+                    </label>
+                    <input type="file" id="card_photo_input" name="card_photo" accept="image/*" style="display:none;" required onchange="previewStudentPhoto(this)">
+                </div>
                 <div class="cc-actions">
                     <button type="submit" class="btn btn-success" style="color:#fff;"><i class="fa fa-upload"></i> Update Photo</button>
                 </div>
@@ -446,9 +474,46 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<style>
+    .pick-box{ position:relative; display:flex; align-items:center; justify-content:center; width:110px; height:110px; border-radius:14px; border:2px dashed #d1d5db; background:#f9fafb; cursor:pointer; overflow:hidden; margin:0 auto; }
+    .pick-box img{ width:100%; height:100%; object-fit:cover; display:none; border-radius:12px; }
+    .pick-empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#9CA3AF; font-size:26px; gap:4px; }
+    .pick-empty small{ font-size:10px; line-height:1.3; font-weight:600; text-transform:uppercase; letter-spacing:.3px; padding:0 8px; }
+    .pick-cam{ position:absolute; left:0; right:0; bottom:0; background:rgba(0,0,0,.55); color:#fff; font-size:10.5px; font-weight:700; text-align:center; padding:3px 0; text-transform:uppercase; letter-spacing:.3px; }
+</style>
+
+<script>
+var STUDENT_PHOTOS = {
+    <?php foreach ($stuPhotoMap as $sid => $info): ?>
+        "<?php echo $sid; ?>": { url: "<?php echo $info['url']; ?>", initial: "<?php echo $info['initial']; ?>" },
+    <?php endforeach; ?>
+};
+function updStudentPick(sel) {
+    var info = STUDENT_PHOTOS[sel.value] || { url: '', initial: 'S' };
+    var img = document.getElementById('studentPickPrev');
+    var empty = document.getElementById('studentPickEmpty');
+    if (info.url) { img.src = info.url; img.style.display = 'block'; empty.style.display = 'none'; }
+    else { img.style.display = 'none'; empty.innerHTML = '<i class="fa fa-graduation-cap"></i><br><small>' + info.initial + ' | No Photo</small>'; empty.style.display = 'flex'; }
+}
+function previewStudentPhoto(input) {
+    if (input.files && input.files[0]) {
+        var rd = new FileReader();
+        rd.onload = function(e) {
+            var img = document.getElementById('studentPickPrev');
+            img.src = e.target.result; img.style.display = 'block';
+            document.getElementById('studentPickEmpty').style.display = 'none';
+        };
+        rd.readAsDataURL(input.files[0]);
+    }
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var sel = document.getElementById('ccStuSel');
+    if (sel) updStudentPick(sel);
+});
+</script>
+
 <script>
 function openCC(){ var ov = document.getElementById('ccOverlay'); ov.style.display = 'block'; var p = ov.querySelector('.cc-panel'); if (p) p.scrollTop = 0; }
 function closeCC(){ document.getElementById('ccOverlay').style.display = 'none'; }
 </script>
-
 <?php include __DIR__ . '/includes/footer.php'; ?>

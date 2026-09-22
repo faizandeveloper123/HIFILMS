@@ -22,6 +22,7 @@ $accent   = '#f2d500';
 
 $selEmp  = (int) ($_GET['emp_id'] ?? 0);
 $selDept = isset($_GET['department']) && trim($_GET['department']) !== '' ? trim($_GET['department']) : '';
+$viewMode = isset($_GET['view']) && (int)($_GET['view'] ?? 0) === 1;
 
 $allEmployees = [];
 $res = db_query("SELECT e.*, qt.token AS qr_token
@@ -212,6 +213,7 @@ include __DIR__ . '/includes/header.php';
 
 <div class="main-content">
     <div class="container-fluid">
+        <?php if (!$viewMode): ?>
         <div class="cards-head">
             <h3><i class="fa fa-id-card"></i> Staff Cards</h3>
             <div class="cards-actions no-print">
@@ -234,7 +236,7 @@ include __DIR__ . '/includes/header.php';
         <form method="get" action="cards.php" class="search-bar-student no-print">
             <div class="form-group col-md-4" style="margin-bottom:0;">
                 <label>Select Staff</label>
-                <select name="emp_id" class="form-control" onchange="this.form.submit()">
+                <select name="emp_id" class="form-control" onchange="if(this.value){location.href='<?php echo BASE_URL; ?>cards.php?emp_id='+encodeURIComponent(this.value)+'&view=1';}">
                     <option value="0">Select Staff Name</option>
                     <?php foreach ($allEmployees as $se): ?>
                         <option value="<?php echo (int)$se['emp_id']; ?>" <?php echo $selEmp === (int)$se['emp_id'] ? 'selected' : ''; ?>>
@@ -255,12 +257,21 @@ include __DIR__ . '/includes/header.php';
                 </div>
             <?php endif; ?>
         </form>
+        <?php else: ?>
+        <div class="cards-head no-print">
+            <h3><i class="fa fa-id-card"></i> Staff Card</h3>
+            <div class="cards-actions no-print">
+                <a href="<?php echo BASE_URL; ?>cards.php" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back</a>
+                <button onclick="window.print()" class="btn btn-success"><i class="fa fa-print"></i> Print Card</button>
+            </div>
+        </div>
+        <?php endif; ?>
 
-        <div class="sheet" id="cardSheet">
+        <div id="cardSheet">
             <?php if ($selEmp <= 0): ?>
-                <div class="no-record" style="grid-column:1/-1;">Pehle staff ka naam select karein, phir uska card khulega.</div>
+                <div class="no-record" style="grid-column:1/-1;">&nbsp;</div>
             <?php elseif (count($employees) === 0): ?>
-                <div class="no-record" style="grid-column:1/-1;">Koi staff card nahi mila.</div>
+                <div class="no-record" style="grid-column:1/-1;">&nbsp;</div>
             <?php else: ?>
             <?php foreach ($employees as $emp):
                 $fullName = trim(($emp['first_name'] ?? '') . ' ' . ($emp['last_name'] ?? ''));
@@ -330,7 +341,6 @@ include __DIR__ . '/includes/header.php';
             <?php endforeach; ?>
             <?php endif; ?>
         </div>
-        </div>
     </div>
 </div>
 
@@ -390,7 +400,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="cc-row" style="justify-content:center;">
                     <label class="pick-box" for="card_photo_input">
                         <img id="staffPickPrev" alt="">
-                        <span class="pick-empty" id="staffPickEmpty"><i class="fa fa-user"></i><br><small>Photo Pick Karne ke liye Click Karein</small></span>
+                        <span class="pick-empty" id="staffPickEmpty"><i class="fa fa-user"></i><br><small>Click to Pick a Photo</small></span>
                         <span class="pick-cam"><i class="fa fa-camera"></i> Change Photo</span>
                     </label>
                     <input type="file" id="card_photo_input" name="card_photo" accept="image/*" style="display:none;" required onchange="previewStaffPhoto(this)">
@@ -400,7 +410,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </form>
         <?php else: ?>
-            <p style="color:#9CA3AF; font-size:12px; margin:0;">Koi staff member available nahi hai.</p>
+            <p style="color:#9CA3AF; font-size:12px; margin:0;">No staff member available.</p>
         <?php endif; ?>
     </div>
 </div>
