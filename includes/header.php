@@ -627,6 +627,11 @@ $topRoleLabel = ucfirst($topUserRole);
     .searchbar-container{ width: 20%; display:flex; align-items:center; justify-content:flex-start; margin-left:0; }
     .searchbar-container input{ width:100%; height:44px; padding:0 14px; border-radius:28px; background:#fff; border:1px solid rgba(145,158,171,0.20); box-shadow:0 6px 16px rgba(145,158,171,0.15); }
     #livesearch { position:absolute; top:100%; left:0; width:100%; background-color:white; z-index:902; padding:10px; border:1px solid rgba(145,158,171,0.20); box-shadow:0 6px 16px rgba(145,158,171,0.15); display:none; }
+    #filter { font-size:13.5px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; }
+    #filter::placeholder { font-size:13px; }
+    @media (max-width: 1200px){ #filter { font-size:12.5px; padding:0 12px; } #filter::placeholder { font-size:12px; } }
+    @media (max-width: 992px){ #filter { font-size:12px; padding:0 10px; } #filter::placeholder { font-size:11.5px; } }
+    @media (max-width: 768px){ #filter { font-size:13px; padding:0 14px; } #filter::placeholder { font-size:12px; } }
     .search-item { display:block; padding:8px 10px; border-bottom:1px solid #f0f0f0; color:#111; text-decoration:none; font-size:13px; }
     .search-item:last-child { border-bottom:none; }
     .search-item:hover,.search-item.active { background:#f4f6f8; }
@@ -659,6 +664,19 @@ $topRoleLabel = ucfirst($topUserRole);
     .user-designation{ font-size:11px; opacity:.7; }
     @media (max-width: 1200px){ .user-info{ display:none; } }
     @media (max-width: 992px){ .brand-info{ display:none; } }
+    @media (min-width: 1201px) and (max-width: 1500px){
+      .searchbar-container{ flex:1 1 340px !important; min-width:260px !important; max-width:500px !important; margin-left:15px !important; }
+      .quick-link-btn{ margin-right:8px !important; }
+    }
+    @media (min-width: 993px) and (max-width: 1200px){
+      .searchbar-container{ flex:1 1 300px !important; min-width:240px !important; max-width:460px !important; margin-left:12px !important; }
+      .quick-link-btn .btn{ width:170px !important; padding:0 14px !important; font-size:13px !important; }
+    }
+    @media (min-width: 769px) and (max-width: 992px){
+      .searchbar-container{ flex:1 1 280px !important; min-width:220px !important; max-width:440px !important; margin-left:10px !important; }
+      .quick-link-btn .btn{ width:150px !important; padding:0 12px !important; font-size:13px !important; }
+      .message{ margin-left:8px !important; }
+    }
     .mobile-profile { display: none !important; }
     .desktop-profile { display: flex !important; }
     .user-dropdown { background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 12px 32px rgba(15,23,42,0.12); overflow:hidden; }
@@ -682,8 +700,8 @@ $topRoleLabel = ucfirst($topUserRole);
       .brand-info{ display:block !important; width:100% !important; min-width:auto !important; flex:1 1 100% !important; padding:0; }
       .brand-title{ font-size:18px !important; }
       .brand-subtitle{ font-size:12px !important; }
-      .searchbar-container{ width:100% !important; flex:1 1 100% !important; }
-      .quick-link-btn{ width:100% !important; }
+      .searchbar-container{ width:100% !important; flex:1 1 100% !important; min-width:100% !important; max-width:none !important; margin-left:0 !important; order:2; }
+      .quick-link-btn{ width:100% !important; flex:1 1 100% !important; order:3; }
       .quick-link-btn .btn{ width:100% !important; justify-content:space-between; }
       .message{ margin-left:0 !important; width:100% !important; display:flex !important; flex-direction:row !important; gap:8px !important; align-items:center !important; justify-content:center !important; flex-wrap:nowrap !important; }
       .chip.user-chip{ width:auto !important; flex-shrink:0 !important; }
@@ -704,8 +722,8 @@ $topRoleLabel = ucfirst($topUserRole);
     <div class="brand-subtitle" style="font-size:14px;color:#637381;font-style:normal;margin-top:4px;"><?php echo e($topSession); ?></div>
 </div>
 
-<div class="searchbar-container" style="width:260px;min-width:180px;max-width:400px;flex:1 1 260px;margin:0 0px;padding-bottom:11px;margin-left:25px;position:relative;">
-    <input type="text" id="filter" style="width:100%;height:44px;padding:0 14px;border-radius:28px;background:#fff;border:1px solid rgba(145,158,171,0.20);box-shadow:0 6px 16px rgba(145,158,171,0.15);" placeholder="Search Student with | Name | GR No | Family Code | Cell No" onkeyup="showResult(this.value)">
+<div class="searchbar-container" style="width:420px;min-width:280px;max-width:600px;flex:1 1 420px;margin:0 0px;padding:6px 0 0;margin-left:25px;position:relative;">
+    <input type="text" id="filter" style="width:100%;height:44px;padding:0 14px;border-radius:28px;background:#fff;border:1px solid rgba(145,158,171,0.20);box-shadow:0 6px 16px rgba(145,158,171,0.15);" placeholder="Search Student | Name | GR No | Cell No" onkeyup="showResult(this.value)">
     <div id="livesearch" style="background-color:white;z-index:902;padding:10px;display:none;"></div>
 </div>
 
@@ -818,7 +836,6 @@ $topRoleLabel = ucfirst($topUserRole);
 </div>
 <!-- /top navigation -->
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script>
 var a,b;
 function showResult(str) {

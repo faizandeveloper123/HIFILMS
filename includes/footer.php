@@ -1,8 +1,5 @@
 <?php if (!defined('HIIFI')) exit('Direct access not allowed.'); ?>
         </div>
-<script src="<?php echo BASE_URL; ?>assets/js/jqueryfile.js"></script>
-<script src="<?php echo BASE_URL; ?>assets/js/bootstrap.min.js"></script>
-<script src="<?php echo BASE_URL; ?>assets/js/custom.min.js"></script>
 <script src="<?php echo BASE_URL; ?>assets/js/jquery.sparkline.min.js"></script>
 <script>
 (function(){
