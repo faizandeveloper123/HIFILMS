@@ -144,11 +144,22 @@ include __DIR__ . '/includes/header.php';
   .search-bar-student .form-group { padding:4px !important; }
   .search-bar-student .form-group input, .search-bar-student .form-group select { width:100% !important; }
 }
+@media (max-width: 767px) {
+  #listofstudents { font-size:12px; }
+  #listofstudents th, #listofstudents td { padding: 5px 4px !important; white-space: nowrap; }
+  #listofstudents th:nth-child(3), #listofstudents td:nth-child(3) { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+  #listofstudents .att-option { min-width:30px; height:26px; font-size:11px; }
+  #listofstudents .att-option span { padding:0 6px; }
+  #listofstudents .attendance-pills { gap:3px; }
+  .filter-row .col-md-5 .form-group { margin-bottom:0 !important; }
+}
 @media (max-width: 480px) {
   .qr-scan-btn { width:100%; white-space:normal; }
   #saveAttendanceBtn { width:100%; }
   .search-bar-student { padding:12px; }
 }
+@keyframes fadeInDown { from { opacity:0; transform: translateY(-14px); } to { opacity:1; transform: translateY(0); } }
+@keyframes fadeInUp   { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
 </style>
 
 <div class="main-content">
@@ -173,10 +184,10 @@ include __DIR__ . '/includes/header.php';
 
         <form class="" action="mark_attend.php" method="get">
             <div class="panel panel-default">
-                <div class="panel-heading"> Students Records <span style="float:right;margin-top: -7px;"></span><div class="clearfix"></div></div>
+                <div class="panel-heading"> Students Records <div class="clearfix"></div>
                 <div class="panel-body">
                     <div class="col-md-12 filter-row" id="advanceSearch" style="">
-                        <div class="col-md-1 col-xs-12" style="padding: 8px;">
+                        <div class="col-md-3 col-xs-12" style="padding: 8px;">
                             <div class="form-group">
                                 <label class="required">Session</label>
                                 <select name="session" class="form-control inputheight" style="font-size:12px; padding-left:4px;">
@@ -219,7 +230,7 @@ include __DIR__ . '/includes/header.php';
                                 </select>
                             </div>
                         </div>
-<div class="col-md-5 col-xs-12" style="padding: 8px;">
+                        <div class="col-md-3 col-xs-12" style="padding: 8px;">
                             <div style="display:flex; flex-wrap:nowrap; justify-content:flex-end; align-items:flex-end; gap:6px;">
                                 <div class="form-group" style="margin:0; flex:0 0 auto;">
                                     <label>Group / Shift</label>
@@ -400,6 +411,28 @@ function qrLookup(){
         .catch(function(){ out.innerHTML = '<div class="alert alert-danger">Search service unavailable. Please try the manual list.</div>'; });
 }
 function escapeHtml(t){ var d = document.createElement('div'); d.textContent = t == null ? '' : String(t); return d.innerHTML; }
+function toggleAdvanceSearch(){
+    var box = document.getElementById('advanceSearch');
+    var icon = document.getElementById('advIcon');
+    if (!box) return;
+    var hide = box.style.display === 'none';
+    if (hide) {
+        box.style.display = '';
+        box.style.animation = '';
+        box.style.animation = 'fadeInDown .2s ease';
+        if (icon) icon.className = 'fa fa-chevron-up';
+    } else {
+        box.style.display = 'none';
+        if (icon) icon.className = 'fa fa-chevron-down';
+    }
+}
+    var scr = document.getElementById('advanceSearch');
+    if (scr) setTimeout(function(){ scr.scrollIntoView({behavior:'smooth', block:'start'}); }, 80);
+}
+    if (icon) icon.className = 'fa fa-chevron-up';
+    var scr = document.getElementById('advanceSearch');
+    if (scr) setTimeout(function(){ scr.scrollIntoView({behavior:'smooth', block:'start'}); }, 60);
+}
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
