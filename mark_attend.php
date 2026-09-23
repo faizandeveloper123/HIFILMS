@@ -70,7 +70,7 @@ if ($sel_class > 0) {
         $sql .= " AND s.group_shift=?";
         $params[] = $sel_shift; $types .= 's';
     }
-    $sql .= " ORDER BY s.roll_no, s.first_name";
+    $sql .= " ORDER BY CAST(s.roll_no AS UNSIGNED), s.roll_no, s.student_id";
     $stmt = db_prepare($sql);
     $stmt->bind_param($types, ...$params);
     $stmt->execute();
@@ -219,20 +219,21 @@ include __DIR__ . '/includes/header.php';
                         </div>
                         <div class="col-md-2" style="padding: 8px;">
                             <div class="form-group">
-                                <label class="required">Course/Class Head</label>
+                                <label class="required">Class Head</label>
                                 <select name="class_head" id="class_head" class="form-control" onchange="getClassesByHead(this.value)">
                                     <option value="">All</option>
-                                    <?php foreach ($classHeads as $ch): ?>
-                                        <option value="<?php echo e($ch['id']); ?>" <?php echo $sel_class_head == $ch['id'] ? 'selected' : ''; ?>><?php echo e($ch['name']); ?></option>
+                                    <?php $headOptions = ['English Department', 'Computer Science', 'School', 'Academy', 'Modern Edu', 'Primary', 'Urdu Lecturer']; ?>
+                                    <?php foreach ($headOptions as $hi => $hname): ?>
+                                        <option value="<?php echo $hi + 1; ?>" <?php echo $sel_class_head == ($hi + 1) ? 'selected' : ''; ?>><?php echo e($hname); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-2" style="padding: 8px;">
                             <div class="form-group">
-                                <label class="required">Course/Class</label>
+                                <label class="required">Class</label>
                                 <select name="class_id" id="class_id" class="form-control">
-                                    <option value="">Select Course/Class</option>
+                                    <option value="">Select Class</option>
                                     <?php foreach ($classes as $c): ?>
                                         <option value="<?php echo $c['class_id']; ?>" <?php echo $sel_class == $c['class_id'] ? 'selected' : ''; ?>><?php echo e($c['class_name']); ?></option>
                                     <?php endforeach; ?>
@@ -256,7 +257,11 @@ include __DIR__ . '/includes/header.php';
                                     <label>Group / Shift</label>
                                     <select name="group_shift" class="form-control" style="min-width:100px; font-size:13px;">
                                         <option value="All">All</option>
-                                        <?php foreach ($shifts as $sh): ?>
+                                        <?php $shiftOptions = ['Morning', 'Evening', 'Karate Kids', 'Normal']; ?>
+                                        <?php foreach ($shiftOptions as $so): ?>
+                                            <option value="<?php echo e($so); ?>" <?php echo $sel_shift == $so ? 'selected' : ''; ?>><?php echo e($so); ?></option>
+                                        <?php endforeach; ?>
+                                        <?php foreach ($shifts as $sh): if (in_array($sh, $shiftOptions, true) || $sh === '2' || $sh === '3') continue; ?>
                                             <option value="<?php echo e($sh); ?>" <?php echo $sel_shift == $sh ? 'selected' : ''; ?>><?php echo e($sh); ?></option>
                                         <?php endforeach; ?>
                                     </select>
@@ -334,8 +339,22 @@ include __DIR__ . '/includes/header.php';
             <button type="submit" name="submit" class="btn btn-success" style="padding:10px 30px;"><i class="fa fa-check"></i> Save Attendance</button>
         </form>
         <?php else: ?>
-            <div style="text-align:center; color:#6B7280; padding:40px; background:#fff; border:1px solid #E5E7EB; border-radius:14px;">
-                Please select a Class and click Search to load students.
+            <div style="background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:16px;">
+                <div style="overflow-x:auto;">
+                    <table id="listofstudents" class="table table-striped table-bordered" style="width:100%; table-layout:fixed; background:#fff; margin-bottom:10px;">
+                        <thead>
+                            <tr>
+                                <th>S.No</th>
+                                <th>GR. No</th>
+                                <th>Student / Father Name</th>
+                                <th>Section</th>
+                                <th>Shift</th>
+                                <th>Attendance</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
 
@@ -392,7 +411,7 @@ function getClassesByHead(val){
         .then(function(data){
             if (data && data.length) {
                 var sel = document.getElementById('class_id');
-                sel.innerHTML = '<option value="">Select Course/Class</option>';
+                sel.innerHTML = '<option value="">Select Class</option>';
                 data.forEach(function(c){
                     var o = document.createElement('option');
                     o.value = c.class_id; o.textContent = c.class_name;
