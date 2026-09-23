@@ -230,43 +230,6 @@ include __DIR__ . '/includes/header.php';
 
 </div>
 
-<div class="row">
-<?php foreach ($checks as $j => $c): ?>
-    <div class="col-md-12" style="margin-top: 15px;">
-        <div style="background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; margin-bottom: 12px;">
-            <h4 style="margin: 0 0 10px 0; font-weight: 700; color: #111827;">
-                <i class="fa fa-list"></i> <?php echo $c['title']; ?> - Affected Records
-            </h4>
-            <div class="table-responsive">
-            <table class="table table-striped table-bordered" style="width:100%;background-color:#FFFFFF;">
-                <thead>
-                    <tr>
-                        <?php foreach ($c['columns'] as $col): ?>
-                            <th><?php echo $col; ?></th>
-                        <?php endforeach; ?>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php if (count($c['rows']) === 0): ?>
-                    <tr><td colspan="<?php echo count($c['columns']); ?>" style="text-align:center; color:#6b7280;">No records found.</td></tr>
-                <?php else: ?>
-                    <?php $sn = 1; foreach ($c['rows'] as $r): ?>
-                    <tr>
-                        <td style="text-align:center;"><?php echo $sn++; ?></td>
-                        <?php foreach ($c['fields'] as $f): ?>
-                            <td><?php echo e($r[$f] ?? ''); ?></td>
-                        <?php endforeach; ?>
-                    </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-                </tbody>
-            </table>
-            </div>
-        </div>
-    </div>
-<?php endforeach; ?>
-</div>
-
 </div>
 </div>
 </div>

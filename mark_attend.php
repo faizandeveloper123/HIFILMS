@@ -176,10 +176,10 @@ include __DIR__ . '/includes/header.php';
                 <div class="panel-heading"> Students Records <span style="float:right;margin-top: -7px;"></span><div class="clearfix"></div></div>
                 <div class="panel-body">
                     <div class="col-md-12 filter-row" id="advanceSearch" style="">
-                        <div class="col-md-3 col-xs-12" style="padding: 8px;">
+                        <div class="col-md-1 col-xs-12" style="padding: 8px;">
                             <div class="form-group">
                                 <label class="required">Session</label>
-                                <select name="session" class="form-control inputheight">
+                                <select name="session" class="form-control inputheight" style="font-size:12px; padding-left:4px;">
                                     <?php foreach ($sessionOptions as $val => $label): ?>
                                         <option value="<?php echo e($val); ?>" <?php echo $sel_session == $val ? 'selected' : ''; ?>><?php echo e($label); ?></option>
                                     <?php endforeach; ?>
@@ -200,7 +200,7 @@ include __DIR__ . '/includes/header.php';
                         <div class="col-md-2" style="padding: 8px;">
                             <div class="form-group">
                                 <label class="required">Course/Class</label>
-                                <select name="class_id" id="class_id" class="form-control" onchange="getSectionAll(this.value)">
+                                <select name="class_id" id="class_id" class="form-control">
                                     <option value="">Select Course/Class</option>
                                     <?php foreach ($classes as $c): ?>
                                         <option value="<?php echo $c['class_id']; ?>" <?php echo $sel_class == $c['class_id'] ? 'selected' : ''; ?>><?php echo e($c['class_name']); ?></option>
@@ -219,26 +219,24 @@ include __DIR__ . '/includes/header.php';
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-2" style="padding: 8px;">
-                            <div class="form-group">
-                                <label>Group / Shift</label>
-                                <select name="group_shift" class="form-control">
-                                    <option value="All">All</option>
-                                    <?php foreach ($shifts as $sh): ?>
-                                        <option value="<?php echo e($sh); ?>" <?php echo $sel_shift == $sh ? 'selected' : ''; ?>><?php echo e($sh); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-2" style="padding: 8px;">
-                            <div class="form-group">
-                                <label class="required">Attendance Date</label>
-                                <input class="form-control" type="date" name="date" id="date" value="<?php echo e($sel_date); ?>">
-                            </div>
-                        </div>
-                        <div class="col-md-2" style="padding:8px;">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary" style="margin-top: 20px;">Search</button>
+<div class="col-md-5 col-xs-12" style="padding: 8px;">
+                            <div style="display:flex; flex-wrap:nowrap; justify-content:flex-end; align-items:flex-end; gap:6px;">
+                                <div class="form-group" style="margin:0; flex:0 0 auto;">
+                                    <label>Group / Shift</label>
+                                    <select name="group_shift" class="form-control" style="min-width:110px; font-size:13px;">
+                                        <option value="All">All</option>
+                                        <?php foreach ($shifts as $sh): ?>
+                                            <option value="<?php echo e($sh); ?>" <?php echo $sel_shift == $sh ? 'selected' : ''; ?>><?php echo e($sh); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="margin:0; flex:0 0 auto;">
+                                    <label class="required">Attendance Date</label>
+                                    <input class="form-control" type="date" name="date" id="date" value="<?php echo e($sel_date); ?>" style="width:150px; font-size:13px;">
+                                </div>
+                                <div class="form-group" style="margin:0; flex:0 0 auto;">
+                                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:0;">Search</button>
+                                </div>
                             </div>
                         </div>
                     </div>
