@@ -253,6 +253,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
         <ul class="child_menu" style="display: none;">
           <li><a href="<?php echo BASE_URL; ?>add_emp.php">Add Employee</a></li>
           <li><a href="<?php echo BASE_URL; ?>view_emp.php">View Employees</a></li>
+          <li><a href="<?php echo BASE_URL; ?>staff_directory.php">Staff Directory</a></li>
           <li><a href="<?php echo BASE_URL; ?>view_emp_attendance.php">Staff Attendance</a></li>
           <li><a href="<?php echo BASE_URL; ?>monthly_attendance.php">Attendance Report</a></li>
           <li><a href="<?php echo BASE_URL; ?>old_employee.php">Old Employees</a></li>
@@ -442,6 +443,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
       <div class="submenu">
         <a href="<?php echo BASE_URL; ?>add_emp.php" class="submenu-item">Add Employee</a>
         <a href="<?php echo BASE_URL; ?>view_emp.php" class="submenu-item">View Employees</a>
+        <a href="<?php echo BASE_URL; ?>staff_directory.php" class="submenu-item">Staff Directory</a>
         <a href="<?php echo BASE_URL; ?>view_emp_attendance.php" class="submenu-item">Staff Attendance</a>
         <a href="<?php echo BASE_URL; ?>monthly_attendance.php" class="submenu-item">Attendance Report</a>
         <a href="<?php echo BASE_URL; ?>old_employee.php" class="submenu-item">Old Employees</a>
