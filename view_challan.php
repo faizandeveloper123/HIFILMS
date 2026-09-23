@@ -126,29 +126,6 @@ include __DIR__ . '/includes/header.php';
                     <div class="col-md-12">
                         <div class="col-md-3 col-xs-12" style="padding: 8px;">
                             <div class="form-group ">
-                                <label class="required">Challan No</label>
-                                <input type="text" name="challan_no" class="form-control" value="<?php echo e($sel_challan); ?>" placeholder="Enter Challan No">
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-xs-12" style="padding: 8px;">
-                            <div class="form-group ">
-                                <label>Student</label>
-                                <input type="text" name="student" class="form-control" value="<?php echo e($sel_student); ?>" placeholder="Student Name / GR No">
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-xs-12" style="padding: 8px;">
-                            <div class="form-group ">
-                                <label>Class</label>
-                                <select name="class_id" class="form-control">
-                                    <option value="0">All Classes</option>
-                                    <?php foreach ($classes as $cl): ?>
-                                        <option value="<?php echo $cl['class_id']; ?>" <?php echo $sel_class === (int) $cl['class_id'] ? 'selected' : ''; ?>><?php echo e($cl['class_name']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-xs-12" style="padding: 8px;">
-                            <div class="form-group ">
                                 <label class="required">Session</label>
                                 <select name="session" class="form-control">
                                     <?php foreach ($sessions as $sv): ?>
@@ -206,10 +183,7 @@ include __DIR__ . '/includes/header.php';
                 <thead>
                     <tr style="background:#F9FAFB;">
                         <th width="4%">S.No</th>
-                        <th width="12%">Challan No</th>
-                        <th width="18%">Student</th>
-                        <th width="10%">Class</th>
-                        <th width="6%">Month</th>
+                        <th width="12%">Month</th>
                         <th width="6%">Year</th>
                         <th width="10%">Total</th>
                         <th width="9%">Paid</th>
@@ -220,7 +194,7 @@ include __DIR__ . '/includes/header.php';
                 </thead>
                 <tbody>
                     <?php if (count($challans) === 0): ?>
-                        <tr><td colspan="11" style="text-align:center; color:#6B7280; padding:40px;">No challans found for the selected filters.</td></tr>
+                        <tr><td colspan="8" style="text-align:center; color:#6B7280; padding:40px;">No challans found for the selected filters.</td></tr>
                     <?php endif; ?>
                     <?php $i = 1; foreach ($challans as $c):
                         $due = (float) $c['total_amount'] - (float) $c['paid_amount'];
@@ -231,12 +205,6 @@ include __DIR__ . '/includes/header.php';
                     ?>
                         <tr>
                             <td><?php echo $i; ?></td>
-                            <td><strong><?php echo e($c['challan_no']); ?></strong></td>
-                            <td>
-                                <?php echo e($c['first_name'] ? trim($c['first_name'] . ' ' . ($c['last_name'] ?? '')) : 'N/A'); ?><br>
-                                <small style="color:#6B7280;">GR# <?php echo e($c['gr_no'] ?: '-'); ?></small>
-                            </td>
-                            <td><?php echo e($c['class_name'] ?? '-'); ?> <?php echo $c['section_name'] ? '<small>(' . e($c['section_name']) . ')</small>' : ''; ?></td>
                             <td><?php echo e($c['month']); ?></td>
                             <td><?php echo e($c['year']); ?></td>
                             <td style="font-weight:700;"><?php echo get_setting('currency_symbol', 'Rs.') . number_format($c['total_amount'], 2); ?></td>
@@ -248,7 +216,7 @@ include __DIR__ . '/includes/header.php';
                             </td>
                         </tr>
                         <tr style="background:#FBFCFE;">
-                            <td colspan="11" style="padding:10px 14px;">
+                            <td colspan="8" style="padding:10px 14px;">
                                 <strong style="font-size:12px; color:#374151;"><i class="fa fa-list"></i> Fee Heads:</strong>
                                 <table class="table table-bordered" style="width:100%; background:#fff; font-size:12px; margin:6px 0 0 0;">
                                     <thead>

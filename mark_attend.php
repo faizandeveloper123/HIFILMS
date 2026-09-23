@@ -144,14 +144,34 @@ include __DIR__ . '/includes/header.php';
   .search-bar-student .form-group { padding:4px !important; }
   .search-bar-student .form-group input, .search-bar-student .form-group select { width:100% !important; }
 }
+/* ---- Responsive attendance table ---- */
+#listofstudents { table-layout: fixed; }
+#listofstudents th, #listofstudents td { vertical-align: middle; overflow-wrap: break-word; word-wrap: break-word; }
+#listofstudents th:first-child, #listofstudents td:first-child { width: 5%; }
+#listofstudents th:nth-child(2), #listofstudents td:nth-child(2) { width: 9%; }
+#listofstudents th:nth-child(3), #listofstudents td:nth-child(3) { width: 26%; }
+#listofstudents th:nth-child(4), #listofstudents td:nth-child(4) { width: 9%; }
+#listofstudents th:nth-child(5), #listofstudents td:nth-child(5) { width: 9%; }
+#listofstudents th:nth-child(6), #listofstudents td:nth-child(6) { width: auto; }
+#listofstudents .attendance-pills { display:flex; gap:6px; flex-wrap:wrap; }
+#listofstudents .att-option { min-width:34px; }
 @media (max-width: 767px) {
   #listofstudents { font-size:12px; }
-  #listofstudents th, #listofstudents td { padding: 5px 4px !important; white-space: nowrap; }
-  #listofstudents th:nth-child(3), #listofstudents td:nth-child(3) { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
-  #listofstudents .att-option { min-width:30px; height:26px; font-size:11px; }
-  #listofstudents .att-option span { padding:0 6px; }
+  #listofstudents th, #listofstudents td { padding: 5px 4px !important; white-space: normal; }
+  #listofstudents .att-option { min-width:28px; height:26px; font-size:11px; padding:0 6px; }
+  #listofstudents .att-option span { padding:0 4px; }
   #listofstudents .attendance-pills { gap:3px; }
   .filter-row .col-md-5 .form-group { margin-bottom:0 !important; }
+}
+/* On small screens each row becomes a card so no column overflows */
+@media (max-width: 600px) {
+  #listofstudents thead { display:none; }
+  #listofstudents, #listofstudents tbody, #listofstudents tr, #listofstudents td { display:block; width:100%; }
+  #listofstudents tr { border:1px solid #E5E7EB; border-radius:12px; margin-bottom:10px; padding:10px; background:#fff; }
+  #listofstudents td { border:none !important; padding:6px 0 !important; white-space:normal; }
+  #listofstudents td::before { content: attr(data-label); display:inline-block; width:110px; font-weight:700; color:#6B7280; }
+  #listofstudents td:first-child { display:none; }
+  #listofstudents .attendance-pills { margin-top:2px; }
 }
 @media (max-width: 480px) {
   .qr-scan-btn { width:100%; white-space:normal; }
@@ -187,7 +207,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="panel-heading"> Students Records <div class="clearfix"></div>
                 <div class="panel-body">
                     <div class="col-md-12 filter-row" id="advanceSearch" style="">
-                        <div class="col-md-3 col-xs-12" style="padding: 8px;">
+                        <div class="col-md-2 col-xs-12" style="padding: 8px;">
                             <div class="form-group">
                                 <label class="required">Session</label>
                                 <select name="session" class="form-control inputheight" style="font-size:12px; padding-left:4px;">
@@ -230,11 +250,11 @@ include __DIR__ . '/includes/header.php';
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-3 col-xs-12" style="padding: 8px;">
-                            <div style="display:flex; flex-wrap:nowrap; justify-content:flex-end; align-items:flex-end; gap:6px;">
-                                <div class="form-group" style="margin:0; flex:0 0 auto;">
+                        <div class="col-md-4 col-xs-12" style="padding: 8px;">
+                            <div style="display:flex; flex-wrap:wrap; justify-content:flex-end; align-items:flex-end; gap:6px;">
+                                <div class="form-group" style="margin:0; flex:1 1 auto; min-width:100px;">
                                     <label>Group / Shift</label>
-                                    <select name="group_shift" class="form-control" style="min-width:110px; font-size:13px;">
+                                    <select name="group_shift" class="form-control" style="min-width:100px; font-size:13px;">
                                         <option value="All">All</option>
                                         <?php foreach ($shifts as $sh): ?>
                                             <option value="<?php echo e($sh); ?>" <?php echo $sel_shift == $sh ? 'selected' : ''; ?>><?php echo e($sh); ?></option>
@@ -243,7 +263,7 @@ include __DIR__ . '/includes/header.php';
                                 </div>
                                 <div class="form-group" style="margin:0; flex:0 0 auto;">
                                     <label class="required">Attendance Date</label>
-                                    <input class="form-control" type="date" name="date" id="date" value="<?php echo e($sel_date); ?>" style="width:150px; font-size:13px;">
+                                    <input class="form-control" type="date" name="date" id="date" value="<?php echo e($sel_date); ?>" style="width:140px; font-size:13px;">
                                 </div>
                                 <div class="form-group" style="margin:0; flex:0 0 auto;">
                                     <button type="submit" class="btn btn-primary btn-sm" style="margin-top:0;">Search</button>
@@ -261,15 +281,15 @@ include __DIR__ . '/includes/header.php';
             <input type="hidden" name="action" value="MarkAttendance">
             <input type="hidden" name="date" value="<?php echo e($sel_date); ?>">
             <div style="overflow-x:auto;">
-                <table id="listofstudents" class="table table-striped table-bordered" style="width:100%; background:#fff; margin-bottom:10px;">
+                <table id="listofstudents" class="table table-striped table-bordered" style="width:100%; table-layout:fixed; background:#fff; margin-bottom:10px;">
                     <thead>
                         <tr>
-                            <th width="5%">S.No</th>
-                            <th width="7%">GR. No</th>
-                            <th width="20%">Student / Father Name</th>
-                            <th width="10%">Section</th>
-                            <th width="8%">Shift</th>
-                            <th width="50%">Attendance</th>
+                            <th>S.No</th>
+                            <th>GR. No</th>
+                            <th>Student / Father Name</th>
+                            <th>Section</th>
+                            <th>Shift</th>
+                            <th>Attendance</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -278,15 +298,15 @@ include __DIR__ . '/includes/header.php';
                         <?php endif; ?>
                         <?php $i = 1; foreach ($students as $st): $cur = $st['att_status']; ?>
                             <tr>
-                                <td><?php echo $i++; ?></td>
-                                <td><?php echo e($st['gr_no'] ?? ($st['roll_no'] ?? $st['student_id'])); ?></td>
-                                <td>
+                                <td data-label="S.No"><?php echo $i++; ?></td>
+                                <td data-label="GR. No"><?php echo e($st['gr_no'] ?? ($st['roll_no'] ?? $st['student_id'])); ?></td>
+                                <td data-label="Student / Father Name">
                                     <strong><?php echo e($st['first_name']); ?></strong>
                                     <div style="font-size:11px; color:#6B7280;"><?php echo e($st['father_name'] ?? $st['last_name']); ?></div>
                                 </td>
-                                <td><?php echo e($st['section_name'] ?? '-'); ?></td>
-                                <td><?php echo e($st['group_shift'] ?? '-'); ?></td>
-                                <td>
+                                <td data-label="Section"><?php echo e($st['section_name'] ?? '-'); ?></td>
+                                <td data-label="Shift"><?php echo e($st['group_shift'] ?? '-'); ?></td>
+                                <td data-label="Attendance">
                                     <div class="attendance-pills">
                                         <label class="att-option present">
                                             <input type="radio" name="att[<?php echo $st['student_id']; ?>]" value="present" <?php echo $cur === 'present' ? 'checked' : ''; ?>>

@@ -467,9 +467,6 @@ include __DIR__ . '/includes/header.php';
                 <thead>
                     <tr style="background:#F9FAFB;">
                         <th>S.No</th>
-                        <th>Challan No</th>
-                        <th>Student</th>
-                        <th>Course/Class</th>
                         <th>Section</th>
                         <th>Month</th>
                         <th>Total</th>
@@ -483,12 +480,6 @@ include __DIR__ . '/includes/header.php';
                     <?php $i = 1; foreach ($challans as $c): $due = (float)$c['total_amount'] - (float)$c['paid_amount']; $badge = 'background:#FEE2E2;color:#DC2626;'; if ($c['status'] === 'partial') $badge = 'background:#FFF7E0;color:#F59E0B;'; if ($c['status'] === 'paid') $badge = 'background:#DCFCE7;color:#16A34A;'; ?>
                         <tr>
                             <td><?php echo $i++; ?></td>
-                            <td><strong><?php echo e($c['challan_no']); ?></strong></td>
-                            <td>
-                                <?php echo e($c['first_name'] ?: 'N/A'); ?><br>
-                                <small style="color:#6B7280;"><?php echo e($c['gr_no'] ? 'GR# ' . $c['gr_no'] : 'GR# -'); ?><i class="fa fa-user" style="margin:0 4px;"></i><?php echo e($c['father_name'] ?? ''); ?></small>
-                            </td>
-                            <td><?php echo e($c['class_name'] ?? '-'); ?></td>
                             <td><?php echo e($c['section_name'] ?? '-'); ?></td>
                             <td><?php echo e($c['month']) . ' / ' . e($c['year']); ?></td>
                             <td style="font-weight:700;"><?php echo get_setting('currency_symbol', 'Rs.') . number_format($c['total_amount'], 2); ?></td>
