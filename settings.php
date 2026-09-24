@@ -1,6 +1,7 @@
 <?php
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/campus.php';
 require_login();
 require_role(['admin']);
 

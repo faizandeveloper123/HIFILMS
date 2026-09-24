@@ -1,5 +1,6 @@
 <?php if (!defined('HIIFI')) exit('Direct access not allowed.');
-require_once __DIR__ . '/ensure_schema.php'; ?>
+require_once __DIR__ . '/ensure_schema.php';
+require_once __DIR__ . '/campus.php'; ?>
 <!DOCTYPE html><html lang="en"><head>
     <title><?php echo isset($page_title) ? e($page_title) . ' | LAPS School & College' : 'LAPS School & College'; ?></title>
     <link rel="icon" type="image/png" href="<?php echo BASE_URL; ?>assets/img/favicon.png">

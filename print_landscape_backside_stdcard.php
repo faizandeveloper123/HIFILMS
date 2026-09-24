@@ -1,6 +1,7 @@
 <?php
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/campus.php';
 require_login();
 
 $valid = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['valid'] ?? '') ? $_GET['valid'] : date('Y-m-d');

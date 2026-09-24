@@ -1,6 +1,8 @@
 <?php
 if (!defined('HIIFI')) exit('Direct access not allowed.');
 
+require_once __DIR__ . '/campus.php';
+
 // Idempotent runtime schema upgrades for the Messages / Complaint Hub / Support Tickets parity work.
 // Cannot modify database/schema.sql, so these run on page load via CREATE TABLE IF NOT EXISTS / ADD COLUMN IF NOT EXISTS.
 

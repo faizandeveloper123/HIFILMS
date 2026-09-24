@@ -1,6 +1,7 @@
 <?php
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/campus.php';
 require_once __DIR__ . '/includes/ensure_schema.php';
 
 // Public page - opens BEFORE login. When the app is switched OFF, this is the
@@ -122,6 +123,11 @@ $campusInfo = get_active_campus();
             overflow: hidden;
             box-shadow: 0 25px 70px rgba(15, 23, 42, 0.12);
             border: 1px solid #e7ecf4;
+            transition: transform .3s ease, box-shadow .3s ease;
+        }
+        .setup-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 32px 80px rgba(15, 23, 42, 0.16);
         }
         .setup-hd {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -157,8 +163,16 @@ $campusInfo = get_active_campus();
             border: none;
             border-radius: 10px;
             margin-top: 6px;
+            cursor: pointer;
+            transition: all .3s ease;
+            box-shadow: 0 8px 18px rgba(255, 120, 0, 0.25);
         }
-        .btn-enter:hover { background: #e56700; }
+        .btn-enter:hover {
+            background: #e56700;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(255, 120, 0, 0.35);
+        }
+        .btn-enter:active { transform: translateY(0); box-shadow: 0 4px 10px rgba(255,120,0,.2); }
         .btn-save {
             background: #16a34a;
             color: #fff;

@@ -14,11 +14,13 @@ db_query("CREATE TABLE IF NOT EXISTS fee_discounts (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB");
 
+if (!function_exists('save_setting')) {
 function save_setting($key, $value) {
     $st = db_prepare("INSERT INTO settings (setting_key, setting_value) VALUES (?, ?)
                       ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)");
     $st->bind_param('ss', $key, $value);
     $st->execute();
+}
 }
 
 function delete_setting($key) {

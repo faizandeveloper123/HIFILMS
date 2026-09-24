@@ -1,6 +1,7 @@
 <?php
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/campus.php';
 require_login();
 
 $ids = trim((string)($_POST['student_ids'] ?? ($_GET['student_ids'] ?? ($_GET['students'] ?? ''))));

@@ -1,6 +1,7 @@
 <?php
 define('HIIFI', true);
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/campus.php';
 require_login();
 
 $classParam = trim((string) ($_GET['class_id'] ?? ''));
