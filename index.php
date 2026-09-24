@@ -31,11 +31,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $res->fetch_assoc();
 
         if ($user && $user['status'] == 1 && hash('sha256', $password) === $user['password']) {
-            session_regenerate_id(true);
-            $_SESSION['user_id'] = $user['user_id'];
-            $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_name'] = $user['full_name'];
-            $_SESSION['user_role'] = $user['role'];
             $redirects = [
                 'admin'    => 'dashboard.php',
                 'staff'    => 'staff_dashboard.php',
@@ -43,7 +38,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'accounts' => 'accounts_dashboard.php',
             ];
             $dest = $redirects[$user['role']] ?? 'dashboard.php';
-            header('Location: ' . BASE_URL . $dest);
+            $_SESSION['pending_login'] = [
+                'email'    => $email,
+                'password' => $password,
+                'role'     => $user['role'],
+                'dest'     => $dest,
+            ];
+            header('Location: ' . BASE_URL . 'school_setup.php?pending=1');
             exit;
         } else {
             $error = 'Invalid email or password.';
@@ -277,7 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <p>Modern SaaS experience for schools with smarter insights and a more reliable system.</p>
             <ul class="feature-list">
                 <li><i class="fas fa-chart-line"></i> Modern analytics &amp; activity monitoring</li>
-                <li><i class="fas fa-shield-alt"></i> Improved and error‑free workflows</li>
+                <li><i class="fas fa-shield-alt"></i> Improved and errorâ€‘free workflows</li>
                 <li><i class="fas fa-bolt"></i> Faster performance &amp; smoother experience</li>
                 <li><i class="fas fa-lock"></i> Secure access and data protection!</li>
             </ul>
@@ -312,6 +313,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </form>
         </div>
+
 
         <div class="powered-by">Powered by Parker Technologies LLC</div>
     </div>

@@ -10,10 +10,11 @@ if (!in_array($num, [8, 10], true)) { $num = 8; }
 $note = trim((string)($_GET['note'] ?? ''));
 if ($note === '') { $note = 'In case of loss, kindly return this card to the school office.'; }
 
-$schoolName  = get_setting('school_name', 'LAPS School & College');
-$schoolAddr  = get_setting('school_address', '');
-$schoolPhone = get_setting('school_phone', '');
-$schoolLogo  = get_setting('school_logo', '');
+$si = school_info((int)($_GET['campus_id'] ?? 0));
+$schoolName  = $si['name'];
+$schoolAddr  = $si['addr'];
+$schoolPhone = $si['phone'];
+$schoolLogo  = $si['logo'];
 $logoSrc     = $schoolLogo !== '' ? BASE_URL . $schoolLogo : BASE_URL . 'assets/img/logo.jpg';
 ?>
 <!DOCTYPE html>

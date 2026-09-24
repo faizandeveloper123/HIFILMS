@@ -167,6 +167,11 @@ function scgClassSection() {
   };
 }
 
+function scgCampus() {
+  var el = document.getElementById('scg_campus_id');
+  return el ? el.value : '0';
+}
+
 // Professional Portrait ID Cards
 function professionalPortraitCards() {
   var ids = scgSelectedIds();
@@ -175,7 +180,7 @@ function professionalPortraitCards() {
   var today = new Date().toISOString().slice(0, 10);
   window.location = "<?php echo BASE_URL; ?>print_students_cards.php?student_ids=" + ids
     + "&class_id=" + encodeURIComponent(cs.class_id) + "&section=" + encodeURIComponent(cs.section)
-    + "&cell_no=YES&valid=" + today + "&DOB=YES";
+    + "&cell_no=YES&valid=" + today + "&DOB=YES" + "&campus_id=" + scgCampus();
 }
 
 // Classic Landscape ID Cards
@@ -185,7 +190,8 @@ function classicLandscapeCards() {
   <?php if (file_exists(__DIR__ . '/print_landscape_students_cards.php')): ?>
   var cs = scgClassSection();
   window.location = "<?php echo BASE_URL; ?>print_landscape_students_cards.php?students=" + ids
-    + "&class_id=" + encodeURIComponent(cs.class_id) + "&section=" + encodeURIComponent(cs.section);
+    + "&class_id=" + encodeURIComponent(cs.class_id) + "&section=" + encodeURIComponent(cs.section)
+    + "&campus_id=" + scgCampus();
   <?php else: ?>
   alert("Landscape cards are not installed on this server yet. Please use Portrait ID Card.");
   <?php endif; ?>
@@ -198,7 +204,8 @@ function familyCards() {
   <?php if (file_exists(__DIR__ . '/print_family_cards.php')): ?>
   var cs = scgClassSection();
   window.location = "<?php echo BASE_URL; ?>print_family_cards.php?students=" + ids
-    + "&class_id=" + encodeURIComponent(cs.class_id) + "&section=" + encodeURIComponent(cs.section);
+    + "&class_id=" + encodeURIComponent(cs.class_id) + "&section=" + encodeURIComponent(cs.section)
+    + "&campus_id=" + scgCampus();
   <?php else: ?>
   alert("Family cards are not installed on this server yet. Please use Portrait ID Card.");
   <?php endif; ?>
@@ -278,7 +285,8 @@ function handleBacksidePrint(){
   var url = printFile + '?valid=' + encodeURIComponent(validDate)
       + '&color=' + encodeURIComponent(modifiedColor)
       + '&num=' + encodeURIComponent(selectedNum)
-      + '&note=' + encodeURIComponent(note);
+      + '&note=' + encodeURIComponent(note)
+      + '&campus_id=' + scgCampus();
 
   window.location.href = url;
 }
@@ -340,6 +348,16 @@ function handleBacksidePrint(){
                                 <option value="All">All Sections</option>
                                 <?php foreach ($sections as $sec): ?>
                                     <option value="<?php echo (int)$sec['section_id']; ?>" <?php echo $selSection === (int)$sec['section_id'] ? 'selected' : ''; ?>><?php echo e($sec['section_name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="scg-filter-col">
+                            <label>Campus (School Info)</label>
+                            <select name="campus_id" id="scg_campus_id">
+                                <option value="0">Active Campus</option>
+                                <?php foreach (get_campuses() as $cp): ?>
+                                    <option value="<?php echo (int)$cp['campus_id']; ?>" <?php echo (int)$cp['is_active'] === 1 ? 'selected' : ''; ?>><?php echo e($cp['name']); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

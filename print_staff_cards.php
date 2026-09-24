@@ -34,8 +34,9 @@ if ($empFs > 24) { $empFs = 24; }
 
 $accent = '#f2d500';
 $ink = '#083a2b';
-$schoolName = $design['school_name'] !== '' ? $design['school_name'] : get_setting('school_name', 'LAPS School & College');
-$schoolLogo = $design['logo'] !== '' ? $design['logo'] : get_setting('school_logo', '');
+$si = school_info((int)($_POST['campus_id'] ?? ($_GET['campus_id'] ?? 0)));
+$schoolName = $si['name'] !== '' ? $si['name'] : $design['school_name'];
+$schoolLogo = $si['logo'] !== '' ? $si['logo'] : $design['logo'];
 $logoSrc = $schoolLogo !== '' ? BASE_URL . $schoolLogo : BASE_URL . 'assets/img/logo.jpg';
 $sigImg = get_setting('signature_image', '');
 $sigSrc = $sigImg !== '' ? BASE_URL . 'assets/uploads/' . basename($sigImg) : '';

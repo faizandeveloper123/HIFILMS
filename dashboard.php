@@ -272,6 +272,35 @@ include __DIR__ . '/includes/header.php';
                 </button>
             </div>
 
+            <?php
+            $campuses = get_campuses();
+            $actCampus = get_active_campus();
+            if (count($campuses) === 0 || !$actCampus):
+            ?>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; background:linear-gradient(120deg,#FFF3E0,#FFE8CC); border:1px solid #FFD9A0; border-radius:14px; padding:14px 18px; margin:0 0 14px;">
+                <div>
+                    <strong style="font-size:14px; color:#7A4E12;"><i class="fa fa-exclamation-triangle"></i> School Info not set yet!</strong>
+                    <div style="font-size:12.5px; color:#9A6B24; margin-top:3px;">Add your school name, logo, address & phone — it will appear automatically on all student cards, family cards, card back sides, certificates and reports.</div>
+                </div>
+                <a href="<?php echo BASE_URL; ?>manage_schools.php" class="btn" style="background:#FF7800; color:#fff; font-weight:700; border-radius:999px; padding:9px 20px; text-decoration:none;">Set Up School Info →</a>
+            </div>
+            <?php else: ?>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:12px 16px; margin:0 0 14px; box-shadow:0 1px 3px rgba(0,0,0,.04);">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <?php if (!empty($actCampus['logo'])): ?>
+                        <img src="<?php echo BASE_URL . e($actCampus['logo']); ?>" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #F3F4F6;" onerror="this.style.display='none';">
+                    <?php else: ?>
+                        <div style="width:44px;height:44px;border-radius:50%;background:#FFE9D6;color:#FF7800;display:flex;align-items:center;justify-content:center;font-size:17px;"><i class="fa fa-university"></i></div>
+                    <?php endif; ?>
+                    <div>
+                        <div style="font-size:14px; font-weight:800; color:#111827;"><?php echo e($actCampus['name']); ?></div>
+                        <div style="font-size:12px; color:#6B7280;"><?php echo e($actCampus['address']); ?><?php echo trim((string)$actCampus['phone']) !== '' ? ' &nbsp;|&nbsp; ' . e($actCampus['phone']) : ''; ?></div>
+                    </div>
+                </div>
+                <a href="<?php echo BASE_URL; ?>manage_schools.php" class="btn" style="background:#FF7800; color:#fff; font-weight:700; border-radius:999px; padding:8px 18px; text-decoration:none; font-size:13px;"><i class="fa fa-pencil"></i> Edit School Info</a>
+            </div>
+            <?php endif; ?>
+
             <div class="kpi-row">
                 <a class="aqib-card kpi-card" href="<?php echo BASE_URL; ?>datewise_fee_collection_report_new.php" target="_blank">
                     <div class="kpi-top">

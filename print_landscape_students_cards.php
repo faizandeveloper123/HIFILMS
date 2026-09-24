@@ -43,10 +43,11 @@ $cardH   = $num('card_h', 2.25, 1.5, 4);
 $gapCol  = $num('gap_col', 0, 0, 0.75);
 $gapRow  = $num('gap_row', 0, 0, 0.75);
 
-$schoolName  = get_setting('school_name', 'LAPS School & College');
-$schoolAddr  = get_setting('school_address', '');
-$schoolPhone = get_setting('school_phone', '');
-$schoolLogo  = get_setting('school_logo', '');
+$si = school_info((int)($_GET['campus_id'] ?? 0));
+$schoolName  = $si['name'];
+$schoolAddr  = $si['addr'];
+$schoolPhone = $si['phone'];
+$schoolLogo  = $si['logo'];
 $logoSrc     = $schoolLogo !== '' ? BASE_URL . $schoolLogo : BASE_URL . 'assets/img/logo.jpg';
 $sigImg      = get_setting('signature_image', '');
 $sigSrc      = $sigImg !== '' ? BASE_URL . 'assets/uploads/' . basename($sigImg) : '';

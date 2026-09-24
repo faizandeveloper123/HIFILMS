@@ -45,15 +45,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'SaveS
 
     // Institute information
     $inst = [
-        'school_name'    => 'school_name',
+        'school_name'    => 'Branch_Name',
         'school_tagline' => 'school_tagline',
-        'school_address' => 'school_address',
-        'school_phone'   => 'school_phone',
-        'owner_name'     => 'owner_name',
-        'owner_email'    => 'owner_email',
-        'owner_phone'    => 'owner_phone',
-        'session_year'   => 'session_year',
-        'gr_no_format'   => 'gr_no_format',
+        'school_address' => 'Branch_Location',
+        'school_phone'   => 'branch_contact',
+        'owner_name'     => 'Owner_Name',
+        'owner_email'    => 'Branch_Owner_Email',
+        'owner_phone'    => 'Owner_no',
+        'session_year'   => 'current_session',
+        'gr_no_format'   => 'no_type',
         'family_search'  => 'family_search',
         'school_about'   => 'school_about',
         'currency_symbol'=> 'currency_symbol',
@@ -102,6 +102,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'SaveS
         $saved += 2;
     }
 
+    // If campuses exist, they are the source of truth for school name/logo/address/phone.
+    $actCampus = get_active_campus();
+    if ($actCampus) { apply_campus_settings($actCampus); }
+
     $message = 'All settings saved successfully! (' . $saved . ' keys)';
 }
 
@@ -141,7 +145,42 @@ include __DIR__ . '/includes/header.php';
 .switch input:checked ~ .slider::after { transform: translateX(22px); }
 .sw-state { font-weight: 600; font-size: 12.5px; }
 .form-section textarea.form-control { min-height: 120px; }
-</style>
+        .school-setup-banner {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: linear-gradient(120deg, #0f172a 0%, #1e293b 55%, #33415c 100%);
+            color: #fff;
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin-bottom: 22px;
+            border: 1px solid #facc15;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.18);
+        }
+        .ssb-ic {
+            width: 54px;
+            height: 54px;
+            flex: 0 0 54px;
+            border-radius: 12px;
+            background: #fff;
+            color: #ff7800;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ssb-tx { flex: 1; }
+        .ssb-tx strong { display: block; font-size: 16px; margin-bottom: 3px; }
+        .ssb-tx span { font-size: 12.5px; color: #cbd5e1; line-height: 1.45; }
+        .ssb-btn {
+            background: #ff7800;
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .ssb-btn:hover { background: #e56700; color: #fff; }
+    </style>
 
 <div class="main-content settings-page">
     <div class="container-fluid">
@@ -154,6 +193,7 @@ include __DIR__ . '/includes/header.php';
                 <a href="<?php echo BASE_URL; ?>add_student_documents.php" class="btn btn-default"><i class="fa fa-file-text"></i> Student Documents</a>
                 <a href="<?php echo BASE_URL; ?>manage_localities.php" class="btn btn-default"><i class="fa fa-map-marker"></i> Localities</a>
                 <a href="<?php echo BASE_URL; ?>manage_occupations.php" class="btn btn-default"><i class="fa fa-briefcase"></i> Father Occupations</a>
+                <a href="<?php echo BASE_URL; ?>manage_schools.php" class="btn btn-default"><i class="fa fa-building"></i> Manage Schools (Campuses)</a>
                 <a href="<?php echo BASE_URL; ?>update_profile.php" class="btn btn-info" style="color:#fff;"><i class="fa fa-user"></i> Update Profile</a>
                 <a href="<?php echo BASE_URL; ?>update_pswd.php" class="btn btn-warning" style="color:#fff;"><i class="fa fa-key"></i> Change Password</a>
             </div>
@@ -173,6 +213,14 @@ include __DIR__ . '/includes/header.php';
                 <div class="tab-content">
                     <!-- ================= INSTITUTE ================= -->
                     <div class="tab-pane active" id="institute">
+                        <div class="school-setup-banner">
+                            <div class="ssb-ic"><i class="fa fa-school"></i></div>
+                            <div class="ssb-tx">
+                                <strong>School / Campus Setup (Pre-Login Page)</strong>
+                                <span>This is the page that opens before login. Save your school name, logo, address and phone here - it auto-applies to every card (ID/family/back/certificates/slips/reports).</span>
+                            </div>
+                            <a href="<?php echo BASE_URL; ?>school_setup.php" class="btn btn-primary ssb-btn"><i class="fa fa-external-link-alt"></i> Open School Setup Page</a>
+                        </div>
                         <div class="form-section">
                             <h4><i class="fa fa-info-circle"></i> Basic Institute Information</h4>
                             <div class="row">

@@ -21,10 +21,11 @@ $slogan = trim((string)($_GET['slogan'] ?? '')) !== '' ? trim((string)$_GET['slo
 
 require_once __DIR__ . '/includes/card_design.php';
 $design = card_design('student');
-$schoolName = $design['school_name'] !== '' ? $design['school_name'] : get_setting('school_name', 'LAPS School & College');
-$schoolAddr = $design['school_addr'];
-$schoolPhone = get_setting('school_phone', '');
-$schoolLogo = $design['logo'] !== '' ? $design['logo'] : get_setting('school_logo', '');
+$si = school_info((int)($_GET['campus_id'] ?? 0));
+$schoolName = $si['name'] !== '' ? $si['name'] : $design['school_name'];
+$schoolAddr = $si['addr'] !== '' ? $si['addr'] : $design['school_addr'];
+$schoolPhone = $si['phone'];
+$schoolLogo = $si['logo'] !== '' ? $si['logo'] : $design['logo'];
 $logoSrc = $schoolLogo !== '' ? BASE_URL . $schoolLogo : BASE_URL . 'assets/img/logo.jpg';
 
 $students = [];

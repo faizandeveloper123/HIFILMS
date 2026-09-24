@@ -332,6 +332,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
         <a href="javascript:void(0)"><i class="fa fa-gear"></i><span class="label" style="font-weight: normal !important;">System Settings</span><span class="fa fa-chevron-right chev"></span></a>
         <ul class="child_menu" style="display: none;">
           <li><a href="<?php echo BASE_URL; ?>settings.php">Update Settings</a></li>
+          <li><a href="<?php echo BASE_URL; ?>manage_schools.php">Manage Schools (Campuses)</a></li>
           <li><a href="<?php echo BASE_URL; ?>manage_localities.php">Manage Localities</a></li>
         </ul>
       </li>
@@ -529,6 +530,7 @@ require_once __DIR__ . '/ensure_schema.php'; ?>
       </a>
       <div class="submenu">
         <a href="<?php echo BASE_URL; ?>settings.php" class="submenu-item">Update Settings</a>
+        <a href="<?php echo BASE_URL; ?>manage_schools.php" class="submenu-item">Manage Schools (Campuses)</a>
         <a href="<?php echo BASE_URL; ?>manage_localities.php" class="submenu-item">Manage Localities</a>
       </div>
       <a href="#" class="nav-item has-submenu">

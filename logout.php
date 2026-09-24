@@ -8,5 +8,5 @@ if (ini_get('session.use_cookies')) {
     setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
 }
 session_destroy();
-header('Location: ' . BASE_URL . 'index.php');
+header('Location: ' . BASE_URL . 'school_setup.php');
 exit;
