@@ -267,8 +267,6 @@ $campusInfo = get_active_campus();
 
         <a href="<?php echo BASE_URL . $enterHref; ?>" class="btn btn-enter"><i class="fa fa-rocket"></i> Login Website</a>
         <a href="<?php echo BASE_URL . $skipHref; ?>" class="skip-login-link"><i class="fa fa-angle-double-right"></i> Skip - Direct Login </a>
-
-        <div class="setup-help"><i class="fas fa-info-circle"></i> Press "Login Website" and the login page opens. Later this info applies automatically on every card - student portrait/landscape, family cards, card back side, certificates, roll slips, pay slips, salary slips and reports.</div>
     </div>
 </div>
 
