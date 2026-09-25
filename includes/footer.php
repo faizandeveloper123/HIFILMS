@@ -124,5 +124,22 @@ function slideout(){ setTimeout(function(){
     $(".alert-success").fadeOut("slow", function () { });
     $(".alert-danger").fadeOut("slow", function () { });
 }, 4000);}
+(function(){
+    var isMobile = function(){ return window.matchMedia('(max-width: 991px)').matches; };
+    var outBtn = document.getElementById('dsSidebarToggleOut');
+    var inBtn = document.getElementById('dsToggleIn');
+    var backdrop = document.getElementById('ios_sidebar_backdrop');
+    var closeDrawer = function(){ document.body.classList.remove('mobile-nav-open'); };
+    if (outBtn) outBtn.addEventListener('click', function(){
+        if (isMobile()) document.body.classList.toggle('mobile-nav-open');
+    });
+    if (inBtn) inBtn.addEventListener('click', closeDrawer);
+    if (backdrop) backdrop.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeDrawer(); });
+    var links = document.querySelectorAll('.left_col a');
+    for (var i = 0; i < links.length; i++) {
+        links[i].addEventListener('click', function(){ if (isMobile()) closeDrawer(); });
+    }
+})();
 </script>
 </body></html>

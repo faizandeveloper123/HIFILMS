@@ -70,516 +70,333 @@ for ($i = 11; $i >= 0; $i--) {
     $chartData['expense'][] = $expense;
 }
 
+// Last 7 days fee collections (real sparkline data)
+$fee7 = [];
+for ($i = 6; $i >= 0; $i--) {
+    $d = date('Y-m-d', strtotime("-$i days"));
+    $fee7[] = (float) (db_query("SELECT COALESCE(SUM(amount),0) t FROM fee_payments WHERE DATE(created_at)='$d'")->fetch_assoc()['t'] ?? 0);
+}
+
 function money($v) {
     return number_format($v);
 }
 
+$cur = e(get_setting('currency_symbol', 'Rs.'));
+$curFull = get_setting('currency_symbol', 'Rs.');
+
 include __DIR__ . '/includes/header.php';
 ?>
 <style>
-    .aqib-dash { padding-top: 10px; padding-bottom: 30px; }
-    .aqib-dash * { box-sizing: border-box; }
-    .aqib-card {
-        background: #fff;
-        border: 1px solid #E5E7EB;
-        border-radius: 16px;
-        box-shadow: 0 1px 3px rgba(16,24,40,0.06);
-    }
-    .aqib-card:hover { box-shadow: 0 8px 24px rgba(15,23,42,0.08); }
-    .kpi-row {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 14px;
-        margin-bottom: 16px;
-    }
-    .kpi-card { padding: 18px; position: relative; overflow: hidden; }
-    .kpi-top { display: flex; align-items: center; gap: 11px; min-width: 0; }
-    .kpi-icon {
-        width: 42px; height: 42px; border-radius: 13px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 17px; flex-shrink: 0;
-    }
-    .kpi-label { font-size: 12.5px; color: #6B7280; font-weight: 600; min-width: 0; overflow-wrap: break-word; }
-    .kpi-badge {
-        font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
-        display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
-    }
-    .kpi-badge.up { color: #16A34A; background: #E7F8EE; }
-    .kpi-badge.down { color: #DC2626; background: #FDECEC; }
-    .kpi-badge.flat { color: #6B7280; background: #F3F4F6; }
-    .kpi-value { font-size: 23px; font-weight: 800; color: #111827; margin-top: 14px; line-height: 1.2; overflow-wrap: break-word; word-break: break-word; }
-    .kpi-change { font-size: 12px; font-weight: 700; margin-top: 5px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-    .kpi-change.up { color: #16A34A; }
-    .kpi-change.down { color: #DC2626; }
-    .kpi-change.flat { color: #9CA3AF; font-weight: 500; }
-    .kpi-change .sub { color: #9CA3AF; font-weight: 500; margin-left: 1px; }
-    .kpi-spark { margin-top: 12px; height: 30px; line-height: 0; margin-left: -18px; margin-right: -18px; margin-bottom: -18px; }
-    a.kpi-card { color: inherit; text-decoration: none; }
-    .kpi-flip-container { position: relative; perspective: 1000px; height: 100%; }
-    .kpi-flipper {
-        display: grid;
-        grid-template-areas: "stack";
-        width: 100%; height: 100%;
-        transition: transform 0.6s;
-        transform-style: preserve-3d;
-    }
-    .kpi-flip-container.flipped .kpi-flipper { transform: rotateY(180deg); }
-    .kpi-flip-face {
-        grid-area: stack;
-        width: 100%; height: 100%;
-        backface-visibility: hidden; -webkit-backface-visibility: hidden;
-    }
-    .kpi-flip-face.front { z-index: 2; }
-    .kpi-flip-face.back { transform: rotateY(180deg); }
-    .row2 {
-        display: grid;
-        grid-template-columns: 2.6fr 1fr;
-        gap: 14px;
-        margin-bottom: 14px;
-        align-items: stretch;
-    }
-    .card-head {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 16px 18px 0 18px;
-    }
-    .card-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: #111827; }
-    .card-title .ico { width: 30px; height: 30px; border-radius: 9px; display:flex; align-items:center; justify-content:center; font-size: 13px; }
-    .pill-tabs { display: flex; gap: 4px; background: #F3F4F6; padding: 3px; border-radius: 999px; }
-    .pill-tab {
-        border: none; background: transparent; font-size: 11.5px; font-weight: 600; color: #6B7280;
-        padding: 5px 12px; border-radius: 999px; cursor: pointer; transition: all .15s ease;
-    }
-    .pill-tab.active { background: #FF7A1B; color: #fff; box-shadow: 0 2px 6px rgba(255,122,27,.35); }
-    .legend-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-    .legend-row { display: flex; align-items: center; gap: 16px; font-size: 12px; color: #6B7280; padding: 8px 18px 0 18px; }
-    .earnings-col { display: flex; flex-direction: column; }
-    .earnings-body { padding: 6px 14px 18px 14px; flex: 1 1 auto; min-height: 220px; }
-    .att-body { padding: 14px 18px 18px 18px; }
-    .att-donut-wrap { display: flex; align-items: center; justify-content: center; margin: 6px 0 14px 0; }
-    .att-donut {
-        width: 132px; height: 132px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        position: relative;
-        box-shadow: inset 0 0 0 1px #E5E7EB;
-    }
-    .att-donut::before {
-        content: ""; position: absolute; width: 10px; height: 10px; background: #fff;
-        border-radius: 50%; top: 6px; left: 50%; transform: translateX(-50%);
-        box-shadow: 0 0 0 3px #fff;
-    }
-    .att-donut-hole {
-        width: 98px; height: 98px; border-radius: 50%; background: #fff;
-        display: flex; flex-direction: column; align-items: center; justify-content: center;
-        box-shadow: inset 0 0 0 1px #F0F2F5;
-    }
-    .att-donut-hole .pct { font-size: 20px; font-weight: 800; color: #16A34A; line-height: 1.1; }
-    .att-donut-hole .lbl { font-size: 9.5px; color: #9CA3AF; text-align: center; line-height: 1.2; margin-top: 2px; }
-    .att-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .att-stat { border: 1px solid #E5E7EB; border-radius: 10px; padding: 8px 10px; }
-    .att-stat .n { font-size: 15px; font-weight: 800; }
-    .att-stat .l { font-size: 10.5px; color: #6B7280; }
-    .att-stat .p { font-size: 10px; font-weight: 700; float: right; }
-    .aw-body { padding: 4px 18px 18px 18px; }
-    .aw-pill-tabs { padding: 10px 18px 0 18px; width: 100%; }
-    .aw-pill-tabs .pill-tab { flex: 1; text-align: center; padding: 6px 4px; white-space: nowrap; }
-    .aw-box {
-        display: flex; align-items: center; justify-content: space-between;
-        border: 1px solid #E5E7EB; border-radius: 12px; padding: 10px 12px; margin-bottom: 10px;
-    }
-    .aw-box .left { display: flex; align-items: center; gap: 10px; }
-    .aw-ico { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-    .aw-box .name { font-size: 12.5px; font-weight: 700; color: #111827; }
-    .aw-box .val { font-size: 17px; font-weight: 800; }
-    .aw-net {
-        background: linear-gradient(135deg,#111827,#1F2937);
-        border-radius: 12px; padding: 12px 14px; color: #fff;
-        display: flex; align-items: center; justify-content: space-between; margin-top: 12px;
-    }
-    .aw-net .n-lbl { font-size: 11px; color: #9CA3AF; }
-    .aw-net .n-val { font-size: 17px; font-weight: 800; color: #4ADE80; }
-    .view-details { display: block; text-align: right; padding: 6px 18px 16px 18px; font-size: 12px; color: #6B7280; text-decoration: none; font-weight: 600; }
-    .view-details:hover { color: #FF7A1B; text-decoration: none; }
-    .row3 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-    .r3-body { padding: 16px 18px; }
-    .stu-total-lbl { font-size: 12.5px; color: #6B7280; }
-    .stu-total-val { font-size: 24px; font-weight: 800; color: #111827; }
-    .stu-badge { font-size: 10.5px; font-weight: 700; color: #16A34A; background: #E7F8EE; padding: 4px 9px; border-radius: 999px; }
-    .stu-donut-wrap { display: flex; justify-content: center; margin: 14px 0; }
-    .stu-donut {
-        width: 118px; height: 118px; border-radius: 50%;
-        background: conic-gradient(#22C55E 0 51%, #FB923C 51% 100%);
-        display: flex; align-items: center; justify-content: center;
-    }
-    .stu-donut-hole { width: 84px; height: 84px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #9CA3AF; }
-    .stu-legend { display: flex; justify-content: space-between; font-size: 12px; color: #374151; margin-top: 4px; }
-    .stu-legend .n { font-weight: 800; color: #111827; }
-    .bday-body { text-align: center; padding: 18px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
-    .bday-title { font-size: 14.5px; font-weight: 800; color: #111827; }
-    .bday-sub { font-size: 12px; color: #6B7280; margin-top: 4px; }
-    .bday-btn {
-        margin-top: 14px; font-size: 12px; font-weight: 700; color: #FF7A1B;
-        border: 1px solid #FFD9B3; background: #FFF7ED; padding: 7px 16px; border-radius: 999px; text-decoration: none; display: inline-block;
-    }
-    .bday-btn:hover { background: #FF7A1B; color: #fff; text-decoration: none; }
-    .bday-list { width: 100%; padding: 4px 4px 0 4px; }
-    .bday-row { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid #F3F4F6; text-align: left; }
-    .bday-row:last-child { border-bottom: none; }
-    .bday-avatar { width: 32px; height: 32px; border-radius: 50%; background: #FFE0EC; color: #EC4899; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; overflow: hidden; }
-    .bday-avatar img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-    .bday-name { font-size: 12.5px; font-weight: 700; color: #111827; }
-    .bday-class { font-size: 11px; color: #6B7280; }
-    .chl-donut-wrap { display: flex; justify-content: center; margin: 6px 0 12px 0; }
-    .chl-donut {
-        width: 108px; height: 108px; border-radius: 50%;
-        background: conic-gradient(#16A34A 0 78%, #F59E0B 78% 95%, #EF4444 95% 100%);
-        display: flex; align-items: center; justify-content: center;
-    }
-    .chl-donut-hole { width: 76px; height: 76px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .chl-donut-hole .pct { font-size: 17px; font-weight: 800; color: #16A34A; }
-    .chl-donut-hole .lbl { font-size: 9.5px; color: #9CA3AF; }
-    .chl-legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #374151; padding: 4px 0; }
-    .chl-legend-item .n { font-weight: 800; color: #111827; }
-    .chl-rate-lbl { font-size: 11.5px; color: #6B7280; margin-top: 10px; }
-    .chl-rate-bar { height: 7px; border-radius: 999px; background: #F3F4F6; margin-top: 6px; overflow: hidden; }
-    .chl-rate-fill { height: 100%; width: 78%; background: linear-gradient(90deg,#22C55E,#16A34A); border-radius: 999px; }
-    .chl-rate-foot { display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; }
-    @media (max-width: 1400px) {
-        .kpi-row { grid-template-columns: repeat(3, 1fr); }
-        .row2 { grid-template-columns: 1fr; }
-        .row3 { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 768px) {
-        .kpi-row { grid-template-columns: repeat(2, 1fr); }
-        .row3 { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 480px) {
-        .kpi-row { grid-template-columns: 1fr; gap: 10px; }
-        .kpi-card { padding: 14px; }
-        .kpi-value { font-size: 20px; }
-        .att-stats { grid-template-columns: 1fr 1fr; gap: 6px; }
-    }
-.kpi-value .toggle-money-eye { font-size: 13px; color: #9CA3AF; cursor: pointer; margin-left: 8px; vertical-align: middle; }
-        .kpi-value .toggle-money-eye:hover { color: #377DFF; }
-    </style>
+    .aqib-dash { padding-top: 6px; }
+    .earnings-body canvas { max-height: 280px; }
+    .kpi-spark { height: 28px; }
+    @media (max-width: 640px) { .earnings-body { min-height: 200px; } }
+</style>
 
 <div class="main-content">
-    <div class="container-fluid">
-        <div class="aqib-dash">
+    <div class="aqib-dash">
 
-            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; padding:4px 4px 14px;">
-                <h3 style="font-size:18px; font-weight:800; color:#111827; margin:0;"><i class="fa fa-tachometer"></i> Executive Dashboard</h3>
-                <button type="button" id="moneyToggle" class="btn btn-default" style="background:#fff; border:1px solid #E5E7EB; border-radius:999px; padding:7px 16px; font-weight:700; color:#374151;" onclick="toggleMoneyVisibility()">
+        <div class="dash-head">
+            <div>
+                <div class="dash-eyebrow">Executive Dashboard</div>
+                <h1 class="dash-title">Campus at a glance</h1>
+                <div class="dash-sub">Live overview of <?php echo e(get_setting('school_name', 'LAPS School & College')); ?> &middot; <?php echo date('l, d M Y'); ?></div>
+            </div>
+            <div class="dash-actions">
+                <button type="button" id="moneyToggle" class="btn" onclick="toggleMoneyVisibility()">
                     <i class="fa fa-eye" id="moneyToggleIcon"></i> <span id="moneyToggleLbl">Hide Values</span>
                 </button>
             </div>
-
-            <?php
-            $campuses = get_campuses();
-            $actCampus = get_active_campus();
-            if (count($campuses) === 0 || !$actCampus):
-            ?>
-            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; background:linear-gradient(120deg,#FFF3E0,#FFE8CC); border:1px solid #FFD9A0; border-radius:14px; padding:14px 18px; margin:0 0 14px;">
-                <div>
-                    <strong style="font-size:14px; color:#7A4E12;"><i class="fa fa-exclamation-triangle"></i> School Info not set yet!</strong>
-                    <div style="font-size:12.5px; color:#9A6B24; margin-top:3px;">Add your school name, logo, address & phone — it will appear automatically on all student cards, family cards, card back sides, certificates and reports.</div>
-                </div>
-                <a href="<?php echo BASE_URL; ?>manage_schools.php" class="btn" style="background:#FF7800; color:#fff; font-weight:700; border-radius:999px; padding:9px 20px; text-decoration:none;">Set Up School Info →</a>
-            </div>
-            <?php else: ?>
-            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:12px 16px; margin:0 0 14px; box-shadow:0 1px 3px rgba(0,0,0,.04);">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <?php if (!empty($actCampus['logo'])): ?>
-                        <img src="<?php echo BASE_URL . e($actCampus['logo']); ?>" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #F3F4F6;" onerror="this.style.display='none';">
-                    <?php else: ?>
-                        <div style="width:44px;height:44px;border-radius:50%;background:#FFE9D6;color:#FF7800;display:flex;align-items:center;justify-content:center;font-size:17px;"><i class="fa fa-university"></i></div>
-                    <?php endif; ?>
-                    <div>
-                        <div style="font-size:14px; font-weight:800; color:#111827;"><?php echo e($actCampus['name']); ?></div>
-                        <div style="font-size:12px; color:#6B7280;"><?php echo e($actCampus['address']); ?><?php echo trim((string)$actCampus['phone']) !== '' ? ' &nbsp;|&nbsp; ' . e($actCampus['phone']) : ''; ?></div>
-                    </div>
-                </div>
-                <a href="<?php echo BASE_URL; ?>manage_schools.php" class="btn" style="background:#FF7800; color:#fff; font-weight:700; border-radius:999px; padding:8px 18px; text-decoration:none; font-size:13px;"><i class="fa fa-pencil"></i> Edit School Info</a>
-            </div>
-            <?php endif; ?>
-
-            <div class="kpi-row">
-                <a class="aqib-card kpi-card" href="<?php echo BASE_URL; ?>datewise_fee_collection_report_new.php" target="_blank">
-                    <div class="kpi-top">
-                        <div class="kpi-icon" style="background:#E9F2FF; color:#377DFF;"><i class="fa fa-wallet"></i></div>
-                        <div class="kpi-label">Fee Received</div>
-                    </div>
-                    <div class="kpi-value"><span class="money-value" data-full="<?php echo e(number_format($feeReceived)); ?>" data-hidden="0"><?php echo e(get_setting('currency_symbol', 'Rs.') . number_format($feeReceived)); ?></span><i class="fa fa-eye toggle-money-eye" title="Show/Hide Amount"></i></div>
-                    <div class="kpi-change flat">Today</div>
-                    <div class="kpi-spark">
-                        <svg width="100%" height="30" viewBox="0 0 120 30" preserveAspectRatio="none">
-                            <defs><linearGradient id="sg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#377DFF" stop-opacity="0.28"></stop><stop offset="100%" stop-color="#377DFF" stop-opacity="0"></stop></linearGradient></defs>
-                            <path d="M0,22 20,18 40,21 60,11 80,15 100,7 120,10 V30 H0 Z" fill="url(#sg1)"></path>
-                            <polyline points="0,22 20,18 40,21 60,11 80,15 100,7 120,10" fill="none" stroke="#377DFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                        </svg>
-                    </div>
-                </a>
-
-                <a class="aqib-card kpi-card" href="<?php echo BASE_URL; ?>print_unpaid_fee_new.php" target="_blank">
-                    <div class="kpi-top">
-                        <div class="kpi-icon" style="background:#D7F5E7; color:#16A34A;"><i class="fa fa-file-invoice-dollar"></i></div>
-                        <div class="kpi-label">Fee Receivable</div>
-                    </div>
-                    <div class="kpi-value"><span class="money-value" data-full="<?php echo e(number_format($feeReceivable)); ?>" data-hidden="0"><?php echo e(get_setting('currency_symbol', 'Rs.') . number_format($feeReceivable)); ?></span><i class="fa fa-eye toggle-money-eye" title="Show/Hide Amount"></i></div>
-                    <div class="kpi-change flat">Outstanding balance</div>
-                    <div class="kpi-spark">
-                        <svg width="100%" height="30" viewBox="0 0 120 30" preserveAspectRatio="none">
-                            <defs><linearGradient id="sg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#16A34A" stop-opacity="0.28"></stop><stop offset="100%" stop-color="#16A34A" stop-opacity="0"></stop></linearGradient></defs>
-                            <path d="M0,9 20,13 40,11 60,18 80,16 100,21 120,17 V30 H0 Z" fill="url(#sg2)"></path>
-                            <polyline points="0,9 20,13 40,11 60,18 80,16 100,21 120,17" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                        </svg>
-                    </div>
-                </a>
-
-                <a class="aqib-card kpi-card" href="<?php echo BASE_URL; ?>datewise_fee_collection_report_new.php" target="_blank">
-                    <div class="kpi-top">
-                        <div class="kpi-icon" style="background:#EADAFF; color:#9747FF;"><i class="fa fa-coins"></i></div>
-                        <div class="kpi-label">Today's Collection</div>
-                    </div>
-                    <div class="kpi-value"><span class="money-value" data-full="<?php echo e(number_format($feeReceived)); ?>" data-hidden="0"><?php echo e(get_setting('currency_symbol', 'Rs.') . number_format($feeReceived)); ?></span><i class="fa fa-eye toggle-money-eye" title="Show/Hide Amount"></i></div>
-                    <div class="kpi-change flat">Today</div>
-                    <div class="kpi-spark">
-                        <svg width="100%" height="30" viewBox="0 0 120 30" preserveAspectRatio="none">
-                            <defs><linearGradient id="sg3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9747FF" stop-opacity="0.28"></stop><stop offset="100%" stop-color="#9747FF" stop-opacity="0"></stop></linearGradient></defs>
-                            <path d="M0,20 20,21 40,16 60,17 80,10 100,12 120,4 V30 H0 Z" fill="url(#sg3)"></path>
-                            <polyline points="0,20 20,21 40,16 60,17 80,10 100,12 120,4" fill="none" stroke="#9747FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                        </svg>
-                    </div>
-                </a>
-
-                <a class="aqib-card kpi-card" href="<?php echo BASE_URL; ?>manage_expenses.php" target="_blank">
-                    <div class="kpi-top">
-                        <div class="kpi-icon" style="background:#FFE5D1; color:#FF7C1B;"><i class="fa fa-receipt"></i></div>
-                        <div class="kpi-label">Monthly Expenses</div>
-                    </div>
-                    <div class="kpi-value"><span class="money-value" data-full="<?php echo e(number_format($monthlyExpenses)); ?>" data-hidden="0"><?php echo e(get_setting('currency_symbol', 'Rs.') . number_format($monthlyExpenses)); ?></span><i class="fa fa-eye toggle-money-eye" title="Show/Hide Amount"></i></div>
-                    <div class="kpi-change flat">This month</div>
-                    <div class="kpi-spark">
-                        <svg width="100%" height="30" viewBox="0 0 120 30" preserveAspectRatio="none">
-                            <defs><linearGradient id="sg4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF7C1B" stop-opacity="0.28"></stop><stop offset="100%" stop-color="#FF7C1B" stop-opacity="0"></stop></linearGradient></defs>
-                            <path d="M0,7 20,11 40,10 60,17 80,15 100,23 120,19 V30 H0 Z" fill="url(#sg4)"></path>
-                            <polyline points="0,7 20,11 40,10 60,17 80,15 100,23 120,19" fill="none" stroke="#FF7C1B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                        </svg>
-                    </div>
-                </a>
-
-                <a class="aqib-card kpi-card" href="<?php echo BASE_URL; ?>student_inquiry.php" target="_blank">
-                    <div class="kpi-top">
-                        <div class="kpi-icon" style="background:#D3F3E4; color:#22C55E;"><i class="fa fa-user-plus"></i></div>
-                        <div class="kpi-label">Admission Inquiry</div>
-                    </div>
-                    <div class="kpi-value"><?php echo $totalInquiries; ?></div>
-                    <div class="kpi-change flat">This month</div>
-                    <div class="kpi-spark">
-                        <svg width="100%" height="30" viewBox="0 0 120 30" preserveAspectRatio="none">
-                            <defs><linearGradient id="sg5" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#22C55E" stop-opacity="0.28"></stop><stop offset="100%" stop-color="#22C55E" stop-opacity="0"></stop></linearGradient></defs>
-                            <path d="M0,23 20,20 40,22 60,15 80,17 100,9 120,12 V30 H0 Z" fill="url(#sg5)"></path>
-                            <polyline points="0,23 20,20 40,22 60,15 80,17 100,9 120,12" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                        </svg>
-                    </div>
-                </a>
-
-                <div class="kpi-flip-container" id="complaintFlipCard">
-                    <div class="kpi-flipper">
-                        <a class="aqib-card kpi-card kpi-flip-face front" href="<?php echo BASE_URL; ?>manage_complaint.php" target="_blank">
-                            <div class="kpi-top">
-                                <div class="kpi-icon" style="background:#FFD4D1; color:#FF261B;"><i class="fa fa-comment-dots"></i></div>
-                                <div class="kpi-label">Complaints</div>
-                            </div>
-                            <div class="kpi-value"><?php echo $totalComplaints; ?></div>
-                            <div class="kpi-change flat">This month</div>
-                            <div class="kpi-spark">
-                                <svg width="100%" height="30" viewBox="0 0 120 30" preserveAspectRatio="none">
-                                    <defs><linearGradient id="sg6" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF261B" stop-opacity="0.22"></stop><stop offset="100%" stop-color="#FF261B" stop-opacity="0"></stop></linearGradient></defs>
-                                    <path d="M0,18 20,17 40,19 60,16 80,18 100,15 120,17 V30 H0 Z" fill="url(#sg6)"></path>
-                                    <polyline points="0,18 20,17 40,19 60,16 80,18 100,15 120,17" fill="none" stroke="#FF261B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                                </svg>
-                            </div>
-                        </a>
-                        <a class="aqib-card kpi-card kpi-flip-face back" href="<?php echo BASE_URL; ?>print_unpaid_fee_new.php" target="_blank">
-                            <div class="kpi-top">
-                                <div class="kpi-icon" style="background:#FFF4EC; color:#FF7C1B;"><i class="fa fa-calendar-check"></i></div>
-                                <div class="kpi-label">Today's Commitments</div>
-                            </div>
-                            <div class="kpi-value"><?php echo $challansUnpaid; ?></div>
-                            <div class="kpi-change flat">Unpaid challans today</div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row2">
-                <div class="aqib-card earnings-col">
-                    <div class="card-head">
-                        <div class="card-title">
-                            <span class="ico" style="background:#FFE5D1; color:#FF7C1B;"><i class="fa fa-chart-bar"></i></span>
-                            Earnings Overview
-                        </div>
-                    </div>
-                    <div class="legend-row">
-                        <span><span class="legend-dot" style="background:#22C55E;"></span>Income</span>
-                        <span><span class="legend-dot" style="background:#FB923C;"></span>Expenses</span>
-                    </div>
-                    <div class="earnings-body">
-                        <canvas id="aqibEarningsChart"></canvas>
-                    </div>
-                </div>
-
-                <div class="aqib-card">
-                    <div class="card-head">
-                        <div class="card-title">
-                            <span class="ico" style="background:#D7DEF3; color:#377DFF;"><i class="fa fa-user-check"></i></span>
-                            Attendance
-                        </div>
-                        <span style="font-size:11px; color:#6B7280; background:#F3F4F6; border:1px solid #E5E7EB; padding:4px 9px; border-radius:999px; white-space:nowrap;"><?php echo date('d M, Y'); ?></span>
-                    </div>
-                    <div class="att-body">
-                        <div class="att-donut-wrap">
-                            <div class="att-donut" style="background: conic-gradient(#22C55E <?php echo $attPct; ?>%, #E5EAF0 0);">
-                                <div class="att-donut-hole">
-                                    <div class="pct"><?php echo $attPct; ?>%</div>
-                                    <div class="lbl">Overall<br>Attendance</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="att-stats">
-                            <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="att-stat" style="display:block; text-decoration:none; color:inherit;"><span class="p" style="color:#16A34A;"><?php echo $attTotal > 0 ? round(($attPresent / $attTotal) * 100) : 0; ?>%</span><div class="n" style="color:#16A34A;"><?php echo $attPresent; ?></div><div class="l">Present</div></a>
-                            <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="att-stat" style="display:block; text-decoration:none; color:inherit;"><span class="p" style="color:#DC2626;"><?php echo $attTotal > 0 ? round(($attAbsent / $attTotal) * 100) : 0; ?>%</span><div class="n" style="color:#DC2626;"><?php echo $attAbsent; ?></div><div class="l">Absent</div></a>
-                            <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="att-stat" style="display:block; text-decoration:none; color:inherit;"><span class="p" style="color:#F59E0B;"><?php echo $attTotal > 0 ? round(($attLeave / $attTotal) * 100) : 0; ?>%</span><div class="n" style="color:#F59E0B;"><?php echo $attLeave; ?></div><div class="l">Leave</div></a>
-                            <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="att-stat" style="display:block; text-decoration:none; color:inherit;"><span class="p" style="color:#377DFF;"><?php echo $attTotal > 0 ? round(($attLate / $attTotal) * 100) : 0; ?>%</span><div class="n" style="color:#377DFF;"><?php echo $attLate; ?></div><div class="l">Late</div></a>
-                        </div>
-                    </div>
-                    <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="view-details">View Details →</a>
-                </div>
-            </div>
-
-            <div class="row3">
-                <div class="aqib-card">
-                    <div class="card-head" style="padding-bottom:0;">
-                        <div>
-                            <div class="stu-total-lbl">Total Students</div>
-                            <div class="stu-total-val"><?php echo $totalStudents; ?></div>
-                        </div>
-                        <span class="stu-badge">Active Students</span>
-                    </div>
-                    <div class="r3-body" style="padding-top:0;">
-                        <div class="stu-donut-wrap">
-                            <div class="stu-donut" style="background: conic-gradient(#22C55E 0 <?php echo $studentPctBoys; ?>%, #FB923C <?php echo $studentPctBoys; ?>% 100%);">
-                                <div class="stu-donut-hole"><i class="fa fa-user-graduate"></i></div>
-                            </div>
-                        </div>
-                        <div class="stu-legend">
-                            <span><span class="legend-dot" style="background:#22C55E;"></span><span class="n"><?php echo $boys; ?></span> Boys <?php echo $studentPctBoys; ?>%</span>
-                            <span><span class="legend-dot" style="background:#FB923C;"></span><span class="n"><?php echo $girls; ?></span> Girls <?php echo $studentPctGirls; ?>%</span>
-                        </div>
-                    </div>
-                    <a href="<?php echo BASE_URL; ?>manage_students.php" target="_blank" class="view-details">View Details →</a>
-                </div>
-
-                <div class="aqib-card" style="display:flex; flex-direction:column;">
-                    <div class="card-head" style="padding-bottom:0;">
-                        <div class="card-title" style="font-size:14px;">
-                            <span class="ico" style="background:#FFE0EC; color:#EC4899;"><i class="fa fa-birthday-cake"></i></span>
-                            Birthday's Today
-                        </div>
-                    </div>
-                    <div class="bday-body">
-                        <?php if (count($birthdays) > 0): ?>
-                            <div class="bday-list">
-                                <?php foreach ($birthdays as $b): ?>
-                                    <div class="bday-row">
-                                        <div class="bday-avatar"><i class="fa fa-user"></i></div>
-                                        <div>
-                                            <div class="bday-name"><?php echo e($b['first_name'] . ' ' . ($b['father_name'] ? ' Mr. ' . $b['father_name'] : '')); ?></div>
-                                            <div class="bday-class"><?php echo e($b['class_name'] ?? ''); ?></div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="bday-sub">No birthdays today</div>
-                        <?php endif; ?>
-                        <a href="<?php echo BASE_URL; ?>student_birthday.php" class="bday-btn">View All →</a>
-                    </div>
-                </div>
-
-                <div class="aqib-card">
-                    <div class="card-head">
-                        <div class="card-title" style="font-size:14px;">
-                            <span class="ico" style="background:#D7F5E7; color:#16A34A;"><i class="fa fa-file-invoice"></i></span>
-                            Challan / Fee Status
-                        </div>
-                        <span style="font-size:11px; color:#6B7280; background:#F3F4F6; border:1px solid #E5E7EB; padding:4px 9px; border-radius:999px; white-space:nowrap;"><?php echo date('M Y'); ?></span>
-                    </div>
-                    <div class="r3-body">
-                        <div class="chl-donut-wrap">
-                            <div class="chl-donut" style="background: conic-gradient(#16A34A 0 <?php echo $challanPct; ?>%, #F59E0B <?php echo $challanPct; ?>% <?php echo $challanPct + $challansUnpaid > 0 ? min(100, $challanPct + ($challansUnpaid / max(1,$challansTotal)) * 100) : $challanPct; ?>%, #EF4444 <?php echo $challanPct; ?>% 100%);">
-                                <div class="chl-donut-hole"><div class="pct"><?php echo $challanPct; ?>%</div><div class="lbl">Paid</div></div>
-                            </div>
-                        </div>
-                        <a href="<?php echo BASE_URL; ?>fee_challans.php" target="_blank" class="chl-legend-item" style="text-decoration:none;"><span><span class="legend-dot" style="background:#16A34A;"></span>Paid <?php echo $challanPct; ?>%</span><span class="n"><?php echo $challansPaid; ?></span></a>
-                        <a href="<?php echo BASE_URL; ?>fee_challans.php" target="_blank" class="chl-legend-item" style="text-decoration:none;"><span><span class="legend-dot" style="background:#F59E0B;"></span>Un-Paid <?php echo $challansTotal > 0 ? round(($challansUnpaid / $challansTotal) * 100) : 0; ?>%</span><span class="n"><?php echo $challansUnpaid; ?></span></a>
-                        <div class="chl-legend-item"><span><span class="legend-dot" style="background:#EF4444;"></span>Partially <?php echo $challansTotal > 0 ? round(($challansPartial / $challansTotal) * 100) : 0; ?>%</span><span class="n"><?php echo $challansPartial; ?></span></div>
-                        <div class="chl-rate-lbl">Collection Rate</div>
-                        <div class="chl-rate-bar"><div class="chl-rate-fill" style="width: <?php echo $challanPct; ?>%;"></div></div>
-                        <div class="chl-rate-foot">
-                            <span style="font-weight:800; color:#111827;"><?php echo $challanPct; ?>%</span>
-                            <span style="color:#6B7280; font-weight:600;"><?php echo $challansTotal; ?> challans this month</span>
-                        </div>
-                    </div>
-                    <a href="<?php echo BASE_URL; ?>fee_challans.php" target="_blank" class="view-details">View Details →</a>
-                </div>
-
-                <div class="aqib-card">
-                    <div class="card-head" style="padding-bottom:0;">
-                        <div class="card-title" style="font-size:14px;">
-                            <span class="ico" style="background:#EADAFF; color:#9747FF;"><i class="fa fa-exchange-alt"></i></span>
-                            Admissions &amp; Withdrawals
-                        </div>
-                    </div>
-                    <div class="pill-tabs aw-pill-tabs" style="display:flex;">
-                        <button type="button" class="pill-tab active" onclick="aqibSwitchAWTab(this, 'month')">This Month</button>
-                        <button type="button" class="pill-tab" onclick="aqibSwitchAWTab(this, 'year')">This Year</button>
-                        <button type="button" class="pill-tab" onclick="aqibSwitchAWTab(this, 'lastyear')">Last Year</button>
-                    </div>
-                    <div class="aw-body">
-                        <div class="aw-box">
-                            <div class="left">
-                                <div class="aw-ico" style="background:#FFE6D6; color:#FF7C1B;"><i class="fa fa-chart-bar"></i></div>
-                                <div>
-                                    <div class="name">Admissions</div>
-                                    <span class="kpi-badge flat" id="awAdmissionsSub" style="margin-top:2px;">This month</span>
-                                </div>
-                            </div>
-                            <div class="val" id="awAdmissionsVal" style="color:#FF7C1B;"><?php echo $admissionsMonth; ?></div>
-                        </div>
-                        <div class="aw-box" style="margin-bottom:0;">
-                            <div class="left">
-                                <div class="aw-ico" style="background:#E7F7EF; color:#16A34A;"><i class="fa fa-chart-bar"></i></div>
-                                <div>
-                                    <div class="name">Withdrawals</div>
-                                    <span class="kpi-badge flat" id="awWithdrawalsSub" style="margin-top:2px;">This month</span>
-                                </div>
-                            </div>
-                            <div class="val" id="awWithdrawalsVal" style="color:#16A34A;"><?php echo $withdrawalsMonth; ?></div>
-                        </div>
-                        <div class="aw-net">
-                            <div>
-                                <div class="n-lbl">Net Growth</div>
-                                <div class="n-val" id="awNetVal" style="color: #4ADE80;">+<?php echo max(0, $admissionsMonth - $withdrawalsMonth); ?> Students</div>
-                            </div>
-                            <i class="fa fa-chart-line" id="awNetIcon" style="color:#4ADE80; font-size:20px;"></i>
-                        </div>
-                    </div>
-                    <a href="<?php echo BASE_URL; ?>manage_students.php" target="_blank" id="awViewDetails" class="view-details">View Details →</a>
-                </div>
-            </div>
-
         </div>
+
+        <?php
+        $campuses = get_campuses();
+        $actCampus = get_active_campus();
+        if (count($campuses) === 0 || !$actCampus):
+        ?>
+        <div class="school-card">
+            <div class="ds-card" style="width:100%;margin:0;">
+                <div class="sc-warn-box">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 18px;">
+                        <div>
+                            <strong style="font-size:14px; color:#7A4E12;"><i class="fa fa-exclamation-triangle"></i> School Info not set yet!</strong>
+                            <div style="font-size:12.5px; color:#9A6B24; margin-top:3px;">Add your school name, logo, address &amp; phone — it will appear automatically on all student cards, family cards, card back sides, certificates and reports.</div>
+                        </div>
+                        <a href="<?php echo BASE_URL; ?>manage_schools.php" class="ds-btn ds-btn-accent">Set Up School Info &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php else: ?>
+        <div class="school-card">
+            <div class="sc-main">
+                <?php if (!empty($actCampus['logo'])): ?>
+                    <div class="sc-logo"><img src="<?php echo BASE_URL . e($actCampus['logo']); ?>" alt="" onerror="this.parentElement.innerHTML='<i class=&quot;fa fa-university&quot;></i>';"></div>
+                <?php else: ?>
+                    <div class="sc-logo" style="background:linear-gradient(135deg,#FFF0E0,#FFD9B3);color:#FF7800;font-size:20px;"><i class="fa fa-university"></i></div>
+                <?php endif; ?>
+                <div style="min-width:0;">
+                    <div class="sc-name"><?php echo e($actCampus['name']); ?></div>
+                    <div class="sc-addr"><i class="fa fa-map-marker"></i><?php echo e($actCampus['address']); ?><?php echo trim((string)$actCampus['phone']) !== '' ? ' &nbsp;&middot;&nbsp; ' . e($actCampus['phone']) : ''; ?></div>
+                </div>
+            </div>
+            </div>
+        <?php endif; ?>
+
+        <div class="kpi-row">
+            <a class="kpi-card" href="<?php echo BASE_URL; ?>datewise_fee_collection_report_new.php" target="_blank">
+                <span class="kpi-accent" style="background:linear-gradient(90deg,#2563EB,#60A5FA);"></span>
+                <div class="kpi-top">
+                    <div class="kpi-icon" style="background:#DBEAFE;color:#2563EB;"><i class="fa fa-wallet"></i></div>
+                    <div class="kpi-label">Fee Received</div>
+                </div>
+                <div class="kpi-value"><span class="money-value" data-full="<?php echo e($curFull . number_format($feeReceived)); ?>" data-hidden="0"><?php echo $cur . number_format($feeReceived); ?></span><i class="fa fa-eye toggle-money-eye" title="Show/Hide Amount"></i></div>
+                <div class="kpi-change flat">Today</div>
+                <span class="kpi-spark" data-spark="<?php echo e(json_encode($chartData['income'])); ?>" data-type="line" data-color="#2563EB" title="Fee collections &middot; last 12 months"></span>
+            </a>
+
+            <a class="kpi-card" href="<?php echo BASE_URL; ?>print_unpaid_fee_new.php" target="_blank">
+                <span class="kpi-accent" style="background:linear-gradient(90deg,#16A34A,#4ADE80);"></span>
+                <div class="kpi-top">
+                    <div class="kpi-icon" style="background:#DCFCE7;color:#16A34A;"><i class="fa fa-file-invoice-dollar"></i></div>
+                    <div class="kpi-label">Fee Receivable</div>
+                </div>
+                <div class="kpi-value"><span class="money-value" data-full="<?php echo e($curFull . number_format($feeReceivable)); ?>" data-hidden="0"><?php echo $cur . number_format($feeReceivable); ?></span><i class="fa fa-eye toggle-money-eye" title="Show/Hide Amount"></i></div>
+                <div class="kpi-change flat">Outstanding balance</div>
+                <div class="kpi-spark ds-mini-stat"><?php echo $challansUnpaid > 0 ? '<span class="ds-pill" style="color:#D97706;background:#FEF3C7;">' . $challansUnpaid . ' unpaid challans</span>' : '<span class="ds-pill">No unpaid challans this month</span>'; ?></div>
+            </a>
+
+            <a class="kpi-card" href="<?php echo BASE_URL; ?>datewise_fee_collection_report_new.php" target="_blank">
+                <span class="kpi-accent" style="background:linear-gradient(90deg,#7C3AED,#A78BFA);"></span>
+                <div class="kpi-top">
+                    <div class="kpi-icon" style="background:#EDE9FE;color:#7C3AED;"><i class="fa fa-coins"></i></div>
+                    <div class="kpi-label">Today's Collection</div>
+                </div>
+                <div class="kpi-value"><span class="money-value" data-full="<?php echo e($curFull . number_format($feeReceived)); ?>" data-hidden="0"><?php echo $cur . number_format($feeReceived); ?></span><i class="fa fa-eye toggle-money-eye" title="Show/Hide Amount"></i></div>
+                <div class="kpi-change flat">Today</div>
+                <span class="kpi-spark" data-spark="<?php echo e(json_encode($fee7)); ?>" data-type="bar" data-color="#7C3AED" title="Fee collections &middot; last 7 days"></span>
+            </a>
+
+            <a class="kpi-card" href="<?php echo BASE_URL; ?>manage_expenses.php" target="_blank">
+                <span class="kpi-accent" style="background:linear-gradient(90deg,#F97316,#FBBF24);"></span>
+                <div class="kpi-top">
+                    <div class="kpi-icon" style="background:#FFF3E6;color:#F97316;"><i class="fa fa-receipt"></i></div>
+                    <div class="kpi-label">Monthly Expenses</div>
+                </div>
+                <div class="kpi-value"><span class="money-value" data-full="<?php echo e($curFull . number_format($monthlyExpenses)); ?>" data-hidden="0"><?php echo $cur . number_format($monthlyExpenses); ?></span><i class="fa fa-eye toggle-money-eye" title="Show/Hide Amount"></i></div>
+                <div class="kpi-change flat">This month</div>
+                <span class="kpi-spark" data-spark="<?php echo e(json_encode($chartData['expense'])); ?>" data-type="line" data-color="#F97316" title="Expenses &middot; last 12 months"></span>
+            </a>
+
+            <a class="kpi-card" href="<?php echo BASE_URL; ?>student_inquiry.php" target="_blank">
+                <span class="kpi-accent" style="background:linear-gradient(90deg,#0891B2,#22D3EE);"></span>
+                <div class="kpi-top">
+                    <div class="kpi-icon" style="background:#CFFAFE;color:#0891B2;"><i class="fa fa-user-plus"></i></div>
+                    <div class="kpi-label">Admission Inquiry</div>
+                </div>
+                <div class="kpi-value"><?php echo $totalInquiries; ?></div>
+                <div class="kpi-change flat">This month</div>
+                <div class="kpi-spark ds-mini-stat"><?php echo $totalInquiries > 0 ? '<span class="ds-pill" style="color:#0891B2;background:#CFFAFE;">Open to new admissions</span>' : '<span class="ds-pill">No new inquiries</span>'; ?></div>
+            </a>
+
+            <div class="kpi-flip-container" id="complaintFlipCard">
+                <div class="kpi-flipper">
+                    <a class="kpi-card kpi-flip-face front" href="<?php echo BASE_URL; ?>manage_complaint.php" target="_blank">
+                        <span class="kpi-accent" style="background:linear-gradient(90deg,#EF4444,#F87171);"></span>
+                        <div class="kpi-top">
+                            <div class="kpi-icon" style="background:#FEE2E2;color:#EF4444;"><i class="fa fa-comment-dots"></i></div>
+                            <div class="kpi-label">Complaints</div>
+                        </div>
+                        <div class="kpi-value"><?php echo $totalComplaints; ?></div>
+                        <div class="kpi-change flat">This month</div>
+                        <div class="kpi-spark ds-mini-stat"><?php echo $totalComplaints > 0 ? '<span class="ds-pill" style="color:#EF4444;background:#FEE2E2;">' . $totalComplaints . ' reported</span>' : '<span class="ds-pill">No complaints</span>'; ?></div>
+                    </a>
+                    <a class="kpi-card kpi-flip-face back" href="<?php echo BASE_URL; ?>print_unpaid_fee_new.php" target="_blank">
+                        <span class="kpi-accent" style="background:linear-gradient(90deg,#D97706,#FBBF24);"></span>
+                        <div class="kpi-top">
+                            <div class="kpi-icon" style="background:#FEF3C7;color:#D97706;"><i class="fa fa-calendar-check"></i></div>
+                            <div class="kpi-label">Unpaid Challans</div>
+                        </div>
+                        <div class="kpi-value"><?php echo $challansUnpaid; ?></div>
+                        <div class="kpi-change flat">This month</div>
+                        <div class="kpi-spark ds-mini-stat"><span class="ds-pill" style="color:#D97706;background:#FEF3C7;">Collection rate <?php echo $challanPct; ?>%</span></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row2">
+            <div class="aqib-card earnings-col">
+                <div class="card-head">
+                    <div class="card-title">
+                        <span class="ico" style="background:#E8F4FF; color:#2563EB;"><i class="fa fa-chart-bar"></i></span>
+                        Earnings Overview
+                    </div>
+                    <span class="pill-tabs">
+                        <span class="pill-tab active" style="cursor:default;">Last 12 months</span>
+                    </span>
+                </div>
+                <div class="legend-row">
+                    <span><span class="legend-dot" style="background:#22C55E;"></span>Income</span>
+                    <span><span class="legend-dot" style="background:#FB923C;"></span>Expenses</span>
+                </div>
+                <div class="earnings-body">
+                    <canvas id="aqibEarningsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="aqib-card">
+                <div class="card-head">
+                    <div class="card-title">
+                        <span class="ico" style="background:#DBEAFE; color:#2563EB;"><i class="fa fa-user-check"></i></span>
+                        Attendance
+                    </div>
+                    <span class="date-chip"><?php echo date('d M, Y'); ?></span>
+                </div>
+                <div class="att-body">
+                    <div class="att-donut-wrap">
+                        <div class="att-donut" style="background: conic-gradient(#22C55E <?php echo $attPct; ?>%, #E5EAF0 0);">
+                            <div class="att-donut-hole">
+                                <div class="pct"><?php echo $attPct; ?>%</div>
+                                <div class="lbl">Overall<br>Attendance</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="att-stats">
+                        <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="att-stat" style="display:block; text-decoration:none; color:inherit;"><span class="p" style="color:#16A34A;"><?php echo $attTotal > 0 ? round(($attPresent / $attTotal) * 100) : 0; ?>%</span><div class="n" style="color:#16A34A;"><?php echo $attPresent; ?></div><div class="l">Present</div></a>
+                        <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="att-stat" style="display:block; text-decoration:none; color:inherit;"><span class="p" style="color:#DC2626;"><?php echo $attTotal > 0 ? round(($attAbsent / $attTotal) * 100) : 0; ?>%</span><div class="n" style="color:#DC2626;"><?php echo $attAbsent; ?></div><div class="l">Absent</div></a>
+                        <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="att-stat" style="display:block; text-decoration:none; color:inherit;"><span class="p" style="color:#D97706;"><?php echo $attTotal > 0 ? round(($attLeave / $attTotal) * 100) : 0; ?>%</span><div class="n" style="color:#D97706;"><?php echo $attLeave; ?></div><div class="l">Leave</div></a>
+                        <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="att-stat" style="display:block; text-decoration:none; color:inherit;"><span class="p" style="color:#2563EB;"><?php echo $attTotal > 0 ? round(($attLate / $attTotal) * 100) : 0; ?>%</span><div class="n" style="color:#2563EB;"><?php echo $attLate; ?></div><div class="l">Late</div></a>
+                    </div>
+                </div>
+                <a href="<?php echo BASE_URL; ?>day_attendance_summary.php" class="view-details">View Details &rarr;</a>
+            </div>
+        </div>
+
+        <div class="row3">
+            <div class="aqib-card">
+                <div class="card-head" style="padding-bottom:0;">
+                    <div>
+                        <div class="stu-total-lbl">Total Students</div>
+                        <div class="stu-total-val"><?php echo $totalStudents; ?></div>
+                    </div>
+                    <span class="stu-badge">Active Students</span>
+                </div>
+                <div class="r3-body" style="padding-top:0;">
+                    <div class="stu-donut-wrap">
+                        <div class="stu-donut" style="background: conic-gradient(#22C55E 0 <?php echo $studentPctBoys; ?>%, #FB923C <?php echo $studentPctBoys; ?>% 100%);">
+                            <div class="stu-donut-hole"><i class="fa fa-user-graduate"></i></div>
+                        </div>
+                    </div>
+                    <div class="stu-legend">
+                        <span><span class="legend-dot" style="background:#22C55E;"></span>Boys <span class="n"><?php echo $boys; ?></span></span>
+                        <span><span class="legend-dot" style="background:#FB923C;"></span>Girls <span class="n"><?php echo $girls; ?></span></span>
+                    </div>
+                    <div style="text-align:center; margin-top:8px;"><span class="ds-pill"><?php echo $studentPctBoys; ?>% boys &middot; <?php echo $studentPctGirls; ?>% girls</span></div>
+                </div>
+                <a href="<?php echo BASE_URL; ?>manage_students.php" target="_blank" class="view-details">View Details &rarr;</a>
+            </div>
+
+            <div class="aqib-card">
+                <div class="card-head" style="padding-bottom:0;">
+                    <div class="card-title" style="font-size:14px;">
+                        <span class="ico" style="background:#FCE7F3; color:#EC4899;"><i class="fa fa-birthday-cake"></i></span>
+                        Birthdays Today
+                    </div>
+                    <span class="date-chip"><?php echo date('d M'); ?></span>
+                </div>
+                <div class="bday-body">
+                    <?php if (count($birthdays) > 0): ?>
+                        <div class="bday-list">
+                            <?php foreach ($birthdays as $b): ?>
+                                <div class="bday-row">
+                                    <div class="bday-avatar"><i class="fa fa-user"></i></div>
+                                    <div>
+                                        <div class="bday-name"><?php echo e($b['first_name'] . ' ' . ($b['father_name'] ? ' Mr. ' . $b['father_name'] : '')); ?></div>
+                                        <div class="bday-class"><?php echo e($b['class_name'] ?? ''); ?></div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="bday-sub">No birthdays today.<br>Nothing to celebrate &mdash; yet.</div>
+                    <?php endif; ?>
+                    <a href="<?php echo BASE_URL; ?>student_birthday.php" class="bday-btn">View All &rarr;</a>
+                </div>
+            </div>
+
+            <div class="aqib-card">
+                <div class="card-head">
+                    <div class="card-title" style="font-size:14px;">
+                        <span class="ico" style="background:#DCFCE7; color:#16A34A;"><i class="fa fa-file-invoice"></i></span>
+                        Challan / Fee Status
+                    </div>
+                    <span class="date-chip"><?php echo date('M Y'); ?></span>
+                </div>
+                <div class="r3-body">
+                    <div class="chl-donut-wrap">
+                        <div class="chl-donut" style="background: conic-gradient(#16A34A 0 <?php echo $challanPct; ?>%, #F59E0B <?php echo $challanPct; ?>% <?php echo $challanPct + $challansUnpaid > 0 ? min(100, $challanPct + ($challansUnpaid / max(1,$challansTotal)) * 100) : $challanPct; ?>%, #EF4444 <?php echo $challanPct; ?>% 100%);">
+                            <div class="chl-donut-hole"><div class="pct"><?php echo $challanPct; ?>%</div><div class="lbl">Paid</div></div>
+                        </div>
+                    </div>
+                    <a href="<?php echo BASE_URL; ?>fee_challans.php" target="_blank" class="chl-legend-item" style="text-decoration:none;"><span><span class="legend-dot" style="background:#16A34A;"></span>Paid</span><span class="n"><?php echo $challansPaid; ?></span></a>
+                    <a href="<?php echo BASE_URL; ?>fee_challans.php" target="_blank" class="chl-legend-item" style="text-decoration:none;"><span><span class="legend-dot" style="background:#F59E0B;"></span>Un-Paid</span><span class="n"><?php echo $challansUnpaid; ?></span></a>
+                    <div class="chl-legend-item"><span><span class="legend-dot" style="background:#EF4444;"></span>Partial</span><span class="n"><?php echo $challansPartial; ?></span></div>
+                    <div class="chl-rate-lbl">Collection Rate</div>
+                    <div class="chl-rate-bar"><div class="chl-rate-fill" style="width: <?php echo $challanPct; ?>%;"></div></div>
+                    <div class="chl-rate-foot">
+                        <span style="font-weight:800; color:#111827;"><?php echo $challanPct; ?>%</span>
+                        <span style="color:#6B7280; font-weight:600;"><?php echo $challansTotal; ?> challans this month</span>
+                    </div>
+                </div>
+                <a href="<?php echo BASE_URL; ?>fee_challans.php" target="_blank" class="view-details">View Details &rarr;</a>
+            </div>
+
+            <div class="aqib-card">
+                <div class="card-head" style="padding-bottom:0;">
+                    <div class="card-title" style="font-size:14px;">
+                        <span class="ico" style="background:#EDE9FE; color:#7C3AED;"><i class="fa fa-exchange-alt"></i></span>
+                        Admissions &amp; Withdrawals
+                    </div>
+                </div>
+                <div class="pill-tabs aw-pill-tabs">
+                    <button type="button" class="pill-tab aw-pill-tab active" onclick="aqibSwitchAWTab(this, 'month')">This Month</button>
+                    <button type="button" class="pill-tab aw-pill-tab" onclick="aqibSwitchAWTab(this, 'year')">This Year</button>
+                    <button type="button" class="pill-tab aw-pill-tab" onclick="aqibSwitchAWTab(this, 'lastyear')">Last Year</button>
+                </div>
+                <div class="aw-body">
+                    <div class="aw-box">
+                        <div class="left">
+                            <div class="aw-ico" style="background:#FFF3E6; color:#F97316;"><i class="fa fa-user-plus"></i></div>
+                            <div>
+                                <div class="name">Admissions</div>
+                                <span class="ds-pill" id="awAdmissionsSub" style="margin-top:3px;">This month</span>
+                            </div>
+                        </div>
+                        <div class="val" id="awAdmissionsVal" style="color:#F97316;"><?php echo $admissionsMonth; ?></div>
+                    </div>
+                    <div class="aw-box" style="margin-bottom:0;">
+                        <div class="left">
+                            <div class="aw-ico" style="background:#E7F7EF; color:#16A34A;"><i class="fa fa-user-minus"></i></div>
+                            <div>
+                                <div class="name">Withdrawals</div>
+                                <span class="ds-pill" id="awWithdrawalsSub" style="margin-top:3px;">This month</span>
+                            </div>
+                        </div>
+                        <div class="val" id="awWithdrawalsVal" style="color:#16A34A;"><?php echo $withdrawalsMonth; ?></div>
+                    </div>
+                    <div class="aw-net">
+                        <div>
+                            <div class="n-lbl">Net Growth</div>
+                            <div class="n-val" id="awNetVal" style="color:#4ADE80;">+<?php echo max(0, $admissionsMonth - $withdrawalsMonth); ?> Students</div>
+                        </div>
+                        <i class="fa fa-chart-line" id="awNetIcon" style="color:#4ADE80; font-size:20px;"></i>
+                    </div>
+                </div>
+                <a href="<?php echo BASE_URL; ?>manage_students.php" target="_blank" id="awViewDetails" class="view-details">View Details &rarr;</a>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -651,6 +468,37 @@ if (flip) {
         flip.classList.toggle('flipped');
     }, 3000);
 }
+
+/* Real-data sparklines (jQuery Sparkline loaded in footer) */
+window.addEventListener('load', function(){
+    if (!window.jQuery || !jQuery.fn.sparkline) return;
+    jQuery('.kpi-spark[data-spark]').each(function(){
+        var $el = jQuery(this);
+        var raw = $el.attr('data-spark');
+        if (!raw) return;
+        try { var data = JSON.parse(raw); } catch(e) { return; }
+        var type = $el.attr('data-type') === 'bar' ? 'bar' : 'line';
+        var color = $el.attr('data-color') || '#2563EB';
+        $el.sparkline(data, {
+            type: type,
+            height: '28px',
+            width: '100%',
+            lineColor: color,
+            fillColor: type === 'line' ? 'rgba(37,99,235,0.10)' : false,
+            fillOpacity: 0.12,
+            spotColor: false,
+            minSpotColor: false,
+            maxSpotColor: false,
+            highlightSpotColor: color,
+            barColor: color,
+            barWidth: 6,
+            barSpacing: 3,
+            chartRangeMin: 0,
+            tooltipFormat: '{{offset|prefix}} {{value}}',
+            disableInteraction: true
+        });
+    });
+});
 
 var moneyEls = document.querySelectorAll('.money-value');
 var MASK = '••••••';
