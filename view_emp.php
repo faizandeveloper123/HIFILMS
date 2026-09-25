@@ -259,13 +259,14 @@ include __DIR__ . '/includes/header.php';
         </form>
 
         <div style="overflow-x:auto; background:#fff; border:1px solid #E5E7EB; border-radius:14px;">
+            <?php $anyEmail = false; foreach ($emps as $em) { if (!empty($em['email'])) { $anyEmail = true; break; } } ?>
             <table class="table table-striped table-bordered" style="width:100%; background:#fff; margin-bottom:0;">
                 <thead>
-                    <tr><th>S.No</th><th>Employee Name</th><th>Designation</th><th>Contact</th><th>Qualification</th><th>Access</th><th>Attendance</th><th>Actions</th></tr>
+                    <tr><th>S.No</th><th>Employee Name</th><th>Designation</th><th>Contact</th><th>Qualification</th><?php if ($anyEmail): ?><th>Access</th><?php endif; ?><th>Attendance</th><th>Actions</th></tr>
                 </thead>
                 <tbody>
                     <?php if (count($emps) === 0): ?>
-                        <tr><td colspan="8" style="text-align:center; color:#6B7280; padding:30px;">No employees found.</td></tr>
+                        <tr><td colspan="<?php echo $anyEmail ? 8 : 7; ?>" style="text-align:center; color:#6B7280; padding:30px;">No employees found.</td></tr>
                     <?php endif; ?>
                     <?php foreach ($emps as $i => $em):
                         $fullName = trim(($em['first_name'] ?? '') . ' ' . ($em['last_name'] ?? ''));
@@ -321,9 +322,13 @@ include __DIR__ . '/includes/header.php';
                                 <?php if (!empty($em['email'])): ?><br><small style="color:#6B7280;"><?php echo e($em['email']); ?></small><?php endif; ?>
                             </td>
                             <td><?php echo e($em['qualification'] ?: '-'); ?></td>
+                            <?php if ($anyEmail): ?>
                             <td>
+                                <?php if (!empty($em['email'])): ?>
                                 <a href="<?php echo BASE_URL; ?>employee_access.php?emp_id=<?php echo $em['emp_id']; ?>" class="btn btn-success btn-sm"><i class="fa fa-key"></i> Access</a>
+                                <?php endif; ?>
                             </td>
+                            <?php endif; ?>
                             <td>
                                 <span class="status-badge status-active"><?php echo (int)$em['present_days']; ?> days</span>
                                 <a href="<?php echo BASE_URL; ?>view_emp_attendance.php" class="btn btn-default btn-xs" title="Mark Attendance"><i class="fa fa-calendar"></i></a>
