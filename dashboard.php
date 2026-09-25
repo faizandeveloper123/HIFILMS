@@ -109,40 +109,6 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
-        <?php
-        $campuses = get_campuses();
-        $actCampus = get_active_campus();
-        if (count($campuses) === 0 || !$actCampus):
-        ?>
-        <div class="school-card">
-            <div class="ds-card" style="width:100%;margin:0;">
-                <div class="sc-warn-box">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px 18px;">
-                        <div>
-                            <strong style="font-size:14px; color:#7A4E12;"><i class="fa fa-exclamation-triangle"></i> School Info not set yet!</strong>
-                            <div style="font-size:12.5px; color:#9A6B24; margin-top:3px;">Add your school name, logo, address &amp; phone — it will appear automatically on all student cards, family cards, card back sides, certificates and reports.</div>
-                        </div>
-                        <a href="<?php echo BASE_URL; ?>manage_schools.php" class="ds-btn ds-btn-accent">Set Up School Info &rarr;</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php else: ?>
-        <div class="school-card">
-            <div class="sc-main">
-                <?php if (!empty($actCampus['logo'])): ?>
-                    <div class="sc-logo"><img src="<?php echo BASE_URL . e($actCampus['logo']); ?>" alt="" onerror="this.parentElement.innerHTML='<i class=&quot;fa fa-university&quot;></i>';"></div>
-                <?php else: ?>
-                    <div class="sc-logo" style="background:linear-gradient(135deg,#FFF0E0,#FFD9B3);color:#FF7800;font-size:20px;"><i class="fa fa-university"></i></div>
-                <?php endif; ?>
-                <div style="min-width:0;">
-                    <div class="sc-name"><?php echo e($actCampus['name']); ?></div>
-                    <div class="sc-addr"><i class="fa fa-map-marker"></i><?php echo e($actCampus['address']); ?><?php echo trim((string)$actCampus['phone']) !== '' ? ' &nbsp;&middot;&nbsp; ' . e($actCampus['phone']) : ''; ?></div>
-                </div>
-            </div>
-            </div>
-        <?php endif; ?>
-
         <div class="kpi-row">
             <a class="kpi-card" href="<?php echo BASE_URL; ?>datewise_fee_collection_report_new.php" target="_blank">
                 <span class="kpi-accent" style="background:linear-gradient(90deg,#2563EB,#60A5FA);"></span>
