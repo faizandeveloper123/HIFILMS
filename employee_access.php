@@ -359,10 +359,6 @@ include __DIR__ . '/includes/header.php';
                     <button type="submit" class="btn btn-success" style="font-weight:700;"><i class="fa fa-save"></i> Save Access</button>
                 </div>
                 </form>
-
-                <div style="margin-top:16px; padding:12px 14px; background:#FFF7ED; border:1px solid #FFE9D6; border-radius:10px; font-size:12.5px; color:#9A3412;">
-                    <i class="fa fa-info-circle"></i> Agar employee ke paas email nahi hai to pehle <strong>Edit Employee</strong> se email add karein. Access grant karte waqt login account khud ban jata hai (default password: <strong>staff123</strong>).
-                </div>
             </div>
         <?php endif; ?>
     </div>
