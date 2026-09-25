@@ -44,6 +44,23 @@ $cardH   = $num('card_h', 2.25, 1.5, 4);
 $gapCol  = $num('gap_col', 0, 0, 0.75);
 $gapRow  = $num('gap_row', 0, 0, 0.75);
 
+/* Printable page box (kept in sync with the CSS below) */
+$pageW   = 8.0;
+$pageH   = 11.5;
+$pagePad = 0.12;
+$innerW  = $pageW - 2 * $pagePad;
+$innerH  = $pageH - 2 * $pagePad;
+
+/* Scale every px-based size with the chosen card size (baseline 3.5 x 2.25in) */
+$scScale = min($cardW / 3.5, $cardH / 2.25);
+$scScale = max(0.5, min(1.6, $scScale));
+
+/* Columns/rows that actually fit on the page, so nothing gets clipped */
+$cols = (int)max(1, floor(($innerW + $gapCol) / ($cardW + $gapCol)));
+$rows = (int)max(1, floor(($innerH + $gapRow) / ($cardH + $gapRow)));
+$fitPer = $cols * $rows;
+if ($fitPer > 0 && $fitPer < $per) { $per = $fitPer; }
+
 $si = school_info((int)($_GET['campus_id'] ?? 0));
 $schoolName  = $si['name'];
 $schoolAddr  = $si['addr'];
@@ -102,7 +119,12 @@ $pages = array_chunk($students, $per);
             /* Full cut size and inner safe zone (card_w/card_h from customization) */
             --sc-full-w: <?php echo $cardW; ?>in;
             --sc-full-h: <?php echo $cardH; ?>in;
-            --sc-scale: 1;
+            /* Derived from card_w/card_h so every px size scales with the card */
+            --sc-scale: <?php echo rtrim(rtrim(number_format($scScale, 3, '.', ''), '0'), '.'); ?>;
+            /* Auto-fit multiplier: JS lowers it per card until nothing is clipped */
+            --sc-fit: 1;
+            /* Columns that fit the printable page width */
+            --sc-cols: <?php echo (int)$cols; ?>;
             --card-gap-col: <?php echo $gapCol; ?>in;
             --card-gap-row: <?php echo $gapRow; ?>in;
             --sc-safe-w: 3.1in;
@@ -112,8 +134,8 @@ $pages = array_chunk($students, $per);
             /* Extra blue above header row (content stays bottom-aligned to white body) */
             --sc-header-min-height: 0.36in;
             /* Fixed printable page box */
-            --fixed-page-w: 8in;
-            --fixed-page-h: 11.5in;
+            --fixed-page-w: <?php echo $pageW; ?>in;
+            --fixed-page-h: <?php echo $pageH; ?>in;
         }
 
         .section {
@@ -141,7 +163,7 @@ $pages = array_chunk($students, $per);
 
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(2, var(--sc-full-w));
+            grid-template-columns: repeat(var(--sc-cols, 2), var(--sc-full-w));
             justify-content: center;
             column-gap: var(--card-gap-col);
             row-gap: var(--card-gap-row);
@@ -237,7 +259,7 @@ $pages = array_chunk($students, $per);
             min-height: 0;
             overflow: hidden;
             position: relative;
-            padding: calc(3px * var(--sc-scale)) 0.125in calc(2px * var(--sc-scale));
+            padding: calc(3px * var(--sc-scale) * var(--sc-fit)) 0.125in 0;
             background: linear-gradient(180deg, rgba(30, 58, 138, 0.06) 0%, #fff 18%, #fff 100%);
             background-color: var(--card-body-bg);
         }
@@ -272,7 +294,7 @@ $pages = array_chunk($students, $per);
 
         .sc-photo {
             width: calc(68px * var(--sc-scale));
-            height: calc(82px * var(--sc-scale));
+            height: calc(82px * var(--sc-scale) * var(--sc-fit));
             border-radius: 6px;
             border: 2px solid var(--card-photo-border);
             background: #f3f4f6;
@@ -283,14 +305,14 @@ $pages = array_chunk($students, $per);
 
         .sc-photo-placeholder {
             width: calc(68px * var(--sc-scale));
-            height: calc(82px * var(--sc-scale));
+            height: calc(82px * var(--sc-scale) * var(--sc-fit));
             border-radius: 6px;
             border: 2px solid var(--card-photo-border);
             background: #f3f4f6;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: calc(5px * var(--sc-scale));
+            font-size: calc(5px * var(--sc-scale) * var(--sc-fit));
             font-weight: 700;
             color: #9ca3af;
             text-align: center;
@@ -300,18 +322,18 @@ $pages = array_chunk($students, $per);
         }
 
         .sc-sig {
-            font-size: calc(10px * var(--sc-scale));
+            font-size: calc(10px * var(--sc-scale) * var(--sc-fit));
             font-weight: 600;
             color: rgb(0, 0, 0);
-            margin-top: 38%;
+            margin-top: calc(38% * var(--sc-fit));
         }
 
         .sc-sig img {
-            max-width: calc(42px * var(--sc-scale));
-            max-height: calc(24px * var(--sc-scale));
+            max-width: calc(42px * var(--sc-scale) * var(--sc-fit));
+            max-height: calc(24px * var(--sc-scale) * var(--sc-fit));
             display: block;
             margin: 0 auto;
-            margin-top: calc(-20px * var(--sc-scale));
+            margin-top: calc(-20px * var(--sc-scale) * var(--sc-fit));
         }
 
         .sc-fields {
@@ -320,22 +342,46 @@ $pages = array_chunk($students, $per);
             min-height: 0;
             overflow: hidden;
             padding-right: calc(3px * var(--sc-scale));
-            font-size: calc(7px * var(--sc-scale));
+            font-size: calc(7px * var(--sc-scale) * var(--sc-fit));
             color: var(--card-text-body);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .sc-fields-top {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Address / Family Code / Contact sit on the very bottom edge of the card body,
+           so they always read as the lower block no matter how much room is left. */
+        .sc-fields-bottom {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: calc(2px * var(--sc-scale));
+            padding-top: calc(3px * var(--sc-scale) * var(--sc-fit));
+            display: flex;
+            flex-direction: column;
         }
 
         .sc-row {
+            flex: 0 0 auto;
             border-bottom: 1px solid var(--card-primary);
-            padding: calc(1px * var(--sc-scale)) 0 calc(0.5px * var(--sc-scale));
-            margin-bottom: calc(1px * var(--sc-scale));
-            line-height: 1.15;
+            padding: calc(1px * var(--sc-scale) * var(--sc-fit)) 0 calc(0.5px * var(--sc-scale) * var(--sc-fit));
+            margin-bottom: calc(1px * var(--sc-scale) * var(--sc-fit));
+            line-height: 1.12;
         }
 
         .sc-row-inline {
             display: flex;
             gap: calc(6px * var(--sc-scale));
             align-items: flex-end;
-            padding-bottom: calc(1px * var(--sc-scale));
+            padding-bottom: calc(1px * var(--sc-scale) * var(--sc-fit));
         }
 
         .sc-inline-block {
@@ -343,7 +389,7 @@ $pages = array_chunk($students, $per);
             min-width: 0;
         }
 
-        .sc-row:last-of-type {
+        .sc-row-last {
             border-bottom: none;
             margin-bottom: 0;
         }
@@ -351,61 +397,102 @@ $pages = array_chunk($students, $per);
         .sc-label {
             font-weight: 800;
             color: var(--card-primary);
-            font-size: calc(7.5px * var(--sc-scale));
+            font-size: calc(7.5px * var(--sc-scale) * var(--sc-fit));
             text-transform: uppercase;
             letter-spacing: 0.2px;
+            line-height: 1.1;
         }
 
         .sc-value {
             font-weight: 600;
-            font-size: calc(10px * var(--sc-scale));
+            font-size: calc(10px * var(--sc-scale) * var(--sc-fit));
+            line-height: 1.12;
             word-break: break-word;
         }
 
         /* Long names: keep within card width next to QR */
         .sc-value-name-sm {
-            font-size: calc(9px * var(--sc-scale));
-            line-height: 1.15;
-        }
-
-        .sc-value-name-xs {
-            font-size: calc(8.5px * var(--sc-scale));
+            font-size: calc(9px * var(--sc-scale) * var(--sc-fit));
             line-height: 1.12;
         }
 
+        .sc-value-name-xs {
+            font-size: calc(8.5px * var(--sc-scale) * var(--sc-fit));
+            line-height: 1.1;
+        }
+
         .sc-value-compact {
-            font-size: calc(8px * var(--sc-scale));
-            line-height: 1.2;
+            font-size: calc(8px * var(--sc-scale) * var(--sc-fit));
+            line-height: 1.15;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
 
+        /* Address (location) + Contact: shrink & wrap so long values stay inside the card */
+        .sc-value-address {
+            font-size: calc(9px * var(--sc-scale) * var(--sc-fit));
+            line-height: 1.12;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .sc-value-address-sm {
+            font-size: calc(8px * var(--sc-scale) * var(--sc-fit));
+            -webkit-line-clamp: 2;
+        }
+
+        .sc-value-address-xs {
+            font-size: calc(7.5px * var(--sc-scale) * var(--sc-fit));
+            line-height: 1.08;
+            -webkit-line-clamp: 3;
+        }
+
+        .sc-value-contact {
+            font-size: calc(9.5px * var(--sc-scale) * var(--sc-fit));
+            line-height: 1.12;
+            overflow-wrap: anywhere;
+        }
+
         .sc-qr {
             flex: 0 0 auto;
             align-self: flex-end;
-            padding-bottom: calc(4px * var(--sc-scale));
+            padding-bottom: calc(4px * var(--sc-scale) * var(--sc-fit));
             z-index: 2;
         }
 
         .sc-qr img {
-            width: calc(75px * var(--sc-scale));
-            height: calc(70px * var(--sc-scale));
+            width: calc(75px * var(--sc-scale) * var(--sc-fit));
+            height: calc(70px * var(--sc-scale) * var(--sc-fit));
             display: block;
-            border-radius: calc(4px * var(--sc-scale));
+            border-radius: calc(4px * var(--sc-scale) * var(--sc-fit));
             border: 1px solid #e5e7eb;
+        }
+
+        /* Last resort when even the minimum fit is not enough: keep 1 address line */
+        .sc-fit-hard .sc-value-address {
+            -webkit-line-clamp: 1;
         }
 
         .sc-footer {
             background: var(--card-primary);
             color: var(--card-text-on-primary);
-            padding: calc(1px * var(--sc-scale)) 0.125in calc(15px * var(--sc-scale));
+            padding: calc(1px * var(--sc-scale) * var(--sc-fit)) 0.125in calc(8px * var(--sc-scale) * var(--sc-fit));
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             justify-content: space-between;
-            gap: calc(5px * var(--sc-scale));
-            font-size: calc(9px * var(--sc-scale));
+            flex-wrap: wrap;
+            column-gap: calc(5px * var(--sc-scale) * var(--sc-fit));
+            row-gap: calc(1px * var(--sc-scale) * var(--sc-fit));
+            font-size: calc(9px * var(--sc-scale) * var(--sc-fit));
+            line-height: 1.2;
+            min-height: 0;
+            overflow: hidden;
             flex-shrink: 0;
         }
 
@@ -426,17 +513,18 @@ $pages = array_chunk($students, $per);
 
         .sc-footer-address {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 3px;
-            flex: 1;
+            flex: 1 1 60%;
             min-width: 0;
             font-weight: 700;
         }
 
         .sc-footer-address-text {
-            flex: 1;
+            flex: 1 1 auto;
             min-width: 0;
             line-height: 1.2;
+            overflow-wrap: anywhere;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -445,11 +533,29 @@ $pages = array_chunk($students, $per);
 
         .sc-footer-phone {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             gap: calc(3px * var(--sc-scale));
             font-weight: 700;
             white-space: nowrap;
-            margin-right: calc(8px * var(--sc-scale));
+            flex: 0 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            margin-right: calc(4px * var(--sc-scale));
+        }
+
+        .sc-footer-phone > span:first-child {
+            flex: 0 0 auto;
+        }
+
+        .sc-footer-phone > span:last-child {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sc-footer-address > span[aria-hidden] {
+            flex: 0 0 auto;
         }
 
         /* Card customization popup (screen only) */
@@ -610,6 +716,8 @@ $pages = array_chunk($students, $per);
 
         body {
             font-weight: 600;
+            margin: 0;
+            -webkit-text-size-adjust: 100%;
         }
 
         page {
@@ -639,10 +747,27 @@ $pages = array_chunk($students, $per);
             height: var(--fixed-page-h);
         }
 
+        /* Screen only: shrink the sheet so it fits narrow screens / phones.
+           Print resets zoom to 1 so the physical card size stays exact. */
+        @media screen and (max-width: 900px) {
+            page { zoom: 0.85; }
+        }
+        @media screen and (max-width: 760px) {
+            page { zoom: 0.7; }
+        }
+        @media screen and (max-width: 620px) {
+            page { zoom: 0.56; }
+        }
+        @media screen and (max-width: 480px) {
+            page { zoom: 0.44; }
+            .section { width: 100%; float: none; border-right: 0; padding-right: 0; margin-left: 0; }
+        }
+
         @media print {
             .cc-ui, #printToolbar, .cc-overlay { display: none !important; }
             body, page { margin: 0; box-shadow: none; }
-            @page { size: 8in 11.5in; margin: 0; }
+            page { zoom: 1 !important; }
+            @page { size: <?php echo $pageW; ?>in <?php echo $pageH; ?>in; margin: 0; }
             .student-card { box-shadow: none; }
             .box { border: 1px dotted #b8b8b8; }
             page { border: 1px solid #d6dbe3; }
@@ -756,10 +881,14 @@ $pages = array_chunk($students, $per);
                         <div class="cc-field">
                             <label class="cc-label">Cards Per A4 Page</label>
                             <select id="cc_cards_per_page" class="cc-control">
+                                <?php if (!in_array((int)$per, [6, 8, 10], true)): ?>
+                                    <option value="<?php echo (int)$per; ?>" selected><?php echo (int)$per; ?> Cards (<?php echo (int)$cols; ?> x <?php echo (int)$rows; ?>)</option>
+                                <?php endif; ?>
                                 <option value="8" <?php echo $per === 8 ? 'selected' : ''; ?>>8 Cards (2 x 4)</option>
                                 <option value="10" <?php echo $per === 10 ? 'selected' : ''; ?>>10 Cards (2 x 5)</option>
                                 <option value="6" <?php echo $per === 6 ? 'selected' : ''; ?>>6 Cards (2 x 3)</option>
                             </select>
+                            <div style="font-size:11px;color:#6b7280;margin-top:4px;">Fits current card size: <?php echo (int)$cols; ?> col &times; <?php echo (int)$rows; ?> rows = <?php echo (int)$fitPer; ?> cards</div>
                         </div>
 
                         <div class="cc-field cc-field-span-full">
@@ -874,7 +1003,19 @@ $pages = array_chunk($students, $per);
                 $dobVal = !empty($st['dob']) ? date('d-M-Y', strtotime($st['dob'])) : '--';
                 $phoneVal = trim((string)($st['phone'] ?? '')) !== '' ? $st['phone'] : '00';
                 $addrVal = trim((string)($st['address'] ?? ''));
+                $addrLen = mb_strlen($addrVal, 'UTF-8');
+                $addrCls = ' sc-value-address';
+                if ($addrLen > 70) { $addrCls .= ' sc-value-address-xs'; }
+                elseif ($addrLen > 45) { $addrCls .= ' sc-value-address-sm'; }
                 $famVal = trim((string)($st['family_code'] ?? ''));
+
+                /* Which rows render, so the last one can drop its separator */
+                $hasAddr   = ($showAddress === 'YES' && $addrVal !== '');
+                $hasFamily = ($showFamily === 'YES' && $famVal !== '');
+                $hasCell   = ($showCell === 'YES');
+                $hasBottom = ($hasAddr || $hasFamily || $hasCell);
+                $topLastCls = $hasBottom ? '' : ' sc-row-last';
+                $bottomLast = $hasCell ? 'cell' : ($hasFamily ? 'family' : 'address');
             ?>
             <div class="box">
                 <div class="student-card">
@@ -908,6 +1049,7 @@ $pages = array_chunk($students, $per);
                             </div>
 
                             <div class="sc-fields">
+                                <div class="sc-fields-top">
                                 <div class="sc-row sc-row-inline">
                                     <div class="sc-inline-block">
                                         <div class="sc-label">Student GR.No</div>
@@ -922,32 +1064,37 @@ $pages = array_chunk($students, $per);
                                     <div class="sc-label">Student Name</div>
                                     <div class="sc-value<?php echo $nameCls; ?>"><?php echo e($fullName); ?></div>
                                 </div>
-                                <div class="sc-row">
+                                <div class="sc-row<?php echo ($showDob === 'YES') ? '' : $topLastCls; ?>">
                                     <div class="sc-label">Class</div>
                                     <div class="sc-value"><?php echo e($classVal); ?></div>
                                 </div>
                                 <?php if ($showDob === 'YES'): ?>
-                                <div class="sc-row">
+                                <div class="sc-row<?php echo $topLastCls; ?>">
                                     <div class="sc-label">Date of Birth </div>
                                     <div class="sc-value"><?php echo e($dobVal); ?></div>
                                 </div>
                                 <?php endif; ?>
-                                <?php if ($showAddress === 'YES' && $addrVal !== ''): ?>
-                                <div class="sc-row">
+                                </div>
+                                <?php if ($hasBottom): ?>
+                                <div class="sc-fields-bottom">
+                                <?php if ($hasAddr): ?>
+                                <div class="sc-row<?php echo $bottomLast === 'address' ? ' sc-row-last' : ''; ?>">
                                     <div class="sc-label">Student Address</div>
-                                    <div class="sc-value sc-value-compact"><?php echo e($addrVal); ?></div>
+                                    <div class="sc-value<?php echo $addrCls; ?>"><?php echo e($addrVal); ?></div>
                                 </div>
                                 <?php endif; ?>
-                                <?php if ($showFamily === 'YES' && $famVal !== ''): ?>
-                                <div class="sc-row">
+                                <?php if ($hasFamily): ?>
+                                <div class="sc-row<?php echo $bottomLast === 'family' ? ' sc-row-last' : ''; ?>">
                                     <div class="sc-label">Family Code</div>
                                     <div class="sc-value"><?php echo e($famVal); ?></div>
                                 </div>
                                 <?php endif; ?>
-                                <?php if ($showCell === 'YES'): ?>
-                                <div class="sc-row">
+                                <?php if ($hasCell): ?>
+                                <div class="sc-row<?php echo $bottomLast === 'cell' ? ' sc-row-last' : ''; ?>">
                                     <div class="sc-label">Contact</div>
-                                    <div class="sc-value"><?php echo e($phoneVal); ?></div>
+                                    <div class="sc-value sc-value-contact"><?php echo e($phoneVal); ?></div>
+                                </div>
+                                <?php endif; ?>
                                 </div>
                                 <?php endif; ?>
                             </div>
@@ -978,6 +1125,63 @@ $pages = array_chunk($students, $per);
         </div>
     </page>
     <?php endforeach; ?>
+
+    <script>
+    /* Auto-fit: shrink each card's inner spacing/fonts until nothing is clipped,
+       so Address (location) and Contact stay visible at any card size. */
+    (function () {
+        var MIN_FIT = 0.55;
+        var STEP = 0.02;
+
+        function overflows(card) {
+            var body = card.querySelector('.sc-body');
+            if (!body) { return false; }
+            var bodyBottom = body.getBoundingClientRect().bottom;
+            var fields = card.querySelector('.sc-fields');
+            var bottom = card.querySelector('.sc-fields-bottom');
+            if (fields) {
+                if (bottom) {
+                    /* the last top row must clear the pinned bottom block */
+                    var top = card.querySelector('.sc-fields-top');
+                    if (top) {
+                        var lastTopRow = top.lastElementChild;
+                        if (lastTopRow && (lastTopRow.getBoundingClientRect().bottom - bottom.getBoundingClientRect().top) > 0.5) { return true; }
+                        if ((top.scrollHeight - top.clientHeight) > 0) { return true; }
+                    }
+                } else if ((fields.scrollHeight - fields.clientHeight) > 0) {
+                    return true;
+                }
+            }
+            var cols = card.querySelectorAll('.sc-photo-wrap, .sc-qr');
+            for (var i = 0; i < cols.length; i++) {
+                if ((cols[i].getBoundingClientRect().bottom - bodyBottom) > 0.5) { return true; }
+                if ((cols[i].scrollHeight - cols[i].clientHeight) > 0) { return true; }
+            }
+            return false;
+        }
+
+        function fitCard(card) {
+            var fit = 1;
+            card.style.setProperty('--sc-fit', '1');
+            card.classList.remove('sc-fit-hard');
+            while (overflows(card) && fit > MIN_FIT) {
+                fit = Math.round((fit - STEP) * 100) / 100;
+                card.style.setProperty('--sc-fit', String(fit));
+            }
+            if (overflows(card)) { card.classList.add('sc-fit-hard'); }
+        }
+
+        function fitAll() {
+            var cards = document.querySelectorAll('.student-card');
+            for (var i = 0; i < cards.length; i++) { fitCard(cards[i]); }
+        }
+
+        fitAll();
+        window.addEventListener('load', fitAll);
+        window.addEventListener('beforeprint', fitAll);
+        if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitAll); }
+    })();
+    </script>
 
 </body>
 </html>
