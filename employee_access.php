@@ -15,10 +15,15 @@ try {
         user_id INT NOT NULL,
         module VARCHAR(50) NOT NULL,
         page VARCHAR(50) NOT NULL,
+        permission VARCHAR(20) DEFAULT NULL,
         allowed TINYINT(1) DEFAULT 1,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         UNIQUE KEY uq_access (user_id, module, page)
     )");
+    $__col = db_query("SHOW COLUMNS FROM user_module_access LIKE 'permission'");
+    if ($__col && $__col->num_rows === 0) {
+        db_query("ALTER TABLE user_module_access ADD COLUMN permission VARCHAR(20) DEFAULT NULL");
+    }
 } catch (\Throwable $e) {}
 
 $emp_id = (int) ($_GET['emp_id'] ?? 0);
