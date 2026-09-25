@@ -342,21 +342,21 @@ $campusInfo = get_active_campus();
                             <div class="form-group">
                                 <label>Campus / School Name *</label>
                                 <div class="input-wrap">
-                                    <input type="text" class="form-control" name="si_name" id="si_name" value="<?php echo e($campusInfo['name'] ?? ''); ?>" placeholder="e.g. LAPS DHA Campus" required="">
+                                    <input type="text" class="form-control" name="si_name" id="si_name" placeholder="e.g. LAPS DHA Campus" required="">
                                     <i class="fa fa-building ficon"></i>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label>Address</label>
                                 <div class="input-wrap">
-                                    <input type="text" class="form-control" name="si_address" id="si_address" value="<?php echo e($campusInfo['address'] ?? ''); ?>" placeholder="School / campus address">
+                                    <input type="text" class="form-control" name="si_address" id="si_address" placeholder="School / campus address">
                                     <i class="fa fa-map-marker-alt ficon"></i>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label>Phone</label>
                                 <div class="input-wrap">
-                                    <input type="text" class="form-control" name="si_phone" id="si_phone" value="<?php echo e($campusInfo['phone'] ?? ''); ?>" placeholder="e.g. 0300-1234567">
+                                    <input type="text" class="form-control" name="si_phone" id="si_phone" placeholder="e.g. 0300-1234567">
                                     <i class="fa fa-phone-alt ficon"></i>
                                 </div>
                                 <div class="field-hint">Best to use the number printed on cards & receipts.</div>
