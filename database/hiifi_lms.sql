@@ -85,9 +85,11 @@ CREATE TABLE IF NOT EXISTS `class_subjects` (
   `class_id`   INT NOT NULL,
   `section_id` INT NOT NULL,
   `subject_id` INT NOT NULL,
+  `sort_order` INT NOT NULL DEFAULT 0,
   `session`    VARCHAR(50) NOT NULL DEFAULT '2026-2027',
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `uq_cs` (`class_id`,`section_id`,`subject_id`),
+  KEY `idx_cs_order` (`class_id`,`section_id`,`sort_order`),
   CONSTRAINT `fk_cs_class`  FOREIGN KEY (`class_id`)   REFERENCES `classes`(`class_id`)  ON DELETE CASCADE,
   CONSTRAINT `fk_cs_section` FOREIGN KEY (`section_id`) REFERENCES `sections`(`section_id`) ON DELETE CASCADE,
   CONSTRAINT `fk_cs_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects`(`subject_id`) ON DELETE CASCADE

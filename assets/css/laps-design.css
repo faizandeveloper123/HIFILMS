@@ -95,6 +95,11 @@ html { -webkit-text-size-adjust: 100%; }
 }
 .right_col .main-content { padding: 16px 22px 44px; }
 
+/* Bootstrap's fixed-width .container can exceed the space left by the fixed
+   sidebar, which forces the whole page to scroll sideways. Keep the original
+   centred max-width on wide screens, but never wider than the content area. */
+.right_col .container { width: 100%; max-width: 1170px; }
+
 /* Shared utility components */
 .ds-card {
   background: var(--card);
@@ -786,6 +791,68 @@ a.kpi-card:hover { text-decoration: none; }
 @media (max-width: 420px) {
   .kpi-row { grid-template-columns: 1fr; }
   .kpi-spark { display: block; }
+}
+
+/* ---------------- Responsive: top bar / header ----------------
+   The top bar used to force the search field onto its own line
+   (flex: 1 1 100% + order: 3) which stacked the bar into two rows, and
+   .message had no intrinsic width so its icon chips collapsed and
+   overlapped the sidebar toggle / Quick Links button. Keep the whole bar
+   on ONE non-wrapping row, give the search field the only flexible
+   space, and lock the icon cluster so it can never be compressed. */
+@media (max-width: 992px) {
+  .header { flex-wrap: nowrap; row-gap: 8px; }
+  .header .brand-info { display: none !important; }
+  .header #dsSidebarToggleOut { flex: 0 0 auto; }
+  .header .quick-link-btn { flex: 0 0 auto; }
+  .header .searchbar-container {
+    order: 0;
+    flex: 1 1 110px;
+    min-width: 0;
+    max-width: none;
+  }
+  .header .message {
+    flex-wrap: nowrap;
+    padding-top: 0;
+  }
+  .header .message > * { flex: 0 0 auto; }
+  .header .desktop-profile { display: none !important; }
+  /* the mobile profile chip is the only account entry point here, so it must
+     keep its intrinsic size instead of being squeezed to zero width */
+  .header .mobile-profile { flex: 0 0 auto; }
+}
+@media (max-width: 768px) {
+  /* icon-only Quick Links: hide the text node, keep the bolt icon */
+  #quickLinkBtn > span { font-size: 0 !important; }
+  #quickLinkBtn > span > i { font-size: 15px !important; margin-right: 0 !important; }
+  #quickLinkBtn .ql-caret { display: none !important; }
+  #quickLinkBtn { padding: 0 12px !important; gap: 0 !important; }
+}
+@media (max-width: 640px) {
+  .header { gap: 6px; padding: 10px 12px; }
+  .header .message { gap: 5px; }
+  .chip { height: 38px; min-width: 38px; }
+  .chip.sms-chip { width: 38px; }
+  .chip i { font-size: 15px; }
+  .user-chip { padding: 2px 4px; }
+  .avtar { width: 30px; height: 30px; font-size: 13px; }
+  #filter { height: 38px !important; }
+  .header .searchbar-container { flex: 1 1 80px; }
+}
+@media (max-width: 560px) {
+  /* too narrow for the name + role badge: keep the avatar (still clickable) so
+     the account menu stays reachable without pushing anything off-screen */
+  .header .mobile-profile .user-info { display: none; }
+}
+@media (max-width: 420px) {
+  /* drop the support/WhatsApp chip so the remaining chips never collide */
+  #csr_whatsapp_wrap { display: none !important; }
+  /* #div1 is an invisible click-shim anchored to .message's left edge and is
+     meant to sit over the WhatsApp chip; with that chip hidden it would land on
+     the envelope chip and hijack its click. sms_show() stays on the bell icon. */
+  #div1 { display: none !important; }
+  .header { gap: 5px; padding: 8px 10px; }
+  .header .searchbar-container { flex: 1 1 60px; }
 }
 
 /* =====================================================================

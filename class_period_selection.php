@@ -203,11 +203,11 @@ $subjects = [];
 $subjectLoadError = '';
 if ($selectedClassId > 0 && $selectedSectionId > 0) {
     try {
-        $subjectStmt = db_prepare("SELECT DISTINCT s.subject_id, s.subject_name
+        $subjectStmt = db_prepare("SELECT DISTINCT s.subject_id, s.subject_name, cs.sort_order
                                    FROM subjects s
                                    INNER JOIN class_subjects cs ON cs.subject_id = s.subject_id
                                    WHERE cs.class_id = ? AND cs.section_id = ?
-                                   ORDER BY s.subject_name, s.subject_id");
+                                   ORDER BY cs.sort_order ASC, s.subject_name ASC, s.subject_id ASC");
         $subjectStmt->bind_param('ii', $selectedClassId, $selectedSectionId);
         $subjectStmt->execute();
         $subjectResult = $subjectStmt->get_result();

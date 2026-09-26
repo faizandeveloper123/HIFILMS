@@ -303,16 +303,21 @@ z-index: 902;
 }
 
 @media (max-width: 768px) {
-        .chip.user-chip {
-        width: 155%;
-        margin-top: 10px;
-        margin-left: -137px;
+    /* Legacy layout hack removed: `width:155%; margin-left:-137px;
+       margin-top:10px` dragged the profile chip backwards over the
+       search bar and Quick Links button and pushed it out of the icon
+       row. Width/spacing are now owned by the design system
+       (assets/css/laps-design.css). */
+    .chip.user-chip {
+        width: auto;
+        margin-top: 0;
+        margin-left: 0;
     }
 
     .quick-link-btn {
     position: relative;
     display: inline-block;
-    margin-left: 22px;
+    margin-left: 0;
     }
 
     #quickLinkBtn {
@@ -326,7 +331,7 @@ z-index: 902;
     outline: none;
     border: 1px solid #FF7C1B;
     border-radius: 25px;
-    margin-top: 4px;
+    margin-top: 0;
 }
 
 

@@ -9,11 +9,42 @@ db_query("CREATE TABLE IF NOT EXISTS class_subjects (
   class_id INT(11) NOT NULL,
   section_id INT(11) NOT NULL,
   subject_id INT(11) NOT NULL,
+  sort_order INT(11) NOT NULL DEFAULT 0,
   session VARCHAR(50) NOT NULL DEFAULT '2026-2027',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY uq_cs (class_id, section_id, subject_id),
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+/* Installations created before subject ordering existed have no sort_order
+   column, and CREATE TABLE IF NOT EXISTS will not add it. Portable
+   SHOW COLUMNS/SHOW INDEX checks work on both MySQL and MariaDB. */
+try {
+    $csCol = db_query("SHOW COLUMNS FROM class_subjects LIKE 'sort_order'");
+    if ($csCol && $csCol->num_rows === 0) {
+        db_query("ALTER TABLE class_subjects ADD COLUMN sort_order INT(11) NOT NULL DEFAULT 0 AFTER subject_id");
+    }
+    $csIdx = db_query("SHOW INDEX FROM class_subjects WHERE Key_name = 'idx_cs_order'");
+    if ($csIdx && $csIdx->num_rows === 0) {
+        db_query("ALTER TABLE class_subjects ADD INDEX idx_cs_order (class_id, section_id, sort_order)");
+    }
+} catch (\Throwable $e) {}
+
+/* Custom subject order (subject_drag.php) must survive a re-assign, so read the
+   current positions before the rows are deleted and reused below. */
+if (!function_exists('cs_existing_order')) {
+function cs_existing_order($class_id, $section_id) {
+    $map = array();
+    $stmt = db_prepare("SELECT subject_id, sort_order FROM class_subjects WHERE class_id = ? AND section_id = ?");
+    $stmt->bind_param('ii', $class_id, $section_id);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($r = $res->fetch_assoc()) {
+        $map[(int) $r['subject_id']] = (int) $r['sort_order'];
+    }
+    return $map;
+}
+}
 
 $msg = '';
 $err = '';
@@ -27,13 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $subjects   = isset($_POST['subjects']) && is_array($_POST['subjects']) ? array_map('intval', $_POST['subjects']) : array();
 
         if ($class_id > 0 && $section_id > 0) {
+            $prev = cs_existing_order($class_id, $section_id);
+            $next = empty($prev) ? 0 : (max($prev) + 1);
+
             $stmt = db_prepare("DELETE FROM class_subjects WHERE class_id = ? AND section_id = ?");
             $stmt->bind_param('ii', $class_id, $section_id);
             $stmt->execute();
 
-            $ins = db_prepare("INSERT INTO class_subjects (class_id, section_id, subject_id, session) VALUES (?, ?, ?, ?)");
+            $ins = db_prepare("INSERT INTO class_subjects (class_id, section_id, subject_id, sort_order, session) VALUES (?, ?, ?, ?, ?)");
             foreach ($subjects as $subject_id) {
-                $ins->bind_param('iiis', $class_id, $section_id, $subject_id, $session);
+                $sort = isset($prev[$subject_id]) ? $prev[$subject_id] : $next++;
+                $ins->bind_param('iiisi', $class_id, $section_id, $subject_id, $sort, $session);
                 $ins->execute();
             }
             $msg = 'Subjects updated for the selected section.';
@@ -59,12 +94,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $err = 'Please select at least one subject.';
         } else {
             $del = db_prepare("DELETE FROM class_subjects WHERE class_id = ? AND section_id = ?");
-            $ins = db_prepare("INSERT INTO class_subjects (class_id, section_id, subject_id, session) VALUES (?, ?, ?, ?)");
+            $ins = db_prepare("INSERT INTO class_subjects (class_id, section_id, subject_id, sort_order, session) VALUES (?, ?, ?, ?, ?)");
             foreach ($pairs as $pair) {
+                $prev = cs_existing_order($pair[0], $pair[1]);
+                $next = empty($prev) ? 0 : (max($prev) + 1);
+
                 $del->bind_param('ii', $pair[0], $pair[1]);
                 $del->execute();
                 foreach ($subjects as $subject_id) {
-                    $ins->bind_param('iiis', $pair[0], $pair[1], $subject_id, $session);
+                    $sort = isset($prev[$subject_id]) ? $prev[$subject_id] : $next++;
+                    $ins->bind_param('iiisi', $pair[0], $pair[1], $subject_id, $sort, $session);
                     $ins->execute();
                 }
             }
@@ -93,7 +132,7 @@ while ($row = $res->fetch_assoc()) {
 }
 
 $assigned = array();
-$res = db_query("SELECT class_id, section_id, subject_id FROM class_subjects");
+$res = db_query("SELECT class_id, section_id, subject_id FROM class_subjects ORDER BY class_id, section_id, sort_order, subject_id");
 while ($row = $res->fetch_assoc()) {
     $assigned[$row['class_id'] . '-' . $row['section_id']][] = (int) $row['subject_id'];
 }
@@ -110,6 +149,10 @@ include __DIR__ . '/includes/header.php';
     #table_sub_agent { padding-top:22px; }
     #table_sub_agent > .container { padding-bottom:16px; }
 
+    .cs-page { background:#fff; padding-top:14px; }
+    .cs-breadcrumb { font-size:13px; margin:0 0 14px; overflow-wrap:break-word; word-wrap:break-word; }
+    .cs-breadcrumb i { color:#c9c8c3; }
+
     .cs-section-label {
         font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
         color:#898781; margin:0 0 10px 2px;
@@ -117,7 +160,7 @@ include __DIR__ . '/includes/header.php';
 
     .cs-stats-row { display:flex; gap:16px; flex-wrap:wrap; margin:0 0 28px 0; }
     .cs-stat-tile {
-        flex:1 1 220px; display:flex; align-items:center; gap:14px;
+        flex:1 1 220px; min-width:0; display:flex; align-items:center; gap:14px;
         background:#fcfcfb; border:1px solid #e1e0d9; border-radius:10px;
         padding:16px 18px; box-shadow:0 1px 3px rgba(11,11,11,0.07);
     }
@@ -136,14 +179,25 @@ include __DIR__ . '/includes/header.php';
 
     #table_sub_agent h3 { margin-bottom:16px; }
 
+    .cs-head {
+        display:flex; align-items:center; justify-content:space-between;
+        gap:12px; flex-wrap:wrap; margin:0 0 16px;
+    }
+    .cs-head h3 { margin:0; }
+    .cs-head .btn { margin-top:0 !important; flex:0 0 auto; }
+
     #table_sub_agent .table > tbody > tr > td,
     #table_sub_agent .table > thead > tr > th { padding:9px 10px; vertical-align:middle; font-size:13px; }
-    #table_sub_agent .table { margin-top:4px; }
+    #table_sub_agent .table { margin-top:4px; min-width:640px; }
+
+    .cs-actions { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+    .cs-actions .btn { margin:0; }
 
     .subj-badge {
         display:inline-block; padding:1px 6px; margin:1px 2px 1px 0;
         border-radius:6px; font-size:10px; font-weight:600; color:#333;
         line-height:1.6; border-left:2px solid #ccc; white-space:nowrap;
+        max-width:100%; overflow-wrap:break-word; word-wrap:break-word;
     }
     .subj-c0 { background:rgba(42,120,214,0.13); border-left-color:#2a78d6; }
     .subj-c1 { background:rgba(235,104,52,0.14); border-left-color:#eb6834; }
@@ -155,21 +209,92 @@ include __DIR__ . '/includes/header.php';
     .subj-c7 { background:rgba(227,73,72,0.14); border-left-color:#e34948; }
     .subj-empty { color:#898781; font-size:12px; font-style:italic; }
 
-    .container1 { display:block; position:relative; padding-left:28px; margin-bottom:8px; cursor:pointer; font-size:13px; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none; }
+    .container1 {
+        display:block; position:relative; padding:4px 6px 4px 28px; margin:0 0 2px;
+        cursor:pointer; font-size:13px; line-height:1.5; min-height:26px;
+        overflow-wrap:break-word; word-wrap:break-word;
+        -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none;
+    }
     .container1 input { position:absolute; opacity:0; cursor:pointer; }
-    .checkmark { position:absolute; top:0; left:0; height:18px; width:18px; background-color:#eee; border:1px solid #ccc; border-radius:4px; }
+    .checkmark { position:absolute; top:6px; left:0; height:18px; width:18px; background-color:#eee; border:1px solid #ccc; border-radius:4px; }
     .container1:hover input ~ .checkmark { background-color:#ccc; }
-    .container1 input:checked ~ .checkmark { background-color:#ff7800; border-color:#ff7800; }
+    .container1 input:checked ~ .checkmark { background:#ff7800; border-color:#ff7800; }
     .checkmark:after { content:""; position:absolute; display:none; }
     .container1 input:checked ~ .checkmark:after { display:block; }
     .container1 .checkmark:after { left:6px; top:2px; width:5px; height:10px; border:solid white; border-width:0 2px 2px 0; -webkit-transform:rotate(45deg); -ms-transform:rotate(45deg); transform:rotate(45deg); }
+
+    .cs-scroll {
+        max-height:300px; overflow-y:auto; -webkit-overflow-scrolling:touch;
+        border:1px solid #e5e5e5; border-radius:6px; padding:10px;
+    }
+    .cs-modal-body { max-height:62vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+
+    .cs-group { margin-bottom:10px; }
+    .cs-group:last-child { margin-bottom:0; }
+    .cs-group-head {
+        display:block; font-weight:bold; font-size:13px; cursor:pointer;
+        min-height:26px; padding:3px 4px; margin:0;
+        overflow-wrap:break-word; word-wrap:break-word;
+    }
+    .cs-group-list { padding-left:20px; }
+    .cs-group-item {
+        display:block; font-weight:normal; font-size:13px; cursor:pointer;
+        min-height:26px; padding:3px 4px; margin:0;
+        overflow-wrap:break-word; word-wrap:break-word;
+    }
+
+    /* Tablet: 768px - 1024px */
+    @media (min-width: 768px) and (max-width: 1024px) {
+        #table_sub_agent { padding-top:16px; }
+        .cs-head { align-items:flex-start; }
+        .cs-stats-row { gap:12px; }
+        .cs-stat-tile { flex:1 1 calc(50% - 6px); padding:14px 16px; }
+        .cs-stat-value { font-size:24px; }
+    }
+
+    /* Mobile: below 768px */
+    @media (max-width: 767px) {
+        .cs-breadcrumb { font-size:12px; margin-bottom:12px; }
+        .cs-page .nav-bar { justify-content:flex-start; }
+        .cs-stats-row { gap:10px; margin-bottom:20px; }
+        .cs-stat-tile { flex:1 1 100%; padding:12px 14px; }
+        .cs-stat-icon { width:38px; height:38px; min-width:38px; font-size:16px; }
+        .cs-stat-value { font-size:22px; }
+        .cs-head { flex-direction:column; align-items:stretch; }
+        .cs-head .btn { width:100%; }
+        .cs-head h3 small { display:block; margin-top:2px; }
+        .cs-scroll { max-height:220px; }
+        .cs-modal-body { max-height:66vh; }
+        .cs-group-head, .cs-group-item { font-size:12px; padding:4px 2px; }
+        #table_sub_agent .table { min-width:520px; }
+        #table_sub_agent .table > tbody > tr > td,
+        #table_sub_agent .table > thead > tr > th { padding:8px; font-size:12px; }
+        .subj-badge { white-space:normal; }
+        .cs-actions .btn { font-size:12px; padding:3px 6px; }
+        #table_sub_agent .table-responsive {
+            -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain;
+            margin:0 -2px; padding:0 2px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cs-breadcrumb { font-size:11px; }
+        .subj-badge { font-size:9px; }
+        .cs-stat-label { font-size:11px; }
+        .container1 { font-size:12px; }
+    }
+
 </style>
-<div class="row" style="background-color: white;">
-  <a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard</a>
-  &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
-  <a href="<?php echo BASE_URL; ?>academic_settings.php">Academic Settings</a>
-  &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
-  Assign Subjects to Classes
+<div class="cs-page">
+  <div class="container">
+    <div class="cs-breadcrumb">
+      <a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard</a>
+      &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
+      <a href="<?php echo BASE_URL; ?>academic_settings.php">Academic Settings</a>
+      &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
+      Assign Subjects to Classes
+    </div>
+  </div>
 
   <div class="nav-container">
     <div class="nav-bar">
@@ -200,23 +325,25 @@ include __DIR__ . '/includes/header.php';
     </div>
   </div>
 
-<?php if ($msg !== ''): ?>
-<div class="alert alert-success alert-dismissible fade in">
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-    <?php echo e($msg); ?>
-</div>
-<?php endif; ?>
+  <div class="container">
+    <?php if ($msg !== ''): ?>
+    <div class="alert alert-success alert-dismissible fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <?php echo e($msg); ?>
+    </div>
+    <?php endif; ?>
 
-<?php if ($err !== ''): ?>
-<div class="alert alert-danger alert-dismissible fade in">
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-    <?php echo e($err); ?>
-</div>
-<?php endif; ?>
+    <?php if ($err !== ''): ?>
+    <div class="alert alert-danger alert-dismissible fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <?php echo e($err); ?>
+    </div>
+    <?php endif; ?>
+  </div>
 
   <section class="add_sub_agent" id="table_sub_agent">
     <div class="container">
-      <div style="float:left;" class="col-md-12">
+      <div class="col-md-12">
         <div class="cs-section-label">Overview</div>
         <div class="cs-stats-row">
           <div class="cs-stat-tile cs-total">
@@ -242,12 +369,15 @@ include __DIR__ . '/includes/header.php';
           </div>
         </div>
         <hr class="cs-divider">
-        <h3><strong>Subjects Allocation To Each Class:</strong>
-          <small>(<?php echo (int) $total_classes; ?> records found)</small>
-          <a href="#" data-toggle="modal" data-target="#BulkAssignModal" class="btn btn-primary pull-right" style="margin-top:-8px;">
+        <div class="cs-head">
+          <h3><strong>Subjects Allocation To Each Class:</strong>
+            <small>(<?php echo (int) $total_classes; ?> records found)</small>
+          </h3>
+          <a href="#" data-toggle="modal" data-target="#BulkAssignModal" class="btn btn-primary">
             <i class="fa fa-clone" aria-hidden="true"></i> Bulk Assign Subjects
           </a>
-        </h3>
+        </div>
+        <div class="table-responsive">
         <table class="table table-striped table-bordered" style="width:100%">
           <thead>
             <tr>
@@ -280,17 +410,20 @@ include __DIR__ . '/includes/header.php';
               </td>
               <td style="text-align:center;"><?php echo count($list); ?></td>
               <td>
-                <a style="padding: 3px 5px; font-size:14px;" data-toggle="modal" data-target="#Modal<?php echo (int) $cls['section_id']; ?>" href="#" style="cursor:pointer;" class="btn btn-success">
-                  Manage <i class="fa fa-pencil" aria-hidden="true"></i>
-                </a>
-                <a style="padding: 3px 5px; font-size:14px;" href="<?php echo BASE_URL; ?>subject_drag.php?section_id=<?php echo (int) $cls['section_id']; ?>&class_id=<?php echo (int) $cls['class_id']; ?>" target="_blank" class="btn btn-success">
-                  Subject Order <i class="fa fa-sort" aria-hidden="true"></i>
-                </a>
+                <div class="cs-actions">
+                  <a data-toggle="modal" data-target="#Modal<?php echo (int) $cls['section_id']; ?>" href="#" class="btn btn-success btn-sm">
+                    Manage <i class="fa fa-pencil" aria-hidden="true"></i>
+                  </a>
+                  <a href="<?php echo BASE_URL; ?>subject_drag.php?section_id=<?php echo (int) $cls['section_id']; ?>&class_id=<?php echo (int) $cls['class_id']; ?>" target="_blank" class="btn btn-success btn-sm">
+                    Subject Order <i class="fa fa-sort" aria-hidden="true"></i>
+                  </a>
+                </div>
               </td>
             </tr>
             <?php $i++; endforeach; ?>
           </tbody>
         </table>
+        </div>
 
         <?php foreach ($classes as $cls): ?>
         <?php $key = $cls['class_id'] . '-' . $cls['section_id']; ?>
@@ -310,7 +443,7 @@ include __DIR__ . '/includes/header.php';
                   </h4>
                 </div>
 
-                <div class="modal-body">
+                <div class="modal-body cs-modal-body">
                   <label for="session">Session</label>
                   <select name="session" class="form-control">
                     <?php foreach ($sessions as $sk => $sv): ?>
@@ -355,7 +488,7 @@ include __DIR__ . '/includes/header.php';
             <small style="color:#777;">Select one or more sections and the subjects to assign to all of them at once. This will overwrite the currently assigned subjects for the selected sections.</small>
           </div>
 
-          <div class="modal-body">
+          <div class="modal-body cs-modal-body">
             <label for="bulk_session">Session</label>
             <select name="session" id="bulk_session" class="form-control">
               <?php foreach ($sessions as $sk => $sv): ?>
@@ -369,7 +502,7 @@ include __DIR__ . '/includes/header.php';
             <div class="row">
               <div class="col-md-6">
                 <label>Sections</label>
-                <div style="max-height:300px; overflow-y:auto; border:1px solid #e5e5e5; padding:10px;">
+                <div class="cs-scroll">
                   <?php
                   $by_class = array();
                   foreach ($classes as $cls) {
@@ -378,14 +511,14 @@ include __DIR__ . '/includes/header.php';
                   }
                   ?>
                   <?php foreach ($by_class as $class_id => $grp): ?>
-                  <div style="margin-bottom:10px;">
-                    <label style="font-weight:bold;">
+                  <div class="cs-group">
+                    <label class="cs-group-head">
                       <input type="checkbox" class="selectAllClass" data-class="<?php echo (int) $class_id; ?>" onclick="toggleClassSections(this)">
                       <?php echo e($grp['name']); ?>
                     </label>
-                    <div style="padding-left:20px;">
+                    <div class="cs-group-list">
                       <?php foreach ($grp['sections'] as $sec): ?>
-                      <label style="display:block; font-weight:normal;">
+                      <label class="cs-group-item">
                         <input type="checkbox" name="sections[]" class="sectionChk class_<?php echo (int) $class_id; ?>" value="<?php echo $sec['class_id'] . '-' . $sec['section_id']; ?>">
                         <?php echo e($sec['class_name'] . ' - ' . $sec['section_name']); ?>
                       </label>
@@ -398,7 +531,7 @@ include __DIR__ . '/includes/header.php';
 
               <div class="col-md-6">
                 <label>Subjects</label>
-                <div style="max-height:300px; overflow-y:auto; border:1px solid #e5e5e5; padding:10px;">
+                <div class="cs-scroll">
                   <?php foreach ($subjects as $sid => $sname): ?>
                   <label class='container1'>
                     <input type='checkbox' name='subjects[]' value="<?php echo (int) $sid; ?>" />

@@ -33,12 +33,19 @@ $sbUserRole = e($_SESSION['user_role'] ?? 'admin');
   gap: 1px;
   flex-wrap: nowrap;
   overflow-x: auto;
-  justify-content: center;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  /* "safe" keeps the first tab on-screen when the row overflows: plain
+     center would push it off the left edge where it cannot be scrolled to */
+  justify-content: safe center;
+  padding: 0 2px;
 }
 .nav-item {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   padding: 8px 15px;
   text-decoration: none;
   color: #2c3e50;
@@ -54,8 +61,33 @@ $sbUserRole = e($_SESSION['user_role'] ?? 'admin');
 .nav-item.active i { color: white; }
 .nav-item i { font-size: 14px; margin-right: 6px; color: #2c3e50; transition: all 0.3s ease; }
 .nav-item:hover i { color: #e67e22; }
-.nav-bar::-webkit-scrollbar { display: none; }
-.nav-bar { -ms-overflow-style: none; scrollbar-width: none; }
+/* the row is wider than most viewports, so keep the scrollbar visible (thin)
+   instead of hiding it - otherwise the clipped tabs look like a bug */
+.nav-bar::-webkit-scrollbar { height: 6px; }
+.nav-bar::-webkit-scrollbar-track { background: #f1f1f1; }
+.nav-bar::-webkit-scrollbar-thumb { background: #c9c8c3; border-radius: 3px; }
+.nav-bar::-webkit-scrollbar-thumb:hover { background: #a9a8a3; }
+.nav-bar { -ms-overflow-style: thin; scrollbar-width: thin; scrollbar-color: #c9c8c3 #f1f1f1; }
+/* On touch devices the scrollbar is a transient overlay, so fade the edge that
+   still has hidden tabs. Toggled from JS (.cs-nav-more-left / -right) so the
+   fade never shows when there is nothing left to scroll to. */
+.nav-container::before, .nav-container::after {
+  content: ""; position: absolute; top: 0; height: calc(100% - 7px); width: 34px;
+  pointer-events: none; opacity: 0; transition: opacity .18s ease; z-index: 2;
+}
+.nav-container::before { left: 0; background: linear-gradient(to right, #fff 25%, rgba(255,255,255,0)); }
+.nav-container::after { right: 0; background: linear-gradient(to left, #fff 25%, rgba(255,255,255,0)); }
+.nav-container.cs-nav-more-left::before { opacity: 1; }
+.nav-container.cs-nav-more-right::after { opacity: 1; }
+@media (max-width: 1024px) {
+  .nav-item { padding: 8px 11px; font-size: 13px; }
+  .nav-item i { font-size: 13px; margin-right: 5px; }
+}
+@media (max-width: 767px) {
+  .nav-item { padding: 8px 10px; font-size: 12.5px; }
+  .nav-item i { font-size: 12.5px; margin-right: 5px; }
+  .nav-container { margin-top: 10px; }
+}
 </style>
 </head>
 <body class="sidebar-expanded">
@@ -740,4 +772,46 @@ if (quickLinkBtn) {
         }
     });
 }
+/* The secondary tab row is wider than most viewports and scrolls sideways.
+   Bring the current (active) tab into view on load so the page never opens
+   with the selected section off-screen. Purely additive - no existing
+   behaviour is changed. */
+(function () {
+    /* this script sits in the <head>/early body, so the tab row is not parsed
+       yet - look it up inside reveal() rather than once at load */
+    function reveal() {
+        var bar = document.querySelector('.nav-bar');
+        if (!bar) return;
+        var wrap = bar.parentElement;
+        var active = bar.querySelector('.nav-item.active');
+        if (wrap && wrap.classList) {
+            var scrollable = bar.scrollWidth - bar.clientWidth > 2;
+            wrap.classList.toggle('cs-nav-more-left', scrollable && bar.scrollLeft > 2);
+            wrap.classList.toggle('cs-nav-more-right', scrollable && bar.scrollLeft < bar.scrollWidth - bar.clientWidth - 2);
+        }
+        if (!active) return;
+        if (bar.scrollWidth <= bar.clientWidth) return;
+        var barRect = bar.getBoundingClientRect();
+        var aRect = active.getBoundingClientRect();
+        /* measure against the bar's own scroll position - offsetLeft would be
+           relative to .nav-container (which is position:sticky) */
+        var left = aRect.left - barRect.left + bar.scrollLeft;
+        var right = left + aRect.width;
+        if (left < bar.scrollLeft) {
+            bar.scrollLeft = Math.max(0, left - 8);
+        } else if (right > bar.scrollLeft + bar.clientWidth) {
+            bar.scrollLeft = Math.min(bar.scrollWidth - bar.clientWidth, right - bar.clientWidth + 8);
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', reveal);
+    } else {
+        reveal();
+    }
+    window.addEventListener('load', reveal);
+    window.addEventListener('resize', reveal);
+    document.addEventListener('scroll', function (e) {
+        if (e.target && e.target.classList && e.target.classList.contains('nav-bar')) reveal();
+    }, true);
+})();
 </script>
