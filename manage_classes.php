@@ -9,6 +9,7 @@ db_query("ALTER TABLE classes ADD COLUMN IF NOT EXISTS monthly_fee DECIMAL(10,2)
 db_query("ALTER TABLE classes ADD COLUMN IF NOT EXISTS misc_fee DECIMAL(10,2) NOT NULL DEFAULT 0.00");
 db_query("ALTER TABLE classes ADD COLUMN IF NOT EXISTS created_at DATETIME DEFAULT NULL");
 db_query("ALTER TABLE classes ADD COLUMN IF NOT EXISTS class_head_id INT(11) DEFAULT NULL");
+db_query("ALTER TABLE classes ADD COLUMN IF NOT EXISTS sort_order INT(11) NOT NULL DEFAULT 0");
 
 db_query("CREATE TABLE IF NOT EXISTS class_heads (
   class_head_id INT(11) NOT NULL AUTO_INCREMENT,
@@ -64,9 +65,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['cid']) && isset($_GET['delete_class']) && $_GET['delete_class'] == '1') {
     $class_id = (int) $_GET['cid'];
-    $stmt = db_prepare("DELETE FROM class_subjects WHERE class_id = ?");
+
+    /* Sections first: several tables reference a section_id rather than a
+       class_id, so those rows have to go before the section rows do. */
+    $sec_res = db_prepare("SELECT section_id FROM sections WHERE class_id = ?");
+    $sec_res->bind_param('i', $class_id);
+    $sec_res->execute();
+    $sec_ids = array();
+    $sec_out = $sec_res->get_result();
+    while ($r = $sec_out->fetch_assoc()) {
+        $sec_ids[] = (int) $r['section_id'];
+    }
+    if (count($sec_ids) > 0) {
+        $in = implode(',', array_fill(0, count($sec_ids), '?'));
+        $types = str_repeat('i', count($sec_ids));
+        foreach (array('class_periods', 'class_subjects', 'datesheet', 'timetable') as $child) {
+            $stmt = db_prepare("DELETE FROM $child WHERE section_id IN ($in)");
+            $stmt->bind_param($types, ...$sec_ids);
+            $stmt->execute();
+        }
+    }
+
+    /* Students are removed, as the confirm message promises. */
+    $stmt = db_prepare("DELETE FROM students WHERE class_id = ?");
     $stmt->bind_param('i', $class_id);
     $stmt->execute();
+
+    /* These all carry a NOT NULL class_id, so the rows have to go with the class. */
+    foreach (array('class_periods', 'class_subjects', 'datesheet', 'timetable') as $child) {
+        $stmt = db_prepare("DELETE FROM $child WHERE class_id = ?");
+        $stmt->bind_param('i', $class_id);
+        $stmt->execute();
+    }
+
+    /* Their class_id is nullable, so detach instead of destroying history. The
+       subject catalogue in particular is master data reused by other classes. */
+    foreach (array('exams', 'fee_heads', 'inquiries', 'periods', 'student_inquiries', 'subjects') as $child) {
+        $stmt = db_prepare("UPDATE $child SET class_id = NULL WHERE class_id = ?");
+        $stmt->bind_param('i', $class_id);
+        $stmt->execute();
+    }
+
     $stmt = db_prepare("DELETE FROM sections WHERE class_id = ?");
     $stmt->bind_param('i', $class_id);
     $stmt->execute();
@@ -112,7 +151,7 @@ if (isset($_GET['id'])) {
     }
 }
 
-$classes = db_query("SELECT c.*, (SELECT COUNT(*) FROM sections WHERE sections.class_id = c.class_id) AS sec_count FROM classes c ORDER BY c.class_id ASC");
+$classes = db_query("SELECT c.*, (SELECT COUNT(*) FROM sections WHERE sections.class_id = c.class_id) AS sec_count FROM classes c ORDER BY c.sort_order ASC, c.class_id ASC");
 $total_classes = $classes->num_rows;
 
 $heads_res = db_query("SELECT class_head_id, class_head_name FROM class_heads ORDER BY class_head_name ASC");
@@ -213,7 +252,7 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <div class="action-buttons">
-  <a href="<?php echo BASE_URL; ?>manage_sections.php?page=" class="btn btn-primary">
+  <a href="<?php echo BASE_URL; ?>manage_sections.php" class="btn btn-primary">
     <i class="fa fa-list"></i> Manage Sections
   </a>
   <a href="<?php echo BASE_URL; ?>class_drag.php" class="btn btn-info">
