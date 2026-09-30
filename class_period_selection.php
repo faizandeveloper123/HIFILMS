@@ -53,35 +53,82 @@ $previewPeriods = [
     ['period_id' => 0, 'period_name' => 'Period 6', 'start_time' => '11:40:00', 'end_time' => '12:20:00', 'category_name' => '', 'is_break' => false],
     ['period_id' => 0, 'period_name' => 'Period 7', 'start_time' => '12:20:00', 'end_time' => '13:00:00', 'category_name' => '', 'is_break' => false],
 ];
-$displayPeriods = $periods;
-if (count($periods) < count($previewPeriods)) {
-    $displayPeriods = $previewPeriods;
-    $teachingSlots = [];
-    $breakSlot = null;
-    foreach ($previewPeriods as $previewIndex => $previewPeriod) {
-        if (!empty($previewPeriod['is_break'])) {
-            $breakSlot = $previewIndex;
-        } else {
-            $teachingSlots[] = $previewIndex;
+/* A row is always labelled by its position - "Period 1", "Period 2" and so on -
+   so a blank or badly named period can never take the label's place. A name
+   that says something extra is kept as a small subtitle underneath. */
+$isBreakLabel = static function ($value) {
+    $value = strtolower(trim((string) $value));
+    if ($value === '') {
+        return false;
+    }
+    foreach (['break', 'lunch', 'recess', 'tea'] as $hint) {
+        if (strpos($value, $hint) !== false) {
+            return true;
         }
     }
-    $realTeachingIndex = 0;
-    foreach ($periods as $period) {
-        $periodName = strtolower((string) ($period['period_name'] ?? ''));
-        $categoryName = strtolower((string) ($period['category_name'] ?? ''));
-        $isRealBreak = false;
-        foreach (['break', 'lunch', 'recess', 'tea'] as $breakHint) {
-            if (strpos($periodName, $breakHint) !== false || strpos($categoryName, $breakHint) !== false) {
-                $isRealBreak = true;
-                break;
-            }
+    return false;
+};
+
+$labelPeriods = static function (array $configured) use ($isBreakLabel) {
+    $teaching = array();
+    $breaks = array();
+    foreach ($configured as $row) {
+        $isBreak = $isBreakLabel($row['period_name'] ?? '') || $isBreakLabel($row['category_name'] ?? '');
+        if ($isBreak) {
+            $breaks[] = $row;
+        } else {
+            $teaching[] = $row;
         }
-        if ($isRealBreak && $breakSlot !== null) {
-            $displayPeriods[$breakSlot] = array_merge($period, ['is_break' => true]);
-        } elseif (!$isRealBreak && isset($teachingSlots[$realTeachingIndex])) {
-            $displayPeriods[$teachingSlots[$realTeachingIndex]] = array_merge($period, ['is_break' => false]);
-            $realTeachingIndex++;
+    }
+
+    $asBreakRow = static function (array $break) {
+        $name = trim((string) ($break['period_name'] ?? ''));
+        $break['display_label'] = $name !== '' ? $name : 'Break';
+        $break['display_sub'] = '';
+        $break['is_break'] = true;
+        return $break;
+    };
+
+    $rows = array();
+    $breakAfter = 4;
+    $breakPlaced = false;
+    $number = 0;
+    foreach ($teaching as $row) {
+        $number++;
+        $label = 'Period ' . $number;
+        $name = trim((string) ($row['period_name'] ?? ''));
+        $row['display_label'] = $label;
+        $row['display_sub'] = ($name !== '' && strcasecmp($name, $label) !== 0) ? $name : '';
+        $row['is_break'] = false;
+        $rows[] = $row;
+        if (count($breaks) > 0 && !$breakPlaced && $number >= $breakAfter) {
+            $rows[] = $asBreakRow($breaks[0]);
+            $breakPlaced = true;
         }
+    }
+    /* a break configured alongside fewer than $breakAfter teaching periods
+       still has to be shown somewhere */
+    if (count($breaks) > 0 && !$breakPlaced) {
+        $rows[] = $asBreakRow($breaks[0]);
+        $breakPlaced = true;
+    }
+    /* any further breaks go at the end rather than being dropped */
+    for ($i = 1; $i < count($breaks); $i++) {
+        $rows[] = $asBreakRow($breaks[$i]);
+    }
+    return $rows;
+};
+
+if (count($periods) > 0) {
+    $displayPeriods = $labelPeriods($periods);
+} else {
+    /* nothing configured yet: show the standard day so the grid is not blank.
+       Its cells stay disabled because no period id exists to save against. */
+    $displayPeriods = array();
+    foreach ($previewPeriods as $previewPeriod) {
+        $previewPeriod['display_label'] = $previewPeriod['period_name'];
+        $previewPeriod['display_sub'] = '';
+        $displayPeriods[] = $previewPeriod;
     }
 }
 
@@ -532,6 +579,7 @@ include __DIR__ . '/includes/header.php';
 .tt-table tbody tr:not(.tt-break):hover{background:#f8fafc}
 .tt-period{white-space:nowrap;width:124px}
 .tt-period-name{color:#1f2937;display:block;font-size:12px;font-weight:600}
+.tt-period-sub{color:#6366f1;display:block;font-size:11px;font-style:italic;font-weight:500;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tt-period-time{color:#9ca3af;display:block;font-size:11px;font-variant-numeric:tabular-nums;font-weight:400;letter-spacing:-.01em;margin-top:3px;white-space:nowrap}
 .tt-cell{padding:10px 8px!important}
 .tt-cell-select{font-size:12px;margin-bottom:6px;min-height:32px;padding:6px 28px 6px 10px}
@@ -659,9 +707,12 @@ include __DIR__ . '/includes/header.php';
                         <?php foreach ($displayPeriods as $periodIndex => $period) {
                             $periodId = (int) ($period['period_id'] ?? 0);
                             $periodKey = $periodId > 0 ? (string) $periodId : 'preview-' . (int) $periodIndex;
-                            $isPreview = $periodId <= 0;
-                            $isBreak = $isPreview ? !empty($period['is_break']) : isset($breakPeriodMap[$periodId]);
-                            $periodName = trim((string) ($period['period_name'] ?? '')) ?: 'Period #' . $periodId;
+                            $isBreak = array_key_exists('is_break', $period) ? !empty($period['is_break']) : isset($breakPeriodMap[$periodId]);
+                            $periodName = trim((string) ($period['display_label'] ?? ''));
+                            if ($periodName === '') {
+                                $periodName = 'Period #' . $periodId;
+                            }
+                            $periodSub = trim((string) ($period['display_sub'] ?? ''));
                             $startTime = $formatTime($period['start_time'] ?? '');
                             $endTime = $formatTime($period['end_time'] ?? '');
                             $periodTime = $startTime !== '' ? $startTime . ($endTime !== '' ? ' - ' . $endTime : '') : 'Time not set';
@@ -671,6 +722,9 @@ include __DIR__ . '/includes/header.php';
                                 <tr class="tt-break">
                                     <td class="tt-period">
                                         <span class="tt-period-name"><?php echo e($periodName); ?></span>
+                                        <?php if ($periodSub !== ''): ?>
+                                            <span class="tt-period-sub"><?php echo e($periodSub); ?></span>
+                                        <?php endif; ?>
                                         <span class="tt-period-time"><?php echo e($periodTime); ?></span>
                                     </td>
                                     <td colspan="<?php echo count($days); ?>">Break</td>
@@ -679,6 +733,9 @@ include __DIR__ . '/includes/header.php';
                                 <tr>
                                     <th class="tt-period" scope="row">
                                         <span class="tt-period-name"><?php echo e($periodName); ?></span>
+                                        <?php if ($periodSub !== ''): ?>
+                                            <span class="tt-period-sub"><?php echo e($periodSub); ?></span>
+                                        <?php endif; ?>
                                         <span class="tt-period-time"><?php echo e($periodTime); ?></span>
                                     </th>
                                     <?php foreach ($days as $day) {

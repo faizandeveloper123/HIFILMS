@@ -104,8 +104,8 @@ include __DIR__ . '/includes/header.php';
                         <thead>
                             <tr>
                                 <th style="width:9%; text-align:center;">S.No</th>
-                                <th>Period</th>
-                                <th>Period Title</th>
+                                <th>Period Name</th>
+                                <th>Category</th>
                                 <th>Start Time</th>
                                 <th>End Time</th>
                                 <th style="width:14%; text-align:center;">Action</th>
@@ -118,8 +118,8 @@ include __DIR__ . '/includes/header.php';
                             <?php foreach ($periods as $i => $p): ?>
                                 <tr>
                                     <td style="text-align:center;"><?php echo $i + 1; ?></td>
-                                    <td><?php echo e($p['cat_name'] ?? $p['period_name']); ?></td>
                                     <td><?php echo e($p['period_name']); ?></td>
+                                    <td><?php echo e($p['cat_name'] ?? '-'); ?></td>
                                     <td><?php echo $p['start_time'] ? date('h:i A', strtotime($p['start_time'])) : '-'; ?></td>
                                     <td><?php echo $p['end_time'] ? date('h:i A', strtotime($p['end_time'])) : '-'; ?></td>
                                     <td style="text-align:center; white-space:nowrap;">
@@ -144,8 +144,8 @@ include __DIR__ . '/includes/header.php';
                                                     <input type="hidden" name="action" value="EditCreatePeriodDetails">
                                                     <input type="hidden" name="period_details_id" value="<?php echo $p['period_id']; ?>">
                                                     <div class="form-group">
-                                                        <label>Period Title</label>
-                                                        <input type="text" name="period_details_title" class="form-control" value="<?php echo e($p['period_name']); ?>" required>
+                                                        <label>Period Name</label>
+                                                        <input type="text" name="period_details_title" class="form-control" value="<?php echo e($p['period_name']); ?>" placeholder="e.g. Period 1" required>
                                                     </div>
                                                     <div class="form-group">
                                                         <label>Start Time</label>
@@ -185,7 +185,7 @@ include __DIR__ . '/includes/header.php';
                         <div class="row" style="padding:0.5%; margin:0.5%;">
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" name="title[]" placeholder="Period Title">
+                                    <input type="text" class="form-control" name="title[]" placeholder="e.g. Period 1">
                                 </div>
                             </div>
                             <div class="col-md-4">
