@@ -277,11 +277,69 @@ include __DIR__ . '/includes/header.php';
         }
     }
 
+    /* ---- Phone / small tablet: the 5-column table is 972px wide, so instead
+       of forcing a sideways scroll every row becomes its own card. The
+       data-label attributes on each <td> supply the field names. ---- */
+    @media (max-width: 767px) {
+        #table_sub_agent .table-responsive { overflow-x: visible; }
+        #table_sub_agent .table {
+            /* the table itself must stop being a table, otherwise width:100%
+               is treated as a shrink-to-fit hint and the min-content width of
+               the cells wins, which is what kept the row at 686px */
+            display: block !important;
+            min-width: 0 !important; width: 100% !important;
+            border: 0 !important; margin: 0;
+        }
+        #table_sub_agent .table > tbody { display: block; width: 100%; }
+        #table_sub_agent .table > thead { display: none; }
+        #table_sub_agent .table > tbody > tr {
+            display: block; width: 100% !important;
+            background:#fff; border:1px solid #e1e0d9; border-radius:10px;
+            padding:12px 14px; margin:0 0 12px;
+            box-shadow:0 1px 3px rgba(11,11,11,0.07);
+        }
+        #table_sub_agent .table > tbody > tr > td {
+            /* plain block, not flex: a flex cell turns every subject badge
+               into its own flex item, and flex-wrap defaults to nowrap, so
+               the badges would all sit on one 650px line */
+            display: block; width: 100% !important;
+            padding: 6px 0 !important; border: 0 !important;
+            text-align: left !important; font-size: 13px; line-height: 1.5;
+            white-space: normal !important;
+        }
+        #table_sub_agent .table > tbody > tr > td + td { border-top: 1px solid #f1f0ec !important; }
+        #table_sub_agent .table > tbody > tr > td::before {
+            content: attr(data-label); display: block; margin-bottom: 3px;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+            text-transform: uppercase; color: #898781;
+        }
+        /* the class name is the card heading, so it needs no label */
+        #table_sub_agent .table > tbody > tr > td:nth-child(2) { font-size: 15px; font-weight: 700; color: #0b0b0b; padding-bottom: 8px !important; }
+        #table_sub_agent .table > tbody > tr > td:nth-child(2)::before { display: none; }
+        #table_sub_agent .table > tbody > tr > td:nth-child(1) {
+            display: inline-block; width: auto !important; margin-right: 8px;
+            padding: 1px 8px !important; border-radius: 999px !important;
+            background: #f0efeb; color: #52514e;
+            font-size: 10px; font-weight: 700;
+        }
+        #table_sub_agent .table > tbody > tr > td:nth-child(1)::before { display: none; }
+        .cs-actions { justify-content: stretch; }
+        .cs-actions .btn { flex: 1 1 0; text-align: center; }
+        .subj-badge { white-space: normal; }
+        /* tap targets inside the modals */
+        .cs-modal-body .container1 { min-height: 34px; }
+        .cs-modal-footer-stretch { display: block; }
+        .cs-modal-footer-stretch .btn { display: block; width: 100%; }
+    }
+
     @media (max-width: 480px) {
         .cs-breadcrumb { font-size:11px; }
         .subj-badge { font-size:9px; }
         .cs-stat-label { font-size:11px; }
         .container1 { font-size:12px; }
+        #table_sub_agent .table > tbody > tr > td::before { min-width: 84px; }
+        .cs-actions { flex-direction: column; }
+        .cs-actions .btn { flex: 1 1 auto; width: 100%; }
     }
 
 </style>
@@ -290,40 +348,13 @@ include __DIR__ . '/includes/header.php';
     <div class="cs-breadcrumb">
       <a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard</a>
       &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
-      <a href="<?php echo BASE_URL; ?>academic_settings.php">Academic Settings</a>
+      <a href="<?php echo BASE_URL; ?>academic_setup.php">Academic Setup</a>
       &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
       Assign Subjects to Classes
     </div>
   </div>
 
-  <div class="nav-container">
-    <div class="nav-bar">
-      <a href="<?php echo BASE_URL; ?>manage_exams.php" class="nav-item ">
-        <i class="fa fa fa-plus"></i>Manage Exams
-      </a>
-      <a href="<?php echo BASE_URL; ?>subjects.php" class="nav-item ">
-        <i class="fa fa-book"></i>Manage Subjects
-      </a>
-      <a href="<?php echo BASE_URL; ?>class_subjects.php" class="nav-item active">
-        <i class="fa fa-layer-group"></i> Class Subjects
-      </a>
-      <a href="<?php echo BASE_URL; ?>teacher_subjects_allocation.php" class="nav-item ">
-        <i class="fa fa-chalkboard-teacher"></i> Teacher Subjects
-      </a>
-      <a href="<?php echo BASE_URL; ?>create_awardList.php" class="nav-item ">
-        <i class="fa fa-list"></i> Award List
-      </a>
-      <a href="<?php echo BASE_URL; ?>grades_marks.php" class="nav-item ">
-        <i class="fa fa fa-star"></i> Grade Settings
-      </a>
-      <a href="<?php echo BASE_URL; ?>upload_signature.php" class="nav-item ">
-        <i class="fa fa-signature"></i> Academic Settings
-      </a>
-      <a href="<?php echo BASE_URL; ?>manage_classes.php" class="nav-item ">
-        <i class="fa fa-users"></i> Class & Sections
-      </a>
-    </div>
-  </div>
+  <?php include __DIR__ . '/includes/academic_tabs.php'; ?>
 
   <div class="container">
     <?php if ($msg !== ''): ?>
@@ -393,11 +424,11 @@ include __DIR__ . '/includes/header.php';
             <?php $key = $cls['class_id'] . '-' . $cls['section_id']; ?>
             <?php $list = isset($assigned[$key]) ? $assigned[$key] : array(); ?>
             <tr>
-              <td style="text-align:center;"><?php echo (int) $i; ?></td>
-              <td>
+              <td data-label="S.No" style="text-align:center;"><?php echo (int) $i; ?></td>
+              <td data-label="Class">
                 <?php echo e($cls['class_name'] . ' - ' . $cls['section_name']); ?>
               </td>
-              <td style="text-align:center;">
+              <td data-label="Subjects" style="text-align:center;">
                 <?php if (count($list) === 0): ?>
                 <span class="subj-empty">No subjects assigned</span>
                 <?php else: ?>
@@ -408,8 +439,8 @@ include __DIR__ . '/includes/header.php';
                 <?php $ci++; endforeach; ?>
                 <?php endif; ?>
               </td>
-              <td style="text-align:center;"><?php echo count($list); ?></td>
-              <td>
+              <td data-label="No. of Subjects" style="text-align:center;"><?php echo count($list); ?></td>
+              <td data-label="Actions">
                 <div class="cs-actions">
                   <a data-toggle="modal" data-target="#Modal<?php echo (int) $cls['section_id']; ?>" href="#" class="btn btn-success btn-sm">
                     Manage <i class="fa fa-pencil" aria-hidden="true"></i>
@@ -464,7 +495,7 @@ include __DIR__ . '/includes/header.php';
                   <?php endforeach; ?>
                 </div>
 
-                <div class="modal-footer">
+                <div class="modal-footer cs-modal-footer-stretch">
                   <input type="submit" class="btn btn-primary" value="Save Subjects">
                 </div>
               </form>
@@ -544,7 +575,7 @@ include __DIR__ . '/includes/header.php';
             </div>
           </div>
 
-          <div class="modal-footer">
+          <div class="modal-footer cs-modal-footer-stretch">
             <input type="submit" class="btn btn-primary" value="Apply To Selected Sections" onclick="return confirmBulkAssign();">
           </div>
         </form>

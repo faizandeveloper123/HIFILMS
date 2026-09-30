@@ -34,25 +34,31 @@ $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = isset($_POST['action']) ? $_POST['action'] : '';
     $name   = isset($_POST['name']) ? trim($_POST['name']) : '';
-    $head   = isset($_POST['class_head']) && $_POST['class_head'] !== '' ? (int) $_POST['class_head'] : 0;
+    // classes.class_head_id is a FK to class_heads, so "not selected" must be NULL - never 0,
+    // otherwise the insert/update dies on a foreign key constraint error.
+    $head   = (isset($_POST['class_head']) && $_POST['class_head'] !== '') ? (int) $_POST['class_head'] : null;
     $fee    = isset($_POST['fee']) && is_numeric($_POST['fee']) ? (float) $_POST['fee'] : 0;
     $misc   = isset($_POST['misc']) && is_numeric($_POST['misc']) ? (float) $_POST['misc'] : 0;
     $class_id = isset($_POST['class_id']) ? (int) $_POST['class_id'] : 0;
 
-    if ($name === '') {
-        $err = 'Class Name is required.';
-    } elseif ($action === 'AddClass') {
-        $stmt = db_prepare("INSERT INTO classes (class_name, class_head_id, monthly_fee, misc_fee, status, created_at) VALUES (?, ?, ?, ?, 'active', NOW())");
-        $stmt->bind_param('sidd', $name, $head, $fee, $misc);
-        $stmt->execute();
-        $msg = 'Class added successfully.';
-    } elseif ($action === 'UpdateClass' && $class_id > 0) {
-        $stmt = db_prepare("UPDATE classes SET class_name = ?, class_head_id = ?, monthly_fee = ?, misc_fee = ? WHERE class_id = ?");
-        $stmt->bind_param('siddi', $name, $head, $fee, $misc, $class_id);
-        $stmt->execute();
-        $msg = 'Class updated successfully.';
-    } else {
-        $err = 'Invalid action.';
+    try {
+        if ($name === '') {
+            $err = 'Class Name is required.';
+        } elseif ($action === 'AddClass') {
+            $stmt = db_prepare("INSERT INTO classes (class_name, class_head_id, monthly_fee, misc_fee, status, created_at) VALUES (?, ?, ?, ?, 1, NOW())");
+            $stmt->bind_param('sidd', $name, $head, $fee, $misc);
+            $stmt->execute();
+            $msg = 'Class added successfully.';
+        } elseif ($action === 'UpdateClass' && $class_id > 0) {
+            $stmt = db_prepare("UPDATE classes SET class_name = ?, class_head_id = ?, monthly_fee = ?, misc_fee = ? WHERE class_id = ?");
+            $stmt->bind_param('siddi', $name, $head, $fee, $misc, $class_id);
+            $stmt->execute();
+            $msg = 'Class updated successfully.';
+        } else {
+            $err = 'Invalid action.';
+        }
+    } catch (Throwable $e) {
+        $err = 'Could not save the class. Please check the values and try again.';
     }
 }
 
@@ -72,13 +78,15 @@ if (isset($_GET['cid']) && isset($_GET['delete_class']) && $_GET['delete_class']
 
 if (isset($_GET['toggle_status']) && isset($_GET['class_id'])) {
     $class_id = (int) $_GET['class_id'];
-    $newStatus = (string) $_GET['toggle_status'];
-    $valid = array('active', 'inactive');
-    if (in_array($newStatus, $valid, true)) {
+    // classes.status is a TINYINT(1): 1 = active, 0 = inactive (matches the rest of the app).
+    $newStatus = ($_GET['toggle_status'] === '0') ? 0 : 1;
+    if ($class_id > 0) {
         $stmt = db_prepare("UPDATE classes SET status = ? WHERE class_id = ?");
-        $stmt->bind_param('si', $newStatus, $class_id);
+        $stmt->bind_param('ii', $newStatus, $class_id);
         $stmt->execute();
-        $msg = 'Class status updated successfully.';
+        $msg = $newStatus === 1
+            ? 'Class marked as active successfully.'
+            : 'Class marked as inactive successfully.';
     }
 }
 
@@ -183,6 +191,8 @@ include __DIR__ . '/includes/header.php';
   <h2><i class="fa fa-graduation-cap"></i> Class Management</h2>
 </div>
 
+<?php $academic_tabs_container_style = 'margin:0 0 18px;'; include __DIR__ . '/includes/academic_tabs.php'; ?>
+
 <?php if ($msg !== ''): ?>
 <div class="alert alert-success alert-dismissible fade in">
     <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
@@ -243,7 +253,7 @@ include __DIR__ . '/includes/header.php';
             }
             echo e($headLabel);
             ?>
-            <?php if ($cls['status'] === 'active'): ?>
+            <?php if ((int) $cls['status'] === 1): ?>
             <br><span class="status-badge status-active"><i class="fa fa-check-circle"></i> Active</span>
             <?php else: ?>
             <br><span class="status-badge status-inactive"><i class="fa fa-ban"></i> Inactive</span>
@@ -258,11 +268,12 @@ include __DIR__ . '/includes/header.php';
           <td><span class="fee-amount"><?php echo number_format((float) $cls['misc_fee']); ?></span></td>
           <td><?php echo $cls['created_at'] ? date('d-M-Y', strtotime($cls['created_at'])) : 'N/A'; ?></td>
           <td>
-            <a href="<?php echo BASE_URL; ?>manage_classes.php?id=<?php echo (int) $cls['class_id']; ?>&fee=<?php echo (float) $cls['monthly_fee']; ?>" class="btn btn-success btn-action" title="Edit Class">
+            <a href="<?php echo BASE_URL; ?>manage_classes.php?id=<?php echo (int) $cls['class_id']; ?>" class="btn btn-success btn-action" title="Edit Class">
               <i class="fa fa-edit"></i> Edit
             </a>
-            <?php $toggleTarget = $cls['status'] === 'active' ? 'inactive' : 'active'; ?>
-            <a href="<?php echo BASE_URL; ?>manage_classes.php?class_id=<?php echo (int) $cls['class_id']; ?>&toggle_status=<?php echo $toggleTarget; ?>" class="btn btn-warning btn-action" title="Toggle Status">
+            <?php $isActive = (int) $cls['status'] === 1; ?>
+            <?php $toggleTarget = $isActive ? 0 : 1; ?>
+            <a href="<?php echo BASE_URL; ?>manage_classes.php?class_id=<?php echo (int) $cls['class_id']; ?>&toggle_status=<?php echo (int) $toggleTarget; ?>" class="btn btn-warning btn-action" title="<?php echo $isActive ? 'Mark as Inactive' : 'Mark as Active'; ?>">
               <i class="fa fa-toggle-on"></i> Status
             </a>
             <a onclick="return confirm('Are you sure you want to delete this class? This will also expel all students in this class!');" href="<?php echo BASE_URL; ?>manage_classes.php?cid=<?php echo (int) $cls['class_id']; ?>&delete_class=1" class="btn btn-danger btn-action" title="Delete Class">
@@ -345,6 +356,11 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <script>
+  // Arriving via ?id= means we are editing: open the form modal straight away.
+  <?php if ($is_edit): ?>
+  $(window).on('load', function() { $('#addClassModal').modal('show'); });
+  <?php endif; ?>
+
   $('a[href*="delete_class=1"]').on('click', function() {
     if (confirm('Are you sure you want to delete this class? This will also expel all students in this class!')) {
       $('#loadingOverlay').addClass('active');

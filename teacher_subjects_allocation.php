@@ -157,20 +157,9 @@ include __DIR__ . '/includes/header.php';
 </style>
 <div class="row" style="background-color: white; margin-top:0;">
   <a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard</a> &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
-  <a href="<?php echo BASE_URL; ?>academic_settings.php">Academic Settings</a> &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
+      <a href="<?php echo BASE_URL; ?>academic_setup.php">Academic Setup</a> &nbsp; <i class="fa fa-angle-double-right"></i> &nbsp;
   Assign Subjects to Teachers
-  <div class="nav-container">
-    <div class="nav-bar">
-      <a href="<?php echo BASE_URL; ?>manage_exams.php" class="nav-item"><i class="fa fa fa-plus"></i>Manage Exams</a>
-      <a href="<?php echo BASE_URL; ?>subjects.php" class="nav-item"><i class="fa fa-book"></i>Manage Subjects</a>
-      <a href="<?php echo BASE_URL; ?>class_subjects.php" class="nav-item"><i class="fa fa-layer-group"></i> Class Subjects</a>
-      <a href="<?php echo BASE_URL; ?>teacher_subjects_allocation.php" class="nav-item active"><i class="fa fa-chalkboard-teacher"></i> Teacher Subjects</a>
-      <a href="<?php echo BASE_URL; ?>create_awardList.php" class="nav-item"><i class="fa fa-list"></i> Award List</a>
-      <a href="<?php echo BASE_URL; ?>grades_marks.php" class="nav-item"><i class="fa fa fa-star"></i> Grade Settings</a>
-      <a href="<?php echo BASE_URL; ?>upload_signature.php" class="nav-item"><i class="fa fa-signature"></i> Academic Settings</a>
-      <a href="<?php echo BASE_URL; ?>manage_classes.php" class="nav-item"><i class="fa fa-users"></i> Class & Sections</a>
-    </div>
-  </div>
+  <?php include __DIR__ . '/includes/academic_tabs.php'; ?>
 </div>
 
 <section class="add_sub_agent" id="table_sub_agent">

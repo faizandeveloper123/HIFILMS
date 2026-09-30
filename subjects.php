@@ -68,125 +68,123 @@ $subject_count = $subjects->num_rows;
 
 include __DIR__ . '/includes/header.php';
 ?>
-<div class="row" style="background-color: white;">
-  <a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard </a> &nbsp; <i style="" class="fa fa-angle-double-right"></i> &nbsp;
-  <a href="<?php echo BASE_URL; ?>academic_settings.php">Academic Settings </a> &nbsp; <i style="" class="fa fa-angle-double-right"></i> &nbsp;
-  Manage Subjects
+<style>
+.panel-white { background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:18px; }
+.crumb { font-size:13px; color:#6B7280; margin:6px 4px 14px; }
+.crumb a { color:#e67e22; text-decoration:none; }
+.crumb a:hover { text-decoration:underline; }
+.sub-list-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+.sub-list-head h3 { font-size:17px; font-weight:800; color:#111827; margin:0; }
+.sub-list-head h3 small { font-weight:500; color:#6B7280; font-size:13px; }
+.sub-count { background:#ff9800; color:#111; font-weight:700; border-radius:20px; padding:5px 14px; font-size:13px; }
+.sub-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table.sub-table { width:100%; min-width:420px; margin:0; }
+table.sub-table th { background:#2b2b36; color:#fff; text-align:center; padding:11px; border:none; font-weight:600; font-size:13px; white-space:nowrap; }
+table.sub-table td { padding:10px; vertical-align:middle; }
+table.sub-table td.sub-name { font-weight:600; color:#111827; }
+table.sub-table tbody tr:hover { background-color:#f8f9fa; }
+.sub-actions { white-space:nowrap; text-align:center; }
+.sub-form-card h4 { font-size:15px; font-weight:800; color:#111827; margin:0 0 4px; }
+.sub-form-card p { font-size:12.5px; color:#6B7280; margin:0 0 16px; }
+.sub-form-card label { display:block; font-weight:600; font-size:13px; margin:0 0 6px; }
+.sub-save { width:100%; font-weight:600; }
+.sub-editing-note { display:none; background:#fff7f0; border:1px solid #ffd8b3; color:#e67e22; border-radius:8px; padding:9px 12px; font-size:12.5px; margin-bottom:14px; }
+.sub-editing-note.show { display:block; }
+@media (max-width: 767px) {
+  .panel-white { padding:14px; }
+  .sub-list-head h3 { font-size:15px; }
+}
+</style>
 
-  <div class="nav-container">
-    <div class="nav-bar">
-      <a href="<?php echo BASE_URL; ?>manage_exams.php" class="nav-item ">
-        <i class="fa fa fa-plus"></i>Manage Exams
-      </a>
-      <a href="<?php echo BASE_URL; ?>subjects.php" class="nav-item active">
-        <i class="fa fa-book"></i>Manage Subjects
-      </a>
-      <a href="<?php echo BASE_URL; ?>class_subjects.php" class="nav-item ">
-        <i class="fa fa-layer-group"></i> Class Subjects
-      </a>
-      <a href="<?php echo BASE_URL; ?>teacher_subjects_allocation.php" class="nav-item ">
-        <i class="fa fa-chalkboard-teacher"></i> Teacher Subjects
-      </a>
-      <a href="<?php echo BASE_URL; ?>create_awardList.php" class="nav-item ">
-        <i class="fa fa-list"></i> Award List
-      </a>
-      <a href="<?php echo BASE_URL; ?>grades_marks.php" class="nav-item ">
-        <i class="fa fa fa-star"></i> Grade Settings
-      </a>
-      <a href="<?php echo BASE_URL; ?>upload_signature.php" class="nav-item ">
-        <i class="fa fa-signature"></i> Academic Settings
-      </a>
-      <a href="<?php echo BASE_URL; ?>manage_classes.php" class="nav-item ">
-        <i class="fa fa-users"></i> Class & Sections
-      </a>
+<div class="main-content">
+  <div class="container-fluid">
+    <?php if ($msg !== ''): ?>
+    <div class="alert alert-success alert-dismissible fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <?php echo e($msg); ?>
+    </div>
+    <?php endif; ?>
+
+    <?php if ($err !== ''): ?>
+    <div class="alert alert-danger alert-dismissible fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        <?php echo e($err); ?>
+    </div>
+    <?php endif; ?>
+
+    <div class="crumb"><a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard</a> &nbsp;<i class="fa fa-angle-double-right"></i>&nbsp; <a href="<?php echo BASE_URL; ?>academic_setup.php">Academic Setup</a> &nbsp;<i class="fa fa-angle-double-right"></i>&nbsp; Manage Subjects</div>
+
+    <?php $academic_tabs_container_style = 'margin-top:0;'; include __DIR__ . '/includes/academic_tabs.php'; ?>
+
+    <div class="row" style="margin-top:16px;">
+      <div class="col-md-7 col-sm-12">
+        <div class="panel-white">
+          <div class="sub-list-head">
+            <h3><i class="fa fa-book"></i> List View Subjects <small>(<?php echo (int) $subject_count; ?> Record Founds)</small></h3>
+            <span class="sub-count"><?php echo (int) $subject_count; ?> total</span>
+          </div>
+          <div class="sub-table-wrap">
+            <table class="table table-striped table-bordered sub-table">
+              <thead>
+                <tr>
+                  <th style="width:70px; text-align:center;">S.No</th>
+                  <th>Subject</th>
+                  <th style="width:110px; text-align:center;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if ((int) $subject_count === 0): ?>
+                <tr><td colspan="3" style="text-align:center; color:#6B7280; padding:30px;">No subjects yet. Add one using the form on the right.</td></tr>
+                <?php endif; ?>
+                <?php $i = 1; while ($row = $subjects->fetch_assoc()): ?>
+                <tr>
+                  <td style="text-align:center;"><?php echo (int) $i; ?></td>
+                  <td class="sub-name"><?php echo e($row['subject_name']); ?></td>
+                  <td class="sub-actions">
+                    <a href="<?php echo BASE_URL; ?>subjects.php?subject=<?php echo (int) $row['subject_id']; ?>" style="padding:0 5px;" class="btn btn-success" title="Edit Subject">
+                      <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </a>
+                    <a href="<?php echo BASE_URL; ?>subjects.php?subject=<?php echo (int) $row['subject_id']; ?>&action=DeleteSubject" style="padding:0 5px;" onClick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger" title="Delete Subject"><i class="fa fa-remove"></i></a>
+                  </td>
+                </tr>
+                <?php $i++; endwhile; ?>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-5 col-sm-12">
+        <div class="panel-white sub-form-card">
+          <div class="sub-editing-note<?php echo $edit_id > 0 ? ' show' : ''; ?>">
+            <i class="fa fa-pencil"></i> Editing subject &mdash; save to apply, or
+            <a href="<?php echo BASE_URL; ?>subjects.php">cancel</a>.
+          </div>
+          <h4><?php echo $edit_id > 0 ? 'Update Subject' : 'Add New Subject'; ?></h4>
+          <p><?php echo $edit_id > 0 ? 'Change the name below and save the record.' : 'Create a new subject offered by the school.'; ?></p>
+
+          <form action="<?php echo BASE_URL; ?>subjects.php" method="post" autocomplete="off">
+            <input type="hidden" name="action" value="AddSubject">
+            <?php if ($edit_id > 0): ?>
+            <input type="hidden" name="subject" value="<?php echo (int) $edit_id; ?>">
+            <?php endif; ?>
+            <div class="form-group" style="margin-bottom:12px;">
+              <label for="sub_name">Subject Name</label>
+              <input type="text" id="sub_name" name="sub" class="form-control" placeholder="Enter Subject Name..." maxlength="100" required value="<?php echo e($edit_sub); ?>">
+            </div>
+            <button type="submit" class="btn btn-primary sub-save"><i class="fa fa-save"></i> <?php echo $edit_id > 0 ? 'Update Subject' : 'Save Subject'; ?></button>
+            <?php if ($edit_id > 0): ?>
+            <a href="<?php echo BASE_URL; ?>subjects.php" class="btn btn-default sub-save" style="margin-top:10px;">Cancel</a>
+            <?php endif; ?>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
-
-<?php if ($msg !== ''): ?>
-<div class="alert alert-success alert-dismissible fade in">
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-    <?php echo e($msg); ?>
 </div>
-<?php endif; ?>
 
-<?php if ($err !== ''): ?>
-<div class="alert alert-danger alert-dismissible fade in">
-    <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-    <?php echo e($err); ?>
-</div>
-<?php endif; ?>
-
-  <section class="add_sub_agent" id="table_sub_agent">
-    <div class="container">
-      <div class="" style="margin-top:10px;">
-        <div class="">
-          <h3 style="float: left;">List View Subjects <small>(<?php echo $subject_count; ?> Record Founds)</small> </h3>
-
-          <div class="clearfix"></div>
-        </div>
-        <div class="panel-body">
-          <div class="clearfix"></div>
-        </div>
-        <div class="clearfix"></div>
-      </div>
-      <br>
-    </div>
-
-    <div style="float:left;" class="col-md-6">
-      <table class="table table-striped table-bordered" style="width:100%">
-        <thead>
-          <tr>
-            <th width="15%" style="text-align:center;">S.No</th>
-            <th width="60%">Subject</th>
-            <th width="25%"> Action </th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php $i = 1; while ($row = $subjects->fetch_assoc()): ?>
-          <tr>
-            <td style="text-align:center;">
-              <?php echo (int) $i; ?>
-            </td>
-            <td> <?php echo e($row['subject_name']); ?> </td>
-            <td>
-              <a style="padding: 0px 5px; font-size:14px;" href="<?php echo BASE_URL; ?>subjects.php?subject=<?php echo (int) $row['subject_id']; ?>" style="cursor:pointer;" class="btn btn-success">
-                <i class="fa fa-pencil" aria-hidden="true"></i>
-              </a>
-              <a href="<?php echo BASE_URL; ?>subjects.php?subject=<?php echo (int) $row['subject_id']; ?>&action=DeleteSubject" style="padding: 0px 5px; font-size:14px;" onClick="return confirm('Are you sure you want to delete this record');" class="btn btn-danger"><i class="fa fa-remove"></i> </a>
-            </td>
-          </tr>
-          <?php $i++; endwhile; ?>
-        </tbody>
-      </table>
-    </div>
-
-    <div style="float:left;" class="col-md-6">
-      <table style="width:100%">
-        <tr>
-          <td width="100%" style="padding-left:2%; padding-right:2%;">
-
-            <form class="form-style-7" action="<?php echo BASE_URL; ?>subjects.php" method="post" enctype="multipart/form-data">
-              <input type="hidden" name="action" value="AddSubject">
-              <?php if ($edit_id > 0): ?>
-              <input type="hidden" name="subject" value="<?php echo (int) $edit_id; ?>">
-              <?php endif; ?>
-              <div class="form-group col-xs-12">
-                <label for=""> Add New Subject </label>
-                <input type="text" name="sub" placeholder="Enter Subject Name..." autocomplete="off" required maxlength="100" style="width: 100%;height: 34px;" autofocus="autofocus" required value="<?php echo e($edit_sub); ?>">
-                <br><br>
-                <div class="clearfix"></div>
-                <input type="submit" class="btn btn-primary" value="Save Subject">
-              </div>
-            </form>
-
-          </td>
-        </tr>
-      </table>
-    </div>
-
-    <br><br>
-  </section>
-
-</div>
+<script>
+  setTimeout(function() { $('.alert').fadeOut('slow'); }, 5000);
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

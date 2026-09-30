@@ -8,13 +8,6 @@ $page_title = 'Academic Setup';
 $message = '';
 $error = '';
 
-$alert = '';
-$module = trim($_GET['module'] ?? '');
-if ($module !== '') {
-    $friendly = str_replace('_', ' ', ucwords($module));
-    $alert = "The \"$friendly\" module is coming soon in this release.";
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -70,13 +63,13 @@ try {
 
 $cards = [
     ['url' => 'manage_exams.php', 'icon' => 'fa fa-plus', 'title' => 'Manage Exams', 'desc' => 'Create exam terms and types for the current session.'],
-    ['module' => 'manage_subjects', 'icon' => 'fa fa-book', 'title' => 'Manage Subjects', 'desc' => 'Add and organize subjects offered by the school.'],
-    ['module' => 'class_subjects', 'icon' => 'fa fa-layer-group', 'title' => 'Course/Class Subjects', 'desc' => 'Assign subjects to classes and sections.'],
-    ['module' => 'teacher_subjects', 'icon' => 'fa fa-chalkboard-teacher', 'title' => 'Teacher Subjects', 'desc' => 'Allocate subjects to teachers.'],
-    ['module' => 'award_list', 'icon' => 'fa fa-list', 'title' => 'Award List', 'desc' => 'Configure award lists and merit rules.'],
-    ['module' => 'grade_settings', 'icon' => 'fa fa-star', 'title' => 'Grade Settings', 'desc' => 'Define grade scales and mark ranges.'],
-    ['module' => 'academic_settings', 'icon' => 'fa fa-signature', 'title' => 'Academic Settings', 'desc' => 'Upload signatures and configure academic settings.'],
-    ['module' => 'class_sections', 'icon' => 'fa fa-users', 'title' => 'Class & Sections', 'desc' => 'Manage classes and sections for the branch.'],
+    ['url' => 'subjects.php', 'icon' => 'fa fa-book', 'title' => 'Manage Subjects', 'desc' => 'Add and organize subjects offered by the school.'],
+    ['url' => 'class_subjects.php', 'icon' => 'fa fa-layer-group', 'title' => 'Course/Class Subjects', 'desc' => 'Assign subjects to classes and sections.'],
+    ['url' => 'teacher_subjects_allocation.php', 'icon' => 'fa fa-chalkboard-teacher', 'title' => 'Teacher Subjects', 'desc' => 'Allocate subjects to teachers.'],
+    ['url' => 'create_awardList.php', 'icon' => 'fa fa-list', 'title' => 'Award List', 'desc' => 'Configure award lists and merit rules.'],
+    ['url' => 'grades_marks.php', 'icon' => 'fa fa-star', 'title' => 'Grade Settings', 'desc' => 'Define grade scales and mark ranges.'],
+    ['url' => 'upload_signature.php', 'icon' => 'fa fa-signature', 'title' => 'Academic Settings', 'desc' => 'Upload signatures and configure academic settings.'],
+    ['url' => 'manage_classes.php', 'icon' => 'fa fa-users', 'title' => 'Class & Sections', 'desc' => 'Manage classes and sections for the branch.'],
 ];
 
 include __DIR__ . '/includes/header.php';
@@ -159,7 +152,6 @@ a.aqib-card:hover {
     <div class="container-fluid">
         <?php if ($message): ?><div class="alert alert-success"><?php echo e($message); ?></div><?php endif; ?>
         <?php if ($error): ?><div class="alert alert-danger"><?php echo e($error); ?></div><?php endif; ?>
-        <?php if ($alert): ?><div class="alert alert-warning"><?php echo e($alert); ?></div><?php endif; ?>
 
         <div class="crumb"><a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard</a> &nbsp;<i class="fa fa-angle-double-right"></i>&nbsp; <a href="<?php echo BASE_URL; ?>academic_setup.php">Academics</a> &nbsp;<i class="fa fa-angle-double-right"></i>&nbsp; Academic Setup</div>
 
@@ -168,21 +160,15 @@ a.aqib-card:hover {
             <div class="page-subtitle">All academic configuration pages in one place for new &amp; existing schools.</div>
         </div>
 
+        <?php $academic_tabs_container_style = 'margin:0 0 18px;'; include __DIR__ . '/includes/academic_tabs.php'; ?>
+
         <div class="setup-grid">
             <?php foreach ($cards as $card): ?>
-                <?php if (isset($card['url'])): ?>
-                    <a class="aqib-card" href="<?php echo BASE_URL . $card['url']; ?>">
-                        <div class="setup-icon"><i class="<?php echo $card['icon']; ?>"></i></div>
-                        <div class="setup-title"><?php echo e($card['title']); ?></div>
-                        <div class="setup-desc"><?php echo e($card['desc']); ?></div>
-                    </a>
-                <?php else: ?>
-                    <a class="aqib-card" href="<?php echo BASE_URL; ?>academic_setup.php?module=<?php echo e($card['module']); ?>">
-                        <div class="setup-icon"><i class="<?php echo $card['icon']; ?>"></i></div>
-                        <div class="setup-title"><?php echo e($card['title']); ?></div>
-                        <div class="setup-desc"><?php echo e($card['desc']); ?></div>
-                    </a>
-                <?php endif; ?>
+                <a class="aqib-card" href="<?php echo BASE_URL . $card['url']; ?>">
+                    <div class="setup-icon"><i class="<?php echo $card['icon']; ?>"></i></div>
+                    <div class="setup-title"><?php echo e($card['title']); ?></div>
+                    <div class="setup-desc"><?php echo e($card['desc']); ?></div>
+                </a>
             <?php endforeach; ?>
         </div>
 

@@ -169,6 +169,16 @@ include __DIR__ . '/includes/header.php';
 ?>
 <style>
 .search-bar-student { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:16px; margin-bottom:16px; }
+/* The form is a flex row, so the children are sized with flex, not bootstrap grid
+   columns. col-md-1 (8.33%) squeezed the Filter button until its label was cut off. */
+.sbs-field { flex:1 1 190px; min-width:0; margin:0; }
+.sbs-field > label { display:block; margin:0 0 6px; }
+.sbs-submit { flex:0 0 auto; margin:0; }
+.sbs-submit .btn { min-width:112px; white-space:nowrap; }
+@media (max-width:575px) {
+  .sbs-field, .sbs-submit { flex:1 1 100%; }
+  .sbs-submit .btn { width:100%; }
+}
 .crumb { font-size:13px; color:#6B7280; margin:6px 4px 14px; }
 .crumb a { color:#e67e22; text-decoration:none; }
 .crumb a:hover { text-decoration:underline; }
@@ -189,40 +199,29 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div class="crumb"><a href="<?php echo BASE_URL; ?>dashboard.php">Dashboard</a> &nbsp;<i class="fa fa-angle-double-right"></i>&nbsp; <a href="<?php echo BASE_URL; ?>manage_exams.php">Examination</a> &nbsp;<i class="fa fa-angle-double-right"></i>&nbsp; Manage Exams (<?php echo count($exams); ?> records)</div>
 
-        <div class="nav-container" style="margin-top:0;">
-            <div class="nav-bar">
-                <a href="<?php echo BASE_URL; ?>manage_exams.php" class="nav-item active"><i class="fa fa-plus"></i>Manage Exams</a>
-                <a href="<?php echo BASE_URL; ?>academic_setup.php" class="nav-item"><i class="fa fa-book"></i>Manage Subjects</a>
-                <a href="<?php echo BASE_URL; ?>academic_setup.php" class="nav-item"><i class="fa fa-layer-group"></i>Course/Class Subjects</a>
-                <a href="<?php echo BASE_URL; ?>academic_setup.php" class="nav-item"><i class="fa fa-chalkboard-teacher"></i>Teacher Subjects</a>
-                <a href="<?php echo BASE_URL; ?>academic_setup.php" class="nav-item"><i class="fa fa-list"></i>Award List</a>
-                <a href="<?php echo BASE_URL; ?>academic_setup.php" class="nav-item"><i class="fa fa-star"></i>Grade Settings</a>
-                <a href="<?php echo BASE_URL; ?>academic_setup.php" class="nav-item"><i class="fa fa-signature"></i>Academic Settings</a>
-                <a href="<?php echo BASE_URL; ?>academic_setup.php" class="nav-item"><i class="fa fa-users"></i>Course/Class &amp; Sections</a>
-            </div>
-        </div>
+        <?php include __DIR__ . '/includes/academic_tabs.php'; ?>
 
         <form method="get" action="manage_exams.php" class="search-bar-student">
-            <div class="form-group col-md-3 col-sm-6" style="margin-bottom:0;">
-                <label>Session</label>
-                <select name="session" class="form-control form-select2">
+            <div class="sbs-field">
+                <label for="flt_session">Session</label>
+                <select name="session" id="flt_session" class="form-control form-select2">
                     <option value="">Select Session</option>
                     <?php foreach ($sessions as $s): ?>
                         <option value="<?php echo e($s); ?>" <?php echo $f_session === $s ? 'selected' : ''; ?>><?php echo e($s); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-group col-md-3 col-sm-6" style="margin-bottom:0;">
-                <label>Exam Type</label>
-                <select name="type_id" class="form-control">
+            <div class="sbs-field">
+                <label for="flt_type">Exam Type</label>
+                <select name="type_id" id="flt_type" class="form-control">
                     <option value="All">All</option>
                     <?php foreach ($exam_types as $t): ?>
                         <option value="<?php echo e($t); ?>" <?php echo $f_type === $t ? 'selected' : ''; ?>><?php echo e($t); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
-            <div class="form-group col-md-1" style="margin-bottom:0;">
-                <button type="submit" class="btn btn-primary" style="width:100%;"><i class="fa fa-filter"></i> Filter</button>
+            <div class="sbs-submit">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Filter</button>
             </div>
         </form>
 

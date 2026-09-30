@@ -68,9 +68,16 @@ $sbUserRole = e($_SESSION['user_role'] ?? 'admin');
 .nav-bar::-webkit-scrollbar-thumb { background: #c9c8c3; border-radius: 3px; }
 .nav-bar::-webkit-scrollbar-thumb:hover { background: #a9a8a3; }
 .nav-bar { -ms-overflow-style: thin; scrollbar-width: thin; scrollbar-color: #c9c8c3 #f1f1f1; }
+/* affordance: the row scrolls sideways, so say so with the cursor */
+.nav-bar.nav-scrollable { cursor: grab; }
+.nav-bar.nav-dragging { cursor: grabbing; }
+.nav-bar.nav-dragging { user-select: none; -webkit-user-select: none; }
 /* On touch devices the scrollbar is a transient overlay, so fade the edge that
    still has hidden tabs. Toggled from JS (.cs-nav-more-left / -right) so the
    fade never shows when there is nothing left to scroll to. */
+/* A gutter is reserved at each end so the arrow buttons below never sit on top
+   of a tab - an overlay arrow would make that tab unclickable. */
+.nav-container { padding-left: 32px; padding-right: 32px; }
 .nav-container::before, .nav-container::after {
   content: ""; position: absolute; top: 0; height: calc(100% - 7px); width: 34px;
   pointer-events: none; opacity: 0; transition: opacity .18s ease; z-index: 2;
@@ -79,6 +86,21 @@ $sbUserRole = e($_SESSION['user_role'] ?? 'admin');
 .nav-container::after { right: 0; background: linear-gradient(to left, #fff 25%, rgba(255,255,255,0)); }
 .nav-container.cs-nav-more-left::before { opacity: 1; }
 .nav-container.cs-nav-more-right::after { opacity: 1; }
+
+/* Real, clickable scroll arrows. They only appear while there is something
+   hidden on that side, so every tab in the row is always reachable. */
+.nav-scroll-btn {
+  position: absolute; top: 0; bottom: 7px; width: 32px;
+  display: none; align-items: center; justify-content: center;
+  border: 0; margin: 0; padding: 0; cursor: pointer; z-index: 3;
+  color: #52514e; font-size: 15px; line-height: 1;
+}
+.nav-scroll-left  { left: 0;  background: linear-gradient(to right, #fff 72%, rgba(255,255,255,0)); }
+.nav-scroll-right { right: 0; background: linear-gradient(to left,  #fff 72%, rgba(255,255,255,0)); }
+.nav-scroll-btn:hover { color: #e67e22; }
+.nav-container.cs-nav-more-left  .nav-scroll-left  { display: flex; }
+.nav-container.cs-nav-more-right .nav-scroll-right { display: flex; }
+.nav-scroll-btn:focus { outline: 2px solid #ff7800; outline-offset: -3px; }
 @media (max-width: 1024px) {
   .nav-item { padding: 8px 11px; font-size: 13px; }
   .nav-item i { font-size: 13px; margin-right: 5px; }
@@ -813,5 +835,110 @@ if (quickLinkBtn) {
     document.addEventListener('scroll', function (e) {
         if (e.target && e.target.classList && e.target.classList.contains('nav-bar')) reveal();
     }, true);
+
+    /* A vertical mouse wheel does not scroll a horizontal-only scroller, so the
+       tab row looked frozen when the wheel was used over it. Map the wheel onto
+       the horizontal axis, and let the row be dragged, but hand the gesture back
+       to the page at either end so vertical page scrolling is never trapped. */
+    function bindScrollInput(bar) {
+        if (!bar || bar.__scrollBound) return;
+        bar.__scrollBound = true;
+
+        bar.addEventListener('wheel', function (e) {
+            var max = bar.scrollWidth - bar.clientWidth;
+            if (max <= 1) return;
+            /* respect a real horizontal swipe (trackpad); otherwise use the
+               vertical delta, since that is the gesture people actually try */
+            var delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+            if (!delta) return;
+            var atStart = bar.scrollLeft <= 0;
+            var atEnd = bar.scrollLeft >= max - 1;
+            if ((delta < 0 && atStart) || (delta > 0 && atEnd)) return;
+            e.preventDefault();
+            bar.scrollLeft = Math.max(0, Math.min(max, bar.scrollLeft + delta));
+            reveal();
+        }, { passive: false });
+
+        var dragging = false, dragged = false, startX = 0, startLeft = 0, dragEndedAt = 0;
+        bar.addEventListener('mousedown', function (e) {
+            if (e.button !== 0) return;
+            if (bar.scrollWidth - bar.clientWidth <= 1) return;
+            dragging = true; dragged = false;
+            startX = e.pageX; startLeft = bar.scrollLeft;
+            /* the grabbing cursor / pointer-events are only applied once the
+               gesture is known to be a drag - adding them here would make a
+               plain click miss its own link, because the browser resolves the
+               click target on mouseup, after pointer-events had already been
+               switched off on every tab */
+        });
+        window.addEventListener('mousemove', function (e) {
+            if (!dragging) return;
+            var dx = e.pageX - startX;
+            if (!dragged) {
+                if (Math.abs(dx) < 4) return;
+                dragged = true;
+                bar.classList.add('nav-dragging');
+                e.preventDefault();
+            }
+            bar.scrollLeft = startLeft - dx;
+            reveal();
+        });
+        window.addEventListener('mouseup', function () {
+            if (!dragging) return;
+            dragging = false;
+            bar.classList.remove('nav-dragging');
+            if (!dragged) return;
+            /* stamped rather than left as a flag: a drag that ends outside the
+               row produces no click, and a stale flag would silently eat the
+               user's next click */
+            dragEndedAt = Date.now();
+        });
+        /* swallow the click that ends a drag so it cannot open a tab */
+        bar.addEventListener('click', function (e) {
+            if (Date.now() - dragEndedAt > 250) return;
+            e.preventDefault();
+            e.stopPropagation();
+        }, true);
+    }
+
+    /* Clickable arrows so a tab that is scrolled out of view is still reachable.
+       They live in the gutter reserved by .nav-container and only show while
+       something is hidden on that side. */
+    function buildScrollArrows(bar) {
+        var wrap = bar.parentElement;
+        if (!wrap || !wrap.classList || wrap.querySelector('.nav-scroll-btn')) return;
+        function add(dir, cls, label) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'nav-scroll-btn ' + cls;
+            b.setAttribute('aria-label', label);
+            b.innerHTML = '<i class="fa fa-angle-' + (dir < 0 ? 'left' : 'right') + ' double"></i>';
+            b.addEventListener('click', function () {
+                var max = bar.scrollWidth - bar.clientWidth;
+                if (max <= 1) return;
+                bar.scrollLeft = Math.max(0, Math.min(max, bar.scrollLeft + dir * Math.max(160, Math.round(bar.clientWidth * 0.8))));
+                reveal();
+            });
+            wrap.appendChild(b);
+        }
+        add(-1, 'nav-scroll-left', 'Scroll tabs to the left');
+        add(1, 'nav-scroll-right', 'Scroll tabs to the right');
+    }
+
+    function init() {
+        reveal();
+        var bar = document.querySelector('.nav-bar');
+        if (bar) {
+            bindScrollInput(bar);
+            buildScrollArrows(bar);
+            if (bar.scrollWidth - bar.clientWidth > 1) bar.classList.add('nav-scrollable');
+        }
+        reveal();
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 })();
 </script>
